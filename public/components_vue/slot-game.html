@@ -1,0 +1,134 @@
+<div>
+  SLOT GAME {{ rows }} x {{ cols }}
+</div>
+
+<main :style="{'--rows': rows, '--cols': cols}">
+  <section u-for="cell in cellList">
+    <slot :name="cell">
+      <div>{{ cell }}</div>
+    </slot>
+  </section>
+</main>
+
+<script>
+  export function $props() {
+    return {
+      rows: {
+        default: 0,
+        cast: parseInt,
+      },
+      cols: {
+        default: 0,
+        cast: parseInt,
+      }
+    }
+  }
+
+  export function $store() {
+    return {
+      // rows: 4,
+      // cols: 3,
+      cellList: [],
+    }
+  }
+
+  export async function connectedCallback({root}) {
+    const {$data} = this
+
+    // this.$effect(() => {
+    //   console.log('rows: ', $data.rows)
+    // })
+
+    await this.$nextTick()
+
+    this.$effect(() => {
+      // await this.$nextTick()
+
+      const cellList = []
+      for (let i = 0; i < $data.rows; i++) {
+        for (let j = 0; j < $data.cols; j++) {
+          cellList.push(`${i}:${j}`)
+        }
+      }
+      $data.cellList = [...cellList]
+      // Object.assign($data, {cellList})
+
+      // await this.$nextTick()
+
+
+    // const slot = this.$querySelector('slot')
+    // this._shadowRoot.addEventListener('slotchange', e => {
+    //   console.log('slotchange', e)
+    })
+  }
+
+
+  export default class extends HTMLElement {
+    // async connectedCallback() {
+    //   const {$data} = this
+
+    //   // this.$effect(() => {
+    //   //   console.log('rows: ', $data.rows)
+    //   // })
+
+    //   await this.$nextTick()
+
+    //   this.$effect(() => {
+    //     // await this.$nextTick()
+
+    //     const cellList = []
+    //     for (let i = 0; i < $data.rows; i++) {
+    //       for (let j = 0; j < $data.cols; j++) {
+    //         cellList.push(`${i}:${j}`)
+    //       }
+    //     }
+    //     $data.cellList = [...cellList]
+    //     // Object.assign($data, {cellList})
+
+    //     // await this.$nextTick()
+
+
+    //   // const slot = this.$querySelector('slot')
+    //   // slot.addEventListener('slotchange', e => {
+    //   //   console.log('slotchange', e)
+    //   })
+    // }
+  }
+</script>
+
+<style>
+  :host {
+    font-family: monospace;
+  }
+
+  ::slotted([slot]), slot > :first-child {
+    display: inline-block;
+    box-sizing: border-box;
+    text-align: center;
+    width: 50px;
+    height: 50px;
+
+  }
+
+  main {
+    display: inline-grid;
+    grid-template-rows: repeat(var(--rows), 100px);
+    grid-template-columns: repeat(var(--cols), minmax(100px, 1fr));
+
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    gap: 0px;
+
+    & > section {
+      box-sizing: border-box;
+      width: 100px;
+      height: 100px;
+      padding: 25px;
+      background-color: white;
+
+      border-bottom: 1px solid black;
+      border-right: 1px solid black;
+      place-self: stretch;
+    }
+  }
+</style>

@@ -1,0 +1,94 @@
+
+<main>
+  <h3>Counter: <span u-if="name">{{ name }}</span>
+  </h3>
+
+  <section>
+    <button @click="count--">(-)<sub>1</sub></button>
+    <button @click="count++">(+)<sub>1</sub></button>
+    <button @click="incRef($data)">(+)<sub>2</sub></button>
+    <div>Property: {{ count }}</div>
+  </section>
+  <section>
+    <button @click="$me.$data.local--">(-)<sub>1</sub></button>
+    <button @click="local++">(+)<sub>1</sub></button>
+    <button @click="incLocal">(+)<sub>2</sub></button>
+    <div>Local: {{ local }}</div>
+  </section>
+  <section>
+    <button @click="friend--">(-)<sub>1</sub></button>
+    <button @click="$data.friend--">(-)<sub>2</sub></button>
+    <button @click="$me.$data.friend++">(+)<sub>1</sub></button>
+    <button @click="incShare()">(+)<sub>2</sub></button>
+    <div>Syncronized: {{ friend }}</div>
+  </section>
+  <section>
+    <button @click="permanent--">-</button>
+    <button @click="permanent++">+</button>
+    <div>Persistent: {{ permanent }}</div>
+  </section>
+</main>
+
+<script>
+  export function $props() {
+    return {
+      name: '',
+      count: {
+        default: 0,
+        cast: parseInt,
+      },
+    }
+  }
+
+  export function $store({persist, sync}) {
+    return {
+      local: 0,
+      permanent: persist(0),
+      friend: sync(0),
+    }
+  }
+
+  export default class extends HTMLElement {
+    incLocal() { this.$data.local++ }
+    incRef(base) { base.count++ }
+    incShare() { this.$data.friend += 1}
+
+    dispatchCountEvent() {
+      this.dispatchEvent(new CustomEvent('count', { detail: this.count }))
+    }
+
+    async connectedCallback() {
+      this.$effect(async () => this.dispatchCountEvent())
+    }
+  }
+</script>
+
+<style>
+  main {
+    display: inline-block;
+    padding: 0 8px 4px 8px;
+    border-width: 1px;
+    width: 24rem;
+    border-style: solid;
+    border-color: black;
+    font-family: monospace;
+    & > h3 > span {
+      color: green;
+    }
+  }
+  section {
+    font-size: 1.0rem;
+    margin-bottom: 0.8rem;
+
+    & > div {
+      float: right;
+      /* display: inline-block; */
+      text-align: right;
+
+      & > div {
+        float: right;
+        width: 3rem;
+      }
+    }
+  }
+</style>

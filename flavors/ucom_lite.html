@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Ucom Lite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- <link u-com rel="stylesheet" href="/style/chota-0.8.1.min.css"> -->
+  <!-- <link u-com rel="stylesheet" href="/style/bootstrap-5.3.2.min.css"> -->
+  <!-- <link u-com rel="stylesheet" href="/style/test.css"> -->
+  <!-- <style u-com>
+    @import url("/style/test.css");
+  </style> -->
+
+  <style>
+    body {
+      padding: 6px 0 0 6px;
+    }
+  </style>
+
+  <script type="importmap">{
+    "imports": {
+      "@com/": "/components_lite/"
+    }
+  }</script>
+  <script src="/src/ucom_lite.ts" type="module"></script>
+</head>
+<body>
+
+<template u-app>
+  <source src="@com/rou-ter.html">
+
+  <!-- <nav>
+    <a u-for="([hash, label]) in tabs" :href="hash">{{ label }}</a>
+  </nav> -->
+
+  <rou-ter>
+    <base href="@com/routes/" lazy>
+    <source src="route-unknown.html"  loc="#unknown"  unknown>
+    <source src="route-home.html"     loc="#home"     tab="Home" default>
+  </rou-ter>
+
+  <script>
+    export function connectedCallback() {
+      const router = this.$qs('rou-ter')
+      router.addEventListener('routes', e => {
+        console.log(e.detail)
+      })
+    }
+    // export function routesInit(e) {
+    //   this.$data.tabs = e.detail
+    //     .filter(v => !!v.attributes.tab)
+    //     .map(v => [v.loc, v.attributes.tab])
+    // }
+  </script>
+
+  <style>
+    :host {
+      font-family: monospace;
+      --link-color: blue;
+    }
+
+    nav {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: repeat(auto-fill, minmax(50px, auto-fit));
+      gap: 0.7rem;
+      align-items: center;
+      justify-content: left;
+
+      margin-bottom: 2rem;
+
+      & > a {
+        box-sizing: border-box;
+        display: inline-block;
+        color: var(--link-color);
+        border: 1px solid var(--link-color);
+        padding: 6px 10px 6px 10px;
+        text-align: center;
+        min-width: 3.5rem;
+        &:hover {
+          background-color: azure;
+        }
+      }
+    }
+
+    main {
+      width: 60rem;
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+  </style>
+
+</template>
+
+</body>
+</html>

@@ -1,0 +1,75 @@
+<slot></slot>
+<main></main>
+
+<script>
+  export default class extends HTMLElement {
+    #routeDefault
+    #routeUnknown
+    #routes
+    #route
+    #main
+
+    async connectedCallback() {
+      const {$data} = this
+      const slot = this.$qs('slot')
+      this.#main = this.$qs('main')
+
+      this.#routes = makeRoutes(await this.$importRoot(slot))
+      this.dispatchEvent(new CustomEvent('routes', {
+        detail: structuredClone(this.#routes),
+      }))
+
+      this.#routeDefault = this.#routes.find(r => r.default)
+      if (!this.#routeDefault) {
+        throw new Error(`Router does not have a default route.  Add 'default' attribute to a source element`)
+      }
+      this.#routeUnknown = this.#routes.find(r => r.unknown)
+
+      this.#route = this.setRoute(window.location.href)
+
+      window.addEventListener('hashchange', this.hashchangeEvent)
+    }
+
+    disconnectedCallback() {
+      window.removeEventListener('hashchange', this.hashchangeEvent)
+    }
+
+    // Save the event as an instance member.
+    hashchangeEvent = e => {
+      this.setRoute(e.newURL)
+    }
+
+    setRoute(href) {
+      this.#route = this.getRoute(href)
+
+      this.#main.innerHTML = ''
+      const elRoute = document.createElement(this.#route.name)
+      this.#main.append(elRoute)
+    }
+
+    getRoute(href) {
+      const hash = this.getHash(href)
+      const route = this.#routes.find(r => r.loc === hash)
+        ?? this.#routeUnknown
+      return route
+    }
+
+    getHash(href) {
+      const {hash} = new URL(href)
+      return hash ? hash : this.#routeDefault.loc
+    }
+  }
+
+  function makeRoutes(dataArr) {
+    return dataArr.map(({name, attributes}) => {
+      const {loc} = attributes
+      return {
+        name,
+        loc,
+        attributes,
+        default: attributes.default !== undefined,
+        unknown: attributes.unknown !== undefined,
+      }
+    })
+  }
+</script>

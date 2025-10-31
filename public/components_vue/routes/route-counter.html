@@ -1,0 +1,21 @@
+<base href="@com/">
+<source src="fancy-counter.html">
+
+<div>
+  <button @click="count++">Click: {{ count }}</button>
+</div>
+
+<fancy-counter
+  name="test"
+  :count="count"
+  @count="$nextTick(() => count = $event.detail)"
+></fancy-counter>
+<fancy-counter></fancy-counter>
+
+<script>
+  export function $store() {
+    return {
+      count: 5,
+    }
+  }
+</script>
