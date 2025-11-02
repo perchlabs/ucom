@@ -317,38 +317,3 @@ Ucom added a new `u-is` directive to its petite-vue inheritance.  `u-is` allows 
   </script>
 </template>
 ```
-
-### FIXME - Inlined Pathed Definitions
-
-While serving HTML you can inline each component directly into the page and then set the `path` attribute to the public web path that the component would normally load from.  Ucom will parse out the component name from the path as normal, and you will still get all of the features as if you had loaded normally.  The best part is that you can combine fetch loading and inlining in any amount or order. Everything will be fine.
-
-Here is what your main HTML page might look like as delivered to the browser.
-
-```html
-<!DOCTYPE html>
-  <head>
-    <script type="importmap">{
-      "imports": {
-        "@com/": "/components/"
-      }
-    }</script>
-  </head>
-<!-- ... -->
-
-  <body>
-    <template u-com="@com/widget-header.com">
-      This is a big-ass widget for the header.
-    </template>
-    <template u-com="@com/app-map-item.com">
-      This is a dependency in your app-map.  It's imported inside of app-map, but this inlined definition gets priority.  Fast.
-    </template>
-    <template u-com="@com/app-map.com">
-      You have a pretty nice map element here.  Also, it needs to load fast.
-      But that's ok because it's inlined.
-    </template>
-    <!-- There is no oops here. -->
-    <!-- If you forgot something then it will just load normally -->
-    <app-map></app-map>
-  </body>
-</html>
-```
