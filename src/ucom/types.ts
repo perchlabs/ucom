@@ -1,5 +1,4 @@
 
-
 export interface ComponentIdentity {
   name: string,
   resolved: string,
@@ -7,7 +6,6 @@ export interface ComponentIdentity {
 export interface ComponentDef extends ComponentIdentity {
   tpl: HTMLTemplateElement,
 }
-
 
 export interface PluginConstructor {
   new (...args: any[]): Plugin
@@ -35,7 +33,6 @@ export type PluginCallbackProviderParams = {
   el: WebComponent,
   shadow: ShadowRoot,
 }
-
 
 type PluginStart = (params: PluginStartParams) => Promise<void>
 type PluginParse = (params: PluginParseParams) => Promise<void>
@@ -100,7 +97,7 @@ export interface ModuleExports {[key: string]: any}
 
 type CustomElementCallbackReturn = void | Promise<void>
 export type AttributeChangedCallback = (name: string, oldValue: string | null, newValue: string | null) => CustomElementCallbackReturn
-export interface ConnectedCallback { (): CustomElementCallbackReturn }
+export type ConnectedCallback = () => CustomElementCallbackReturn
 export type DisconnectedCallback = () => CustomElementCallbackReturn
 export type FormAssociatedCallback = (form: HTMLFormElement | null) => CustomElementCallbackReturn
 export type FormDisabledCallback = (isDisabled: boolean) => CustomElementCallbackReturn
@@ -123,8 +120,8 @@ export interface RawComponentConstructor {
   observedAttributes?: string[]
 }
 
+// Plugins which add to either WebComponent or its constructor should create an Upgrade interface for it.
 export interface WebComponent extends RawComponent {}
-
 export interface WebComponentConstructor extends RawComponentConstructor {
   new (...args: any[]): WebComponent
   get ident(): ComponentDef

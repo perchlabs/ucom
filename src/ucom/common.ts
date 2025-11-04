@@ -8,7 +8,6 @@ export const CUSTOM_CALLBACKS = [
   'formResetCallback',
   'formStateRestoreCallback',
 ]
-export const CUSTOM_CALLBACKS_SET = new Set(...CUSTOM_CALLBACKS)
 
 export const $attr = (elem: HTMLElement | null, name: string, fallback?: any): any => {
   const attr = elem?.getAttribute(name)

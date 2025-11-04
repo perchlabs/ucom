@@ -10,9 +10,7 @@ import type {
   ConnectedCallback,
   DisconnectedCallback,
 } from '../ucom'
-import {
-  CUSTOM_CALLBACKS,
-} from '../ucom'
+import {CUSTOM_CALLBACKS} from '../ucom'
 import {createApp, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
 
 // Proto constants.
