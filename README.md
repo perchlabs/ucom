@@ -5,6 +5,8 @@ Ucom is a buildless declarative [custom element](https://developer.mozilla.org/e
 * petite-vue (`33.7k` minified) (`13.0k` gzipped)
 * lite (`17.0k` minified) (`6.3k` gzipped)
 
+**Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
+
 
 ### Installation
 
