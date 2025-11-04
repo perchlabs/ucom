@@ -5,7 +5,6 @@ import {
   RelativePlugin,
   ImportPlugin,
   StylePlugin,
-  HelperPlugin,
   VuePlugin,
 } from './plugins'
 
@@ -15,7 +14,6 @@ const ucom = new Ucom([
   RelativePlugin,
   ImportPlugin,
   StylePlugin,
-  HelperPlugin,
   VuePlugin,
 ])
 ucom.start()

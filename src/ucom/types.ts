@@ -119,8 +119,8 @@ export interface RawComponent extends HTMLElement {
 
 export interface RawComponentConstructor {
   new (...args: any[]): RawComponent
-  observedAttributes?: string[]
   formAssociated?: boolean
+  observedAttributes?: string[]
 }
 
 export interface WebComponent extends RawComponent {}
