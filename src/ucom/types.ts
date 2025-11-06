@@ -59,6 +59,7 @@ type PluginManagerProvider<T> = (params: PluginCallbackProviderParams) => T[]
 
 export interface ComponentManager {
   lazy: {[key: string]: ComponentIdentity},
+  start: () => Promise<void>,
   define: ComponentDefiner,
   import: ComponentImporter,
   resolve: ComponentResolver,

@@ -253,17 +253,3 @@ type ParsedScript = {
 type ComponentOpts = {
   internals: boolean,
 }
-
-// type ComponentSchema = {
-//   man: ComponentManager,
-//   ident: ComponentDef
-
-//   Raw: RawComponentConstructor,
-//   frags: DocumentFragment,
-
-//   exports: ModuleExports,
-//   plugins: PluginManager,
-
-//   shadowRootOpts: ShadowRootInit,
-//   componentOpts: ComponentOpts,
-// }

@@ -111,9 +111,7 @@ export default class VuePlugin implements Plugin {
 
   disconnected({el: elReal}: PluginCallbackProviderParams): DisconnectedCallback {
     const el = elReal as UpgradeComponent
-    return () => {
-      el[CleanupKey].forEach(stop)
-    }
+    return () => el[CleanupKey].forEach(stop)
   }
 }
 
