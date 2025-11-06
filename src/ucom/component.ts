@@ -9,14 +9,9 @@ import type {
   ComponentDef,
   PluginCallbackProviderParams,
   AttributeChangedCallback,
-  ConnectedCallback,
-  DisconnectedCallback,
   FormAssociatedCallback,
   FormDisabledCallback,
-  FormResetCallback,
   FormStateRestoreCallback,
-
-  // CallbackKey,
 } from './types.ts'
 import {
   $attr,
@@ -166,7 +161,6 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
 
     static get ident() { return ident }
 
-    #methods: RegisteredCoreMethods = {}
     #shadow = this.attachShadow(shadowRootOpts)
     #internals = componentOpts.internals ? this.attachInternals() : undefined
 
@@ -186,16 +180,14 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
 
     async attributeChangedCallback(...params: Parameters<AttributeChangedCallback>) {
       const k = 'attributeChanged'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f(...params))
+      plugins[k](this.#params).forEach(async f => await f(...params))
 
       await super[`${k}Callback`]?.(...params)
     }
 
     async connectedCallback() {
       const k = 'connected'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f())
+      plugins[k](this.#params).forEach(async f => await f())
 
       await super[`${k}Callback`]?.({
         shadow: this.#shadow,
@@ -205,40 +197,35 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
 
     async disconnectedCallback() {
       const k = 'disconnected'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f())
+      plugins[k](this.#params).forEach(async f => await f())
 
       await super[`${k}Callback`]?.()
     }
 
     async formAssociatedCallback(...params: Parameters<FormAssociatedCallback>) {
       const k = 'formAssociated'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f(...params))
+      plugins[k](this.#params).forEach(async f => await f(...params))
 
       await super[`${k}Callback`]?.(...params)
     }
 
     async formDisabledCallback(...params: Parameters<FormDisabledCallback>) {
       const k = 'formDisabled'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f(...params))
+      plugins[k](this.#params).forEach(async f => await f(...params))
 
       await super[`${k}Callback`]?.(...params)
     }
 
     async formResetCallback() {
       const k = 'formReset'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f())
+      plugins[k](this.#params).forEach(async f => await f())
 
       await super[`${k}Callback`]?.()
     }
 
     async formStateRestoreCallback(...params: Parameters<FormStateRestoreCallback>) {
       const k = 'formStateRestore'
-      this.#methods[k] ??= plugins[k](this.#params)
-      this.#methods[k].forEach(async f => await f(...params))
+      plugins[k](this.#params).forEach(async f => await f(...params))
 
       await super[`${k}Callback`]?.(...params)
     }
@@ -279,14 +266,4 @@ type ComponentSchema = {
 
   shadowRootOpts: ShadowRootInit,
   componentOpts: ComponentOpts,
-}
-
-type RegisteredCoreMethods = {
-  connected?: ConnectedCallback[]
-  disconnected?: DisconnectedCallback[]
-  attributeChanged?: AttributeChangedCallback[]
-  formAssociated?: FormAssociatedCallback[]
-  formDisabled?: FormDisabledCallback[]
-  formReset?: FormResetCallback[]
-  formStateRestore?: FormStateRestoreCallback[]
 }
