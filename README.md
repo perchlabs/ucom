@@ -7,7 +7,6 @@ Ucom is a buildless declarative [custom element](https://developer.mozilla.org/e
 
 **Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
 
-
 ### Installation
 
 ```html

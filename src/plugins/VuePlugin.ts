@@ -74,7 +74,7 @@ export default class VuePlugin implements Plugin {
     })
   }
 
-  attributeChangedProvider({Component, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
+  attributeChanged({Component, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
     const {
       [PropDefsKey]: propDefs,
     } = Component as UpgradeComponentConstructor
@@ -95,7 +95,7 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  connectedProvider({Component, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
+  connected({Component, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
     const {
       [PropDefsKey]: propDefs,
       [StoreMakerKey]: storeMaker,
@@ -115,7 +115,7 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  disconnectedProvider({el: elReal}: PluginCallbackProviderParams): DisconnectedCallback {
+  disconnected({el: elReal}: PluginCallbackProviderParams): DisconnectedCallback {
     const el = elReal as UpgradeComponent
     return () => {
       el[CleanupKey].forEach(stop)
@@ -381,7 +381,7 @@ type persister = (v: string) => InstanceType<typeof Persist>
 type syncer = (v: string) => InstanceType<typeof Sync>
 
 type StoreMaker = (opts: {
-  props: {[key: string]: any}
+  props: Record<string, any>
   persist: persister
   sync: syncer
 }) => Record<string, any>
@@ -399,8 +399,8 @@ type PropDef = {
 type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
-  [DataKey]: { [key: string]: any}
-  [CleanupKey]: {[key: string]: any}
+  [DataKey]: Record<string, any>
+  [CleanupKey]: Record<string, any>
   $reactive: () => {}
   $nextTick: () => {}
   $stopEffect: () => {}
@@ -408,7 +408,7 @@ interface UpgradeComponent extends WebComponent {
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {
   new (...args: any[]): UpgradeComponent
-  [PropDefsKey]: { [key: string]: any}
+  [PropDefsKey]: Record<string, any>
   [StoreMakerKey]?: StoreMaker,
 }
 

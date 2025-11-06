@@ -9,9 +9,7 @@ import type {
   ComponentManager,
   ComponentImporter,
 } from '../ucom'
-import {
-  $attrBool,
-} from '../ucom'
+import { $attrBool } from '../ucom'
 
 // const ATTR_SRC = 'u-src'
 
@@ -129,7 +127,7 @@ function handleSourceElement(el: HTMLSourceElement, carry: ImportCarry, man: Com
     return
   }
 
-  const attributes: {[key: string]: any} = {}
+  const attributes: Record<string, any> = {}
   for (const {name, value} of el.attributes) {
     attributes[name] = value
   }
@@ -152,7 +150,7 @@ function handleSourceElement(el: HTMLSourceElement, carry: ImportCarry, man: Com
 }
 
 type ImportComponentData = ComponentIdentity & {
-  attributes: {[key: string]: string}
+  attributes: Record<string, string>
 }
 
 type ImportCarry = {

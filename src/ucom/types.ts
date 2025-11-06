@@ -11,22 +11,12 @@ export interface PluginConstructor {
   new (...args: any[]): Plugin
 }
 
-export interface Plugin {
-  start?: PluginStart
-  parse?: PluginParse
-  define?: PluginDefine
-  construct?: PluginConstruct
+type PluginStart = (params: PluginStartParams) => Promise<void>
+type PluginParse = (params: PluginParseParams) => Promise<void>
+type PluginDefine = (params: PluginDefineParams) => Promise<void>
+type PluginConstruct = (params: PluginConstructParams) => void
 
-  attributeChangedProvider?: PluginProvider<AttributeChangedCallback>
-  connectedProvider?: PluginProvider<ConnectedCallback>
-  disconnectedProvider?: PluginProvider<DisconnectedCallback>
-  formAssociatedProvider?: PluginProvider<FormAssociatedCallback>
-  formDisabledProvider?: PluginProvider<FormDisabledCallback>
-  formResetProvider?: PluginProvider<FormResetCallback>
-  formStateRestoreProvider?: PluginProvider<FormStateRestoreCallback>
-}
 export type PluginProvider<T> = (params: PluginCallbackProviderParams) => T
-
 export type PluginCallbackProviderParams = {
   Component: WebComponentConstructor,
   Raw: RawComponentConstructor,
@@ -34,10 +24,20 @@ export type PluginCallbackProviderParams = {
   shadow: ShadowRoot,
 }
 
-type PluginStart = (params: PluginStartParams) => Promise<void>
-type PluginParse = (params: PluginParseParams) => Promise<void>
-type PluginDefine = (params: PluginDefineParams) => Promise<void>
-type PluginConstruct = (params: PluginConstructParams) => void
+export interface Plugin {
+  start?: PluginStart
+  parse?: PluginParse
+  define?: PluginDefine
+  construct?: PluginConstruct
+
+  attributeChanged?: PluginProvider<AttributeChangedCallback>
+  connected?: PluginProvider<ConnectedCallback>
+  disconnected?: PluginProvider<DisconnectedCallback>
+  formAssociated?: PluginProvider<FormAssociatedCallback>
+  formDisabled?: PluginProvider<FormDisabledCallback>
+  formReset?: PluginProvider<FormResetCallback>
+  formStateRestore?: PluginProvider<FormStateRestoreCallback>
+}
 
 export interface PluginManager {
   start: PluginStart
@@ -93,7 +93,7 @@ export type PluginConstructParams = PluginCoreParams & {
   shadow: ShadowRoot,
 }
 
-export interface ModuleExports {[key: string]: any}
+export type ModuleExports = Record<string, any>
 
 type CustomElementCallbackReturn = void | Promise<void>
 export type AttributeChangedCallback = (name: string, oldValue: string | null, newValue: string | null) => CustomElementCallbackReturn

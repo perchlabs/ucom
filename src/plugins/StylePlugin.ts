@@ -4,7 +4,6 @@ import type {
   PluginConstructParams,
   Plugin,
 } from '../ucom'
-// import {$queryForLibAttr} from '../ucom'
 
 const ATTR_STYLE = 'u-com'
 

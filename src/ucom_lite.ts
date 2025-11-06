@@ -7,7 +7,7 @@ import {
   StylePlugin,
 } from './plugins'
 
-const ucom = new Ucom([
+const ucom = Ucom([
   CorePlugin,
   TemplatePlugin,
   RelativePlugin,
