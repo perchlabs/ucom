@@ -25,7 +25,7 @@ export default (plugins: PluginManager) => {
 
   const defineActual = async (ident: ComponentDef) => {
     delete lazy?.[ident.name]
-    return defineComponent({man, plugins, ident})
+    return defineComponent(man, plugins, ident)
   }
 
   const get = async ({name, tpl, resolved = ''}: {name: string, tpl?: HTMLTemplateElement, resolved?: string}) => {

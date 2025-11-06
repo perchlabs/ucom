@@ -71,13 +71,8 @@ export class ComponentFetchError extends Error {
   }
 }
 
-export async function defineComponent(params: {
-  man: ComponentManager,
-  plugins: PluginManager,
-  ident: ComponentDef,
-}) {
-  const {man, plugins} = params
-  const ident = Object.freeze(params.ident)
+export async function defineComponent(man: ComponentManager, plugins: PluginManager, identMut: ComponentDef) {
+  const ident = Object.freeze(identMut)
   const {name, tpl} = ident
 
   const frags = (tpl.cloneNode(true) as HTMLTemplateElement).content
@@ -90,16 +85,15 @@ export async function defineComponent(params: {
   const {Raw, exports, shadowRootOpts, customElementOpts, componentOpts} = await parseScript(name, frags)
   Object.defineProperty(Raw, 'name', { get() { return name } })
 
-  const Com = createComponentConstructor({
+  const Com = createComponentConstructor(
     man,
+    plugins,
     ident,
     Raw,
     frags,
-    exports,
-    plugins,
     shadowRootOpts,
     componentOpts,
-  })
+  )
 
   await plugins.define({man, ident, Com, Raw, exports})
   customElements.define(name, Com, customElementOpts)
@@ -152,9 +146,15 @@ export function hashContent(data: HTMLTemplateElement | DocumentFragment): strin
     .toString()
 }
 
-function createComponentConstructor(schema: ComponentSchema): WebComponentConstructor {
-  const {man, plugins, ident, Raw, frags, shadowRootOpts, componentOpts} = schema
-
+function createComponentConstructor(
+  man: ComponentManager,
+  plugins: PluginManager,
+  ident: ComponentDef,
+  Raw: RawComponentConstructor,
+  frags: DocumentFragment,
+  shadowRootOpts: ShadowRootInit,
+  componentOpts: ComponentOpts,
+): WebComponentConstructor {
   const Com = class extends Raw implements WebComponent {
     static formAssociated = Raw.formAssociated ?? false
     static observedAttributes = [...(Raw.observedAttributes ?? [])]
@@ -254,16 +254,16 @@ type ComponentOpts = {
   internals: boolean,
 }
 
-type ComponentSchema = {
-  man: ComponentManager,
-  ident: ComponentDef
+// type ComponentSchema = {
+//   man: ComponentManager,
+//   ident: ComponentDef
 
-  Raw: RawComponentConstructor,
-  frags: DocumentFragment,
+//   Raw: RawComponentConstructor,
+//   frags: DocumentFragment,
 
-  exports: ModuleExports,
-  plugins: PluginManager,
+//   exports: ModuleExports,
+//   plugins: PluginManager,
 
-  shadowRootOpts: ShadowRootInit,
-  componentOpts: ComponentOpts,
-}
+//   shadowRootOpts: ShadowRootInit,
+//   componentOpts: ComponentOpts,
+// }

@@ -104,14 +104,8 @@ export default class VuePlugin implements Plugin {
 
     return async () => {
       el[CleanupKey] = []
-      connectData({
-        Raw,
-        propDefs,
-        storeMaker,
-        el,
-        shadow,
-      })
-      await el.$nextTick()
+      connectData(Raw, el, propDefs, shadow, storeMaker)
+      el.$nextTick()
     }
   }
 
@@ -142,16 +136,16 @@ function makePropDefs(propsMaker?: PropsMaker): PropDefs {
   return defs
 }
 
-function connectData({Raw, propDefs, storeMaker, el, shadow}: {
+function connectData(
   Raw: RawComponentConstructor,
-  propDefs: PropDefs,
-  storeMaker?: StoreMaker,
   el: UpgradeComponent,
+  propDefs: PropDefs,
   shadow: ShadowRoot,
-}) {
+  storeMaker?: StoreMaker,
+) {
   if (el[DataKey]) { return }
 
-  const r = makeReactive({Raw, propDefs, storeMaker, el})
+  const r = makeReactive(Raw, el, propDefs, storeMaker)
   Object.assign(el, {
     get [DataKey]() { return r },
   })
@@ -160,16 +154,16 @@ function connectData({Raw, propDefs, storeMaker, el, shadow}: {
   app.mount(shadow)
 }
 
-function makeReactive({Raw, propDefs, storeMaker, el}: {
+function makeReactive(
   Raw: RawComponentConstructor,
+  el: UpgradeComponent,
   propDefs: PropDefs,
   storeMaker?: StoreMaker,
-  el: UpgradeComponent,
-}) {
+) {
   const {name} = Raw
   const rawProto = Raw.prototype
 
-  const storeProtos: {[key: string]: any} = {}
+  const storeProtos: Record<string, any> = {}
   Object.entries(rawProto).forEach(([k, v]) => {
     if (k in StoreSkip) { return }
     if (k.startsWith('$')) { return }
@@ -178,24 +172,24 @@ function makeReactive({Raw, propDefs, storeMaker, el}: {
   })
 
   const proxies: any[] = []
-  const props = makePropsProxy({proxies, propDefs, el})
-  const {sync, persist} = makeStore({proxies, Raw, props, storeMaker, el})
-  makeSync({proxies, name, sync})
-  makePersist({proxies, name, persist})
+  const props = makePropsProxy(el, proxies, propDefs)
+  const {sync, persist} = makeStore(Raw, el, proxies, props, storeMaker)
+  makeSync(name, proxies, sync)
+  makePersist(name, proxies, persist)
 
   return mergeProxies(proxies)
 }
 
-function makeStore({proxies, Raw, el, props, storeMaker}: {
-  proxies: any,
+function makeStore(
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
+  proxies: any,
   props: any,
   storeMaker?: StoreMaker,
-}) {
+) {
   const rawProto = Raw.prototype
 
-  const d: {[key: string]: any} = {
+  const d: Record<string, any> = {
     get $me() { return el },
   }
 
@@ -214,8 +208,8 @@ function makeStore({proxies, Raw, el, props, storeMaker}: {
     sync: (v: any) => new Sync(v),
   }) ?? {}
 
-  const persist: { [key: string]: any} = {}
-  const sync: { [key: string]: any} = {}
+  const persist: Record<string, any> = {}
+  const sync: Record<string, any> = {}
   for (let [k, v] of Object.entries(store)) {
     if (typeof v === 'function') { throw `VuePlugin: function '${k}' should not be placed directly on the store.` }
     if (k.startsWith('$')) { throw `VuePlugin: don't prefix store names with a '$'.` }
@@ -234,11 +228,7 @@ function makeStore({proxies, Raw, el, props, storeMaker}: {
   return {sync, persist}
 }
 
-function makeSync({name, proxies, sync}: {
-  name: string,
-  proxies: any[],
-  sync: object,
-}) {
+function makeSync(name: string, proxies: any[], sync: object) {
   if (!Object.keys(sync).length) {
     return
   }
@@ -249,11 +239,7 @@ function makeSync({name, proxies, sync}: {
   proxies.push(syncMap.get(name))
 }
 
-function makePersist({name, proxies, persist}: {
-  name: string,
-  proxies: any[],
-  persist: object,
-}) {
+function makePersist( name: string, proxies: any[], persist: object) {
   const persistEntries = Object.entries(persist)
   if (!persistEntries.length) {
     return
@@ -282,11 +268,7 @@ function makePersist({name, proxies, persist}: {
   proxies.push(persistMap.get(name))
 }
 
-function makePropsProxy({el, proxies, propDefs}: {
-  el: HTMLElement,
-  proxies: any[],
-  propDefs: PropDefs,
-}) {
+function makePropsProxy(el: HTMLElement, proxies: any[], propDefs: PropDefs) {
   const entries = Object.entries(propDefs)
   if (!entries.length) {
     return
@@ -297,7 +279,7 @@ function makePropsProxy({el, proxies, propDefs}: {
     attrs[name] = value
   }
 
-  const d: { [key: string]: any} = {}
+  const d: Record<string, any> = {}
   for (let [k, v] of entries) {
     const raw = attrs[k] ?? v.default ?? ''
     d[k] = v.cast?.(raw) ?? raw
@@ -353,7 +335,7 @@ const mergeProxyTrap = {
   },
 }
 
-function mergeProxies (objects: object[]) {
+function mergeProxies(objects: object[]) {
   return new Proxy({ objects }, mergeProxyTrap);
 }
 
