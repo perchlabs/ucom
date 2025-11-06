@@ -45,9 +45,9 @@ export interface PluginManager {
   define: PluginDefine
   construct: PluginConstruct
 
+  attributeChanged: PluginManagerProvider<AttributeChangedCallback>
   connected: PluginManagerProvider<ConnectedCallback>
   disconnected: PluginManagerProvider<DisconnectedCallback>
-  attributeChanged: PluginManagerProvider<AttributeChangedCallback>
   formAssociated: PluginManagerProvider<FormAssociatedCallback>
   formDisabled: PluginManagerProvider<FormDisabledCallback>
   formReset: PluginManagerProvider<FormResetCallback>

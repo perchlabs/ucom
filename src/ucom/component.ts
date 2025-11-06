@@ -15,6 +15,8 @@ import type {
   FormDisabledCallback,
   FormResetCallback,
   FormStateRestoreCallback,
+
+  // CallbackKey,
 } from './types.ts'
 import {
   $attr,
@@ -182,7 +184,7 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
       })
     }
 
-    async attributeChangedCallback(...params: [name: string, oldValue: string | null, newValue: string | null]) {
+    async attributeChangedCallback(...params: Parameters<AttributeChangedCallback>) {
       const k = 'attributeChanged'
       this.#methods[k] ??= plugins[k](this.#params)
       this.#methods[k].forEach(async f => await f(...params))
@@ -195,13 +197,10 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
       this.#methods[k] ??= plugins[k](this.#params)
       this.#methods[k].forEach(async f => await f())
 
-      const params: {shadow: ShadowRoot, internals?: ElementInternals} = {
+      await super[`${k}Callback`]?.({
         shadow: this.#shadow,
-      }
-      if (this.#internals) {
-        params.internals = this.#internals
-      }
-      await super[`${k}Callback`]?.(params)
+        internals: this.#internals,
+      })
     }
 
     async disconnectedCallback() {
@@ -212,7 +211,7 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
       await super[`${k}Callback`]?.()
     }
 
-    async formAssociated(...params: [form: HTMLFormElement | null]) {
+    async formAssociatedCallback(...params: Parameters<FormAssociatedCallback>) {
       const k = 'formAssociated'
       this.#methods[k] ??= plugins[k](this.#params)
       this.#methods[k].forEach(async f => await f(...params))
@@ -220,7 +219,7 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
       await super[`${k}Callback`]?.(...params)
     }
 
-    async formDisabledCallback(...params: [isDisabled: boolean]) {
+    async formDisabledCallback(...params: Parameters<FormDisabledCallback>) {
       const k = 'formDisabled'
       this.#methods[k] ??= plugins[k](this.#params)
       this.#methods[k].forEach(async f => await f(...params))
@@ -236,7 +235,7 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
       await super[`${k}Callback`]?.()
     }
 
-    async formStateRestoreCallback(...params: [state: string | File | FormData, reason: 'autocomplete' | 'restore']) {
+    async formStateRestoreCallback(...params: Parameters<FormStateRestoreCallback>) {
       const k = 'formStateRestore'
       this.#methods[k] ??= plugins[k](this.#params)
       this.#methods[k].forEach(async f => await f(...params))
