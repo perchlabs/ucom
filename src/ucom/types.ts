@@ -18,7 +18,7 @@ type PluginConstruct = (params: PluginConstructParams) => void
 
 export type PluginProvider<T> = (params: PluginCallbackProviderParams) => T
 export type PluginCallbackProviderParams = {
-  Component: WebComponentConstructor,
+  Com: WebComponentConstructor,
   Raw: RawComponentConstructor,
   el: WebComponent,
   shadow: ShadowRoot,
@@ -81,13 +81,13 @@ export type PluginParseParams = PluginCoreParams & {
   frags: DocumentFragment,
 }
 export type PluginDefineParams = PluginCoreParams & {
-  Component: WebComponentConstructor,
+  Com: WebComponentConstructor,
   Raw: RawComponentConstructor,
   exports: ModuleExports,
 }
 
 export type PluginConstructParams = PluginCoreParams & {
-  Component: WebComponentConstructor
+  Com: WebComponentConstructor
   Raw: RawComponentConstructor,
   el: WebComponent,
   shadow: ShadowRoot,

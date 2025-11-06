@@ -90,7 +90,7 @@ export async function defineComponent(params: {
   const {Raw, exports, shadowRootOpts, customElementOpts, componentOpts} = await parseScript(name, frags)
   Object.defineProperty(Raw, 'name', { get() { return name } })
 
-  const Component = createComponentConstructor({
+  const Com = createComponentConstructor({
     man,
     ident,
     Raw,
@@ -101,8 +101,8 @@ export async function defineComponent(params: {
     componentOpts,
   })
 
-  await plugins.define({man, ident, Component, Raw, exports})
-  customElements.define(name, Component, customElementOpts)
+  await plugins.define({man, ident, Com, Raw, exports})
+  customElements.define(name, Com, customElementOpts)
 
   return ident
 }
@@ -155,7 +155,7 @@ export function hashContent(data: HTMLTemplateElement | DocumentFragment): strin
 function createComponentConstructor(schema: ComponentSchema): WebComponentConstructor {
   const {man, plugins, ident, Raw, frags, shadowRootOpts, componentOpts} = schema
 
-  const Component = class extends Raw implements WebComponent {
+  const Com = class extends Raw implements WebComponent {
     static formAssociated = Raw.formAssociated ?? false
     static observedAttributes = [...(Raw.observedAttributes ?? [])]
 
@@ -171,7 +171,7 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
       plugins.construct({
         man,
         ident,
-        Component,
+        Com,
         Raw,
         el: this,
         shadow: this.#shadow,
@@ -232,14 +232,14 @@ function createComponentConstructor(schema: ComponentSchema): WebComponentConstr
 
     get #params(): PluginCallbackProviderParams {
       return {
-        Component,
+        Com,
         Raw,
         el: this,
         shadow: this.#shadow,
       }
     }
   }
-  return Component
+  return Com
 }
 
 type ParsedScript = {

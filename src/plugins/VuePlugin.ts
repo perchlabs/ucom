@@ -27,10 +27,10 @@ const syncMap = new Map<string, any>
 const PROP_REFLECT_DEFAULT = true
 
 export default class VuePlugin implements Plugin {
-  async define({Component, exports}: PluginDefineParams) {
-    const proto = Component.prototype
+  async define({Com, exports}: PluginDefineParams) {
+    const proto = Com.prototype
 
-    const Upgrade = Component as UpgradeComponentConstructor
+    const Upgrade = Com as UpgradeComponentConstructor
     const {$props, $store} = exports as UpgradeExports
 
     const propDefs = makePropDefs($props)
@@ -40,10 +40,10 @@ export default class VuePlugin implements Plugin {
     })
 
     const propKeys = Object.keys(propDefs)
-    const attrKeysOld = Component.observedAttributes ?? []
+    const attrKeysOld = Com.observedAttributes ?? []
     const attrKeysNew = propKeys.filter(k => !attrKeysOld.includes(k))
     const attrKeysMerged = [...attrKeysOld, ...attrKeysNew]
-    Object.defineProperty(Component, 'observedAttributes', { get() { return attrKeysMerged } })
+    Object.defineProperty(Com, 'observedAttributes', { get() { return attrKeysMerged } })
 
     for (const k of propKeys) {
       Object.defineProperty(proto, k, {
@@ -74,10 +74,10 @@ export default class VuePlugin implements Plugin {
     })
   }
 
-  attributeChanged({Component, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
+  attributeChanged({Com, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
     const {
       [PropDefsKey]: propDefs,
-    } = Component as UpgradeComponentConstructor
+    } = Com as UpgradeComponentConstructor
     const el = elReal as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
@@ -95,11 +95,11 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  connected({Component, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
+  connected({Com, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
     const {
       [PropDefsKey]: propDefs,
       [StoreMakerKey]: storeMaker,
-    } = Component as UpgradeComponentConstructor
+    } = Com as UpgradeComponentConstructor
     const el = elReal as UpgradeComponent
 
     return async () => {

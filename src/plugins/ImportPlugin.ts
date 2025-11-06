@@ -18,8 +18,8 @@ export default class ImportPlugin implements Plugin {
     await importRoot(man, frags)
   }
 
-  async define({man, Component}: PluginDefineParams) {
-    Object.assign(Component.prototype, {
+  async define({man, Com}: PluginDefineParams) {
+    Object.assign(Com.prototype, {
       $import: man.import
     })
   }
