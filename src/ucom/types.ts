@@ -24,19 +24,32 @@ export type PluginCallbackProviderParams = {
   shadow: ShadowRoot,
 }
 
-export interface Plugin {
+// export type PluginCallbackKey = keyof PluginCallbacks
+
+export type PluginCallbackKey =
+  'attributeChangedCallback' |
+  'connectedCallback' |
+  'disconnectedCallback' |
+  'formAssociatedCallback' |
+  'formDisabledCallback' |
+  'formResetCallback' |
+  'formStateRestoreCallback'
+
+export interface PluginCallbacks {
+  attributeChangedCallback?: PluginProvider<AttributeChangedCallback>
+  connectedCallback?: PluginProvider<ConnectedCallback>
+  disconnectedCallback?: PluginProvider<DisconnectedCallback>
+  formAssociatedCallback?: PluginProvider<FormAssociatedCallback>
+  formDisabledCallback?: PluginProvider<FormDisabledCallback>
+  formResetCallback?: PluginProvider<FormResetCallback>
+  formStateRestoreCallback?: PluginProvider<FormStateRestoreCallback>
+}
+
+export interface Plugin extends PluginCallbacks {
   start?: PluginStart
   parse?: PluginParse
   define?: PluginDefine
   construct?: PluginConstruct
-
-  attributeChanged?: PluginProvider<AttributeChangedCallback>
-  connected?: PluginProvider<ConnectedCallback>
-  disconnected?: PluginProvider<DisconnectedCallback>
-  formAssociated?: PluginProvider<FormAssociatedCallback>
-  formDisabled?: PluginProvider<FormDisabledCallback>
-  formReset?: PluginProvider<FormResetCallback>
-  formStateRestore?: PluginProvider<FormStateRestoreCallback>
 }
 
 export interface PluginManager {
@@ -45,15 +58,15 @@ export interface PluginManager {
   define: PluginDefine
   construct: PluginConstruct
 
-  attributeChanged: PluginManagerProvider<AttributeChangedCallback>
-  connected: PluginManagerProvider<ConnectedCallback>
-  disconnected: PluginManagerProvider<DisconnectedCallback>
-  formAssociated: PluginManagerProvider<FormAssociatedCallback>
-  formDisabled: PluginManagerProvider<FormDisabledCallback>
-  formReset: PluginManagerProvider<FormResetCallback>
-  formStateRestore: PluginManagerProvider<FormStateRestoreCallback>
+  attributeChangedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<AttributeChangedCallback>) => void
+  connectedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams) => void
+  disconnectedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams) => void
+  formAssociatedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormAssociatedCallback>) => void
+  formDisabledCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormDisabledCallback>) => void
+  formResetCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams) => void
+  formStateRestoreCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormStateRestoreCallback>) => void
 }
-type PluginManagerProvider<T> = (params: PluginCallbackProviderParams) => T[]
+// type PluginManagerProvider<T> = (params: PluginCallbackProviderParams) => T[]
 
 
 

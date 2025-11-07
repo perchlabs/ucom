@@ -7,6 +7,7 @@ import type {
   PluginManager,
   ComponentManager,
   ComponentDef,
+  // PluginCallbackKey,
   PluginCallbackProviderParams,
   AttributeChangedCallback,
   FormAssociatedCallback,
@@ -16,6 +17,14 @@ import type {
 import {
   $attr,
   $attrBool,
+
+  ATTRIBUTE_CHANGED,
+  CONNECTED,
+  DISCONNECTED,
+  FORM_ASSOCIATED,
+  FORM_DISABLED,
+  FORM_RESET,
+  FORM_STATE_RESTORE,
 } from './common.ts'
 
 export function resolveImport(url: string, postfixFile: string, postfixDir: string): ComponentIdentity {
@@ -178,56 +187,56 @@ function createComponentConstructor(
       })
     }
 
-    async attributeChangedCallback(...params: Parameters<AttributeChangedCallback>) {
-      const k = 'attributeChanged'
-      plugins[k](this.#params).forEach(async f => await f(...params))
+    async [ATTRIBUTE_CHANGED](...params: Parameters<AttributeChangedCallback>) {
+      const k = ATTRIBUTE_CHANGED
+      plugins[k](k, this.#params, params)
 
-      await super[`${k}Callback`]?.(...params)
+      await super[k]?.(...params)
     }
 
-    async connectedCallback() {
-      const k = 'connected'
-      plugins[k](this.#params).forEach(async f => await f())
+    async [CONNECTED]() {
+      const k = CONNECTED
+      plugins[k](k, this.#params)
 
-      await super[`${k}Callback`]?.({
+      await super[k]?.({
         shadow: this.#shadow,
         internals: this.#internals,
       })
     }
 
-    async disconnectedCallback() {
-      const k = 'disconnected'
-      plugins[k](this.#params).forEach(async f => await f())
+    async [DISCONNECTED]() {
+      const k = DISCONNECTED
+      plugins[k](k, this.#params)
 
-      await super[`${k}Callback`]?.()
+      await super[k]?.()
     }
 
-    async formAssociatedCallback(...params: Parameters<FormAssociatedCallback>) {
-      const k = 'formAssociated'
-      plugins[k](this.#params).forEach(async f => await f(...params))
+    async [FORM_ASSOCIATED](...params: Parameters<FormAssociatedCallback>) {
+      const k = FORM_ASSOCIATED
+      plugins[k](k, this.#params, params)
 
-      await super[`${k}Callback`]?.(...params)
+      await super[k]?.(...params)
     }
 
-    async formDisabledCallback(...params: Parameters<FormDisabledCallback>) {
-      const k = 'formDisabled'
-      plugins[k](this.#params).forEach(async f => await f(...params))
+    async [FORM_DISABLED](...params: Parameters<FormDisabledCallback>) {
+      const k = FORM_DISABLED
+      plugins[k](k, this.#params, params)
 
-      await super[`${k}Callback`]?.(...params)
+      await super[k]?.(...params)
     }
 
-    async formResetCallback() {
-      const k = 'formReset'
-      plugins[k](this.#params).forEach(async f => await f())
+    async [FORM_RESET]() {
+      const k = FORM_RESET
+      plugins[k](k, this.#params)
 
-      await super[`${k}Callback`]?.()
+      await super[k]?.()
     }
 
-    async formStateRestoreCallback(...params: Parameters<FormStateRestoreCallback>) {
-      const k = 'formStateRestore'
-      plugins[k](this.#params).forEach(async f => await f(...params))
+    async [FORM_STATE_RESTORE](...params: Parameters<FormStateRestoreCallback>) {
+      const k = FORM_STATE_RESTORE
+      plugins[k](k, this.#params, params)
 
-      await super[`${k}Callback`]?.(...params)
+      await super[k]?.(...params)
     }
 
     get #params(): PluginCallbackProviderParams {

@@ -10,7 +10,12 @@ import type {
   ConnectedCallback,
   DisconnectedCallback,
 } from '../ucom'
-import {CUSTOM_CALLBACKS} from '../ucom'
+import {
+  CUSTOM_CALLBACKS,
+  ATTRIBUTE_CHANGED,
+  CONNECTED,
+  DISCONNECTED,
+} from '../ucom'
 import {createApp, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
 
 // Proto constants.
@@ -74,7 +79,7 @@ export default class VuePlugin implements Plugin {
     })
   }
 
-  attributeChanged({Com, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
+  [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
     const {
       [PropDefsKey]: propDefs,
     } = Com as UpgradeComponentConstructor
@@ -95,7 +100,7 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  connected({Com, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
+  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
     const {
       [PropDefsKey]: propDefs,
       [StoreMakerKey]: storeMaker,
@@ -109,7 +114,7 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  disconnected({el: elReal}: PluginCallbackProviderParams): DisconnectedCallback {
+  [DISCONNECTED]({el: elReal}: PluginCallbackProviderParams): DisconnectedCallback {
     const el = elReal as UpgradeComponent
     return () => el[CleanupKey].forEach(stop)
   }

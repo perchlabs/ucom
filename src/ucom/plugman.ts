@@ -6,10 +6,54 @@ import type {
   PluginDefineParams,
   PluginConstructParams,
   PluginCallbackProviderParams,
+
+  Plugin,
+  PluginCallbacks,
+  PluginProvider,
+
+  AttributeChangedCallback,
+  ConnectedCallback,
+  DisconnectedCallback,
+  FormAssociatedCallback,
+  FormDisabledCallback,
+  FormResetCallback,
+  FormStateRestoreCallback,
 } from './types.ts'
+import {
+  ATTRIBUTE_CHANGED,
+  CONNECTED,
+  DISCONNECTED,
+  FORM_ASSOCIATED,
+  FORM_DISABLED,
+  FORM_RESET,
+  FORM_STATE_RESTORE,
+} from './common.ts'
+
+type PluginCallbackKey = keyof PluginCallbacks
 
 export default (pluginClasses: PluginConstructor[]): PluginManager  => {
   const plugins = pluginClasses.map(v => new v)
+
+  function provide<T>(
+    key: PluginCallbackKey,
+    builderParams: PluginCallbackProviderParams,
+  ) {
+    const f = (p: Plugin) => (p[key] as PluginProvider<T>)?.(builderParams)
+
+    return plugins
+      .map(f)
+      .filter(p => !!p)
+  }
+
+
+  // function run<T>(
+  //   key: PluginCallbackKey,
+  //   builderParams: PluginCallbackProviderParams,
+  //   params: Array<string>,
+  // ) {
+
+  // }
+
 
   return {
     async start(params: PluginStartParams) {
@@ -26,26 +70,33 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
       plugins.forEach(p => p.construct?.(params))
     },
 
-    connected(params: PluginCallbackProviderParams) {
-      return plugins.map(v => v.connected?.(params)).filter(v => !!v)
+    [ATTRIBUTE_CHANGED](k: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<AttributeChangedCallback>) {
+      const list = provide<AttributeChangedCallback>(k, builder)
+      list.forEach(async f => await f(...params))
     },
-    disconnected(params: PluginCallbackProviderParams) {
-      return plugins.map(v => v.disconnected?.(params)).filter(v => !!v)
+    [CONNECTED](k: PluginCallbackKey, builder: PluginCallbackProviderParams) {
+      const list = provide<ConnectedCallback>(k, builder)
+      list.forEach(async f => await f())
     },
-    attributeChanged(params: PluginCallbackProviderParams) {
-      return plugins.map(p => p.attributeChanged?.(params)).filter(p => !!p)
+    [DISCONNECTED](k: PluginCallbackKey, builder: PluginCallbackProviderParams) {
+      const list = provide<DisconnectedCallback>(k, builder)
+      list.forEach(async f => await f())
     },
-    formAssociated(params: PluginCallbackProviderParams) {
-      return plugins.map(p => p.formAssociated?.(params)).filter(p => !!p)
+    [FORM_ASSOCIATED](k: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormAssociatedCallback>) {
+      const list = provide<FormAssociatedCallback>(k, builder)
+      list.forEach(async f => await f(...params))
     },
-    formDisabled(params: PluginCallbackProviderParams) {
-      return plugins.map(p => p.formDisabled?.(params)).filter(p => !!p)
+    [FORM_DISABLED](k: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormDisabledCallback>) {
+      const list = provide<FormDisabledCallback>(k, builder)
+      list.forEach(async f => await f(...params))
     },
-    formReset(params: PluginCallbackProviderParams) {
-      return plugins.map(p => p.formReset?.(params)).filter(p => !!p)
+    [FORM_RESET](k: PluginCallbackKey, builder: PluginCallbackProviderParams) {
+      const list = provide<FormResetCallback>(k, builder)
+      list.forEach(async f => await f())
     },
-    formStateRestore(params: PluginCallbackProviderParams) {
-      return plugins.map(p => p.formStateRestore?.(params)).filter(p => !!p)
+    [FORM_STATE_RESTORE](k: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormStateRestoreCallback>) {
+      const list = provide<FormStateRestoreCallback>(k, builder)
+      list.forEach(async f => await f(...params))
     },
   }
 }

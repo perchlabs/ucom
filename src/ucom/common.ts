@@ -1,3 +1,10 @@
+export const ATTRIBUTE_CHANGED = 'attributeChangedCallback'
+export const CONNECTED = 'connectedCallback'
+export const DISCONNECTED = 'disconnectedCallback'
+export const FORM_ASSOCIATED = 'formAssociatedCallback'
+export const FORM_DISABLED = 'formDisabledCallback'
+export const FORM_RESET = 'formResetCallback'
+export const FORM_STATE_RESTORE = 'formStateRestoreCallback'
 
 export const CUSTOM_CALLBACKS = [
   'attributeChangedCallback',
