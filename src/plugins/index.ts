@@ -1,6 +1,0 @@
-export {default as CorePlugin} from './CorePlugin.ts'
-export {default as TemplatePlugin} from './TemplatePlugin.ts'
-export {default as RelativePlugin} from './RelativePlugin.ts'
-export {default as ImportPlugin} from './ImportPlugin.ts'
-export {default as StylePlugin} from './StylePlugin.ts'
-export {default as VuePlugin} from './VuePlugin.ts'
