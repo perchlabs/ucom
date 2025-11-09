@@ -8,10 +8,9 @@
 <fancy-counter
   name="test"
   :count="count"
-  @count="$nextTick(() => count = $event.detail)"
-></fancy-counter>
-<fancy-counter></fancy-counter>
-
+  @count="count = $event.count"
+  ></fancy-counter>
+  <fancy-counter></fancy-counter>
 <script>
   export function $store() {
     return {

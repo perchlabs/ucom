@@ -16,16 +16,16 @@
     <div>Local: {{ local }}</div>
   </section>
   <section>
-    <button @click="friend--">(-)<sub>1</sub></button>
-    <button @click="$data.friend--">(-)<sub>2</sub></button>
-    <button @click="$me.$data.friend++">(+)<sub>1</sub></button>
+    <button @click="sync--">(-)<sub>1</sub></button>
+    <button @click="$data.sync--">(-)<sub>2</sub></button>
+    <button @click="$me.$data.sync++">(+)<sub>1</sub></button>
     <button @click="incShare()">(+)<sub>2</sub></button>
-    <div>Syncronized: {{ friend }}</div>
+    <div>Syncronized: {{ sync }}</div>
   </section>
   <section>
-    <button @click="permanent--">-</button>
-    <button @click="permanent++">+</button>
-    <div>Persistent: {{ permanent }}</div>
+    <button @click="persist--">-</button>
+    <button @click="persist++">+</button>
+    <div>Persistent: {{ persist }}</div>
   </section>
 </main>
 
@@ -43,22 +43,33 @@
   export function $store({persist, sync}) {
     return {
       local: 0,
-      permanent: persist(0),
-      friend: sync(0),
+      persist: persist(0),
+      sync: sync(0),
+    }
+  }
+
+  class CountEvent extends Event {
+    constructor(count) {
+      super('count')
+      this.count = count
     }
   }
 
   export default class extends HTMLElement {
     incLocal() { this.$data.local++ }
     incRef(base) { base.count++ }
-    incShare() { this.$data.friend += 1}
-
-    dispatchCountEvent() {
-      this.dispatchEvent(new CustomEvent('count', { detail: this.count }))
-    }
+    incShare() { this.$data.sync += 1}
 
     async connectedCallback() {
-      this.$effect(async () => this.dispatchCountEvent())
+      this.$effect(async () => {
+        // Save the next value and trigger the proxy as soon as possible.
+        const count = this.$data.count
+        // Wait for petite-vue to update the templates and to avoid incomprehensible timing problems.
+        // This can be done in the receiving component of an event, but that is impolite.
+        await this.$nextTick()
+        // Custom event classes have better ergonomics on the receiving end.
+        this.dispatchEvent(new CountEvent(count))
+      })
     }
   }
 </script>
@@ -82,7 +93,6 @@
 
     & > div {
       float: right;
-      /* display: inline-block; */
       text-align: right;
 
       & > div {

@@ -30,7 +30,7 @@ const StoreSkip = new Set(['constructor', ...CUSTOM_CALLBACKS])
 const persistMap = new Map<string, any>
 const syncMap = new Map<string, any>
 
-const PROP_REFLECT_DEFAULT = true
+// const PROP_REFLECT_DEFAULT = true
 
 export default class VuePlugin implements Plugin {
   async define({Com, exports}: PluginDefineParams) {
@@ -58,12 +58,15 @@ export default class VuePlugin implements Plugin {
           return this[DataKey][k]
         },
         set(newValue) {
-          if (propDefs[k].reflect) {
-            this.setAttribute(k, newValue)
-          } else {
-            this[DataKey][k] = propDefs[k].cast?.(newValue) ?? newValue
-          }
+          this[DataKey][k] = propDefs[k].cast?.(newValue) ?? newValue
         },
+        // set(newValue) {
+        //   if (propDefs[k].reflect) {
+        //     this.setAttribute(k, newValue)
+        //   } else {
+        //     this[DataKey][k] = propDefs[k].cast?.(newValue) ?? newValue
+        //   }
+        // },
       })
     }
 
@@ -130,11 +133,11 @@ function makePropDefs(propsMaker?: PropsMaker): PropDefs {
     if (typeof v !== 'object') {
       v = {
         default: v,
-        reflect: PROP_REFLECT_DEFAULT,
+        // reflect: PROP_REFLECT_DEFAULT,
       }
     }
     v.default ??= ''
-    v.reflect ??= PROP_REFLECT_DEFAULT
+    // v.reflect ??= PROP_REFLECT_DEFAULT
 
     defs[k] = v
   })
@@ -382,7 +385,8 @@ type PropRawDef = string | PropDef
 
 type PropDef = {
   default: any
-  reflect: boolean,
+  // TODO: Investigate ways to control reflective attributes/properties
+  // reflect: boolean,
   cast?: (value: any) => any
 }
 type PropDefs = Record<string, PropDef>
