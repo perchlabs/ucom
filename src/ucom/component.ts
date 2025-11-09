@@ -8,7 +8,7 @@ import type {
   ComponentManager,
   ComponentDef,
 
-  PluginCallbackProviderParams,
+  PluginCallbackBuilderParams,
   AttributeChangedCallback,
   // ConnectedCallback,
   // DisconnectedCallback,
@@ -229,7 +229,7 @@ function createComponentConstructor(
       await super[FORM_STATE_RESTORE]?.(...params)
     }
 
-    get #params(): PluginCallbackProviderParams {
+    get #params(): PluginCallbackBuilderParams {
       return {
         Com,
         Raw,

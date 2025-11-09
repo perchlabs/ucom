@@ -4,7 +4,7 @@ import type {
   WebComponentConstructor,
   Plugin,
   PluginDefineParams,
-  PluginCallbackProviderParams,
+  PluginCallbackBuilderParams,
   ModuleExports,
   AttributeChangedCallback,
   ConnectedCallback,
@@ -79,7 +79,7 @@ export default class VuePlugin implements Plugin {
     })
   }
 
-  [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackProviderParams): AttributeChangedCallback {
+  [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackBuilderParams): AttributeChangedCallback {
     const {
       [PropDefsKey]: propDefs,
     } = Com as UpgradeComponentConstructor
@@ -100,7 +100,7 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackProviderParams): ConnectedCallback {
+  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
     const {
       [PropDefsKey]: propDefs,
       [StoreMakerKey]: storeMaker,
@@ -114,7 +114,7 @@ export default class VuePlugin implements Plugin {
     }
   }
 
-  [DISCONNECTED]({el: elReal}: PluginCallbackProviderParams): DisconnectedCallback {
+  [DISCONNECTED]({el: elReal}: PluginCallbackBuilderParams): DisconnectedCallback {
     const el = elReal as UpgradeComponent
     return () => el[CleanupKey].forEach(stop)
   }

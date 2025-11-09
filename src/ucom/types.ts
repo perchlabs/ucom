@@ -16,12 +16,12 @@ type PluginParse = (params: PluginParseParams) => Promise<void>
 type PluginDefine = (params: PluginDefineParams) => Promise<void>
 type PluginConstruct = (params: PluginConstructParams) => void
 
-export type PluginProvider<T extends PluginCallbackType> =
-  (params: PluginCallbackProviderParams) =>
+export type PluginCallbackBuilder<T extends PluginCallbackType> =
+  (params: PluginCallbackBuilderParams) =>
   (...params: Parameters<T>) => void | Promise<void>
 
 
-export type PluginCallbackProviderParams = {
+export type PluginCallbackBuilderParams = {
   Com: WebComponentConstructor,
   Raw: RawComponentConstructor,
   el: WebComponent,
@@ -60,13 +60,13 @@ export type CallbackRelated = {
 }
 
 export interface PluginCallbacks extends Partial<CallbackRelated> {
-  attributeChangedCallback?: PluginProvider<AttributeChangedCallback>
-  connectedCallback?: PluginProvider<ConnectedCallback>
-  disconnectedCallback?: PluginProvider<DisconnectedCallback>
-  formAssociatedCallback?: PluginProvider<FormAssociatedCallback>
-  formDisabledCallback?: PluginProvider<FormDisabledCallback>
-  formResetCallback?: PluginProvider<FormResetCallback>
-  formStateRestoreCallback?: PluginProvider<FormStateRestoreCallback>
+  attributeChangedCallback?: PluginCallbackBuilder<AttributeChangedCallback>
+  connectedCallback?: PluginCallbackBuilder<ConnectedCallback>
+  disconnectedCallback?: PluginCallbackBuilder<DisconnectedCallback>
+  formAssociatedCallback?: PluginCallbackBuilder<FormAssociatedCallback>
+  formDisabledCallback?: PluginCallbackBuilder<FormDisabledCallback>
+  formResetCallback?: PluginCallbackBuilder<FormResetCallback>
+  formStateRestoreCallback?: PluginCallbackBuilder<FormStateRestoreCallback>
 }
 
 export interface Plugin extends PluginCallbacks {
@@ -76,8 +76,8 @@ export interface Plugin extends PluginCallbacks {
   construct?: PluginConstruct
 }
 
-export type PluginManagerProvider = (builder: PluginCallbackProviderParams) => void
-export type PluginManagerProviderWithParams<T extends PluginCallbackType> = (builder: PluginCallbackProviderParams, params: Parameters<T>) => void
+export type PluginManagerProvider = (builder: PluginCallbackBuilderParams) => void
+export type PluginManagerProviderWithParams<T extends PluginCallbackType> = (builder: PluginCallbackBuilderParams, params: Parameters<T>) => void
 
 export interface PluginManager extends CallbackRelated {
   start: PluginStart

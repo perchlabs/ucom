@@ -5,9 +5,12 @@ import type {
   PluginParseParams,
   PluginDefineParams,
   PluginConstructParams,
-  PluginCallbackProviderParams,
+  PluginCallbackBuilderParams,
 
-  PluginProvider,
+  PluginCallbackBuilder,
+  PluginCallbackKey,
+  PluginCallbackType,
+  PluginCallbacks,
 
   AttributeChangedCallback,
   ConnectedCallback,
@@ -16,10 +19,6 @@ import type {
   FormDisabledCallback,
   FormResetCallback,
   FormStateRestoreCallback,
-
-  PluginCallbackKey,
-  PluginCallbackType,
-  PluginCallbacks,
 } from './types.ts'
 import {
   ATTRIBUTE_CHANGED,
@@ -36,10 +35,10 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
 
   function provide<T extends PluginCallbackType>(
     key: PluginCallbackKey,
-    builderParams: PluginCallbackProviderParams,
+    builderParams: PluginCallbackBuilderParams,
   ) {
     return plugins
-      .map((p: PluginCallbacks) => (p[key] as PluginProvider<T>)?.(builderParams))
+      .map((p: PluginCallbacks) => (p[key] as PluginCallbackBuilder<T>)?.(builderParams))
       .filter(v => !!v)
   }
 
@@ -58,25 +57,25 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
       plugins.forEach(p => p.construct?.(params))
     },
 
-    [ATTRIBUTE_CHANGED](builder: PluginCallbackProviderParams, params: Parameters<AttributeChangedCallback>) {
+    [ATTRIBUTE_CHANGED](builder: PluginCallbackBuilderParams, params: Parameters<AttributeChangedCallback>) {
       provide<AttributeChangedCallback>(ATTRIBUTE_CHANGED, builder).map(async f => await f(...params))
     },
-    [CONNECTED](builder: PluginCallbackProviderParams) {
+    [CONNECTED](builder: PluginCallbackBuilderParams) {
       provide<ConnectedCallback>(CONNECTED, builder).map(async f => await f())
     },
-    [DISCONNECTED](builder: PluginCallbackProviderParams) {
+    [DISCONNECTED](builder: PluginCallbackBuilderParams) {
       provide<DisconnectedCallback>(DISCONNECTED, builder).map(async f => await f())
     },
-    [FORM_ASSOCIATED](builder: PluginCallbackProviderParams, params: Parameters<FormAssociatedCallback>) {
+    [FORM_ASSOCIATED](builder: PluginCallbackBuilderParams, params: Parameters<FormAssociatedCallback>) {
       provide<FormAssociatedCallback>(FORM_ASSOCIATED, builder).map(async f => await f(...params))
     },
-    [FORM_DISABLED](builder: PluginCallbackProviderParams, params: Parameters<FormDisabledCallback>) {
+    [FORM_DISABLED](builder: PluginCallbackBuilderParams, params: Parameters<FormDisabledCallback>) {
       provide<FormDisabledCallback>(FORM_DISABLED, builder).map(async f => await f(...params))
     },
-    [FORM_RESET](builder: PluginCallbackProviderParams) {
+    [FORM_RESET](builder: PluginCallbackBuilderParams) {
       provide<FormResetCallback>(FORM_RESET, builder).map(async f => await f())
     },
-    [FORM_STATE_RESTORE](builder: PluginCallbackProviderParams, params: Parameters<FormStateRestoreCallback>) {
+    [FORM_STATE_RESTORE](builder: PluginCallbackBuilderParams, params: Parameters<FormStateRestoreCallback>) {
       provide<FormStateRestoreCallback>(FORM_STATE_RESTORE, builder).map(async f => await f(...params))
     },
   }
