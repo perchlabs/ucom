@@ -16,7 +16,11 @@ type PluginParse = (params: PluginParseParams) => Promise<void>
 type PluginDefine = (params: PluginDefineParams) => Promise<void>
 type PluginConstruct = (params: PluginConstructParams) => void
 
-export type PluginProvider<T> = (params: PluginCallbackProviderParams) => T
+export type PluginProvider<T extends PluginCallbackType> =
+  (params: PluginCallbackProviderParams) =>
+  (...params: Parameters<T>) => void | Promise<void>
+
+
 export type PluginCallbackProviderParams = {
   Com: WebComponentConstructor,
   Raw: RawComponentConstructor,
@@ -24,7 +28,14 @@ export type PluginCallbackProviderParams = {
   shadow: ShadowRoot,
 }
 
-// export type PluginCallbackKey = keyof PluginCallbacks
+type CustomElementCallbackReturn = void | Promise<void>
+export type AttributeChangedCallback = (name: string, oldValue: string | null, newValue: string | null) => CustomElementCallbackReturn
+export type ConnectedCallback = () => CustomElementCallbackReturn
+export type DisconnectedCallback = () => CustomElementCallbackReturn
+export type FormAssociatedCallback = (form: HTMLFormElement | null) => CustomElementCallbackReturn
+export type FormDisabledCallback = (isDisabled: boolean) => CustomElementCallbackReturn
+export type FormResetCallback = () => CustomElementCallbackReturn
+export type FormStateRestoreCallback = (state: string | File | FormData, reason: 'autocomplete' | 'restore') => CustomElementCallbackReturn
 
 export type PluginCallbackKey =
   'attributeChangedCallback' |
@@ -35,7 +46,20 @@ export type PluginCallbackKey =
   'formResetCallback' |
   'formStateRestoreCallback'
 
-export interface PluginCallbacks {
+export type PluginCallbackType =
+  AttributeChangedCallback |
+  ConnectedCallback | 
+  DisconnectedCallback |
+  FormAssociatedCallback |
+  FormDisabledCallback |
+  FormResetCallback |
+  FormStateRestoreCallback
+
+export type CallbackRelated = {
+  [k in PluginCallbackKey]: (...args: any[]) => any
+}
+
+export interface PluginCallbacks extends Partial<CallbackRelated> {
   attributeChangedCallback?: PluginProvider<AttributeChangedCallback>
   connectedCallback?: PluginProvider<ConnectedCallback>
   disconnectedCallback?: PluginProvider<DisconnectedCallback>
@@ -52,22 +76,23 @@ export interface Plugin extends PluginCallbacks {
   construct?: PluginConstruct
 }
 
-export interface PluginManager {
+export type PluginManagerProvider = (builder: PluginCallbackProviderParams) => void
+export type PluginManagerProviderWithParams<T extends PluginCallbackType> = (builder: PluginCallbackProviderParams, params: Parameters<T>) => void
+
+export interface PluginManager extends CallbackRelated {
   start: PluginStart
   parse: PluginParse
   define: PluginDefine
   construct: PluginConstruct
 
-  attributeChangedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<AttributeChangedCallback>) => void
-  connectedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams) => void
-  disconnectedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams) => void
-  formAssociatedCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormAssociatedCallback>) => void
-  formDisabledCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormDisabledCallback>) => void
-  formResetCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams) => void
-  formStateRestoreCallback: (key: PluginCallbackKey, builder: PluginCallbackProviderParams, params: Parameters<FormStateRestoreCallback>) => void
+  attributeChangedCallback: PluginManagerProviderWithParams<AttributeChangedCallback>
+  connectedCallback: PluginManagerProvider
+  disconnectedCallback: PluginManagerProvider
+  formAssociatedCallback: PluginManagerProviderWithParams<FormAssociatedCallback>
+  formDisabledCallback: PluginManagerProviderWithParams<FormDisabledCallback>
+  formResetCallback: PluginManagerProvider
+  formStateRestoreCallback: PluginManagerProviderWithParams<FormStateRestoreCallback>
 }
-// type PluginManagerProvider<T> = (params: PluginCallbackProviderParams) => T[]
-
 
 
 export interface ComponentManager {
@@ -81,7 +106,6 @@ export interface ComponentManager {
 export type ComponentDefiner = (name: string | null, tpl: HTMLTemplateElement) => Promise<ComponentDef | undefined>
 export type ComponentImporter = (url: string, tpl?: HTMLTemplateElement) => Promise<ComponentDef | undefined> 
 export type ComponentResolver = (url: string) => ComponentIdentity
-
 
 export interface PluginCoreParams {
   man: ComponentManager,
@@ -109,14 +133,6 @@ export type PluginConstructParams = PluginCoreParams & {
 
 export type ModuleExports = Record<string, any>
 
-type CustomElementCallbackReturn = void | Promise<void>
-export type AttributeChangedCallback = (name: string, oldValue: string | null, newValue: string | null) => CustomElementCallbackReturn
-export type ConnectedCallback = () => CustomElementCallbackReturn
-export type DisconnectedCallback = () => CustomElementCallbackReturn
-export type FormAssociatedCallback = (form: HTMLFormElement | null) => CustomElementCallbackReturn
-export type FormDisabledCallback = (isDisabled: boolean) => CustomElementCallbackReturn
-export type FormResetCallback = () => CustomElementCallbackReturn
-export type FormStateRestoreCallback = (state: string | File | FormData, reason: 'autocomplete' | 'restore') => CustomElementCallbackReturn
 
 export interface RawComponent extends HTMLElement {
   attributeChangedCallback?(...args: Parameters<AttributeChangedCallback>): CustomElementCallbackReturn

@@ -7,11 +7,14 @@ import type {
   PluginManager,
   ComponentManager,
   ComponentDef,
-  // PluginCallbackKey,
+
   PluginCallbackProviderParams,
   AttributeChangedCallback,
+  // ConnectedCallback,
+  // DisconnectedCallback,
   FormAssociatedCallback,
   FormDisabledCallback,
+  // FormResetCallback,
   FormStateRestoreCallback,
 } from './types.ts'
 import {
@@ -91,9 +94,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
 
   await plugins.parse({man, ident, frags})
 
-  const {Raw, exports, shadowRootOpts, customElementOpts, componentOpts} = await parseScript(name, frags)
-  Object.defineProperty(Raw, 'name', { get() { return name } })
-
+  const [Raw, exports, shadowRootOpts, customElementOpts, componentOpts] = await parseScript(name, frags)
   const Com = createComponentConstructor(
     man,
     plugins,
@@ -128,21 +129,21 @@ async function parseScript(name: string, frags: DocumentFragment): Promise<Parse
     ...exports
   } = module as {default: RawComponentConstructor} & ModuleExports
 
-  return {
+  return [
     Raw,
     exports,
-    shadowRootOpts: {
+    {
       mode: $attr(script, 'mode') ?? 'closed',
       slotAssignment: $attr(script, 'slotAssignment') ?? undefined,
       delegatesFocus: $attrBool(script, 'delegatesFocus') ?? undefined,
     },
-    customElementOpts: {
+    {
       extends: $attr(script, 'extends') ?? undefined,
     },
-    componentOpts: {
+    {
       internals: $attrBool(script, 'internals') ?? undefined,
     },
-  }
+  ]
 }
 
 export function hashContent(data: HTMLTemplateElement | DocumentFragment): string {
@@ -164,9 +165,12 @@ function createComponentConstructor(
   shadowRootOpts: ShadowRootInit,
   componentOpts: ComponentOpts,
 ): WebComponentConstructor {
+  const formAssociated = 'formAssociated'
+  const observedAttributes = 'observedAttributes'
+
   const Com = class extends Raw implements WebComponent {
-    static formAssociated = Raw.formAssociated ?? false
-    static observedAttributes = [...(Raw.observedAttributes ?? [])]
+    static [formAssociated] = Raw[formAssociated] ?? false
+    static [observedAttributes] = [...(Raw[observedAttributes] ?? [])]
 
     static get ident() { return ident }
 
@@ -188,55 +192,41 @@ function createComponentConstructor(
     }
 
     async [ATTRIBUTE_CHANGED](...params: Parameters<AttributeChangedCallback>) {
-      const k = ATTRIBUTE_CHANGED
-      plugins[k](k, this.#params, params)
-
-      await super[k]?.(...params)
+      plugins[ATTRIBUTE_CHANGED](this.#params, params)
+      await super[ATTRIBUTE_CHANGED]?.(...params)
     }
 
     async [CONNECTED]() {
-      const k = CONNECTED
-      plugins[k](k, this.#params)
-
-      await super[k]?.({
+      plugins[CONNECTED](this.#params)
+      await super[CONNECTED]?.({
         shadow: this.#shadow,
         internals: this.#internals,
       })
     }
 
     async [DISCONNECTED]() {
-      const k = DISCONNECTED
-      plugins[k](k, this.#params)
-
-      await super[k]?.()
+      plugins[DISCONNECTED](this.#params)
+      await super[DISCONNECTED]?.()
     }
 
     async [FORM_ASSOCIATED](...params: Parameters<FormAssociatedCallback>) {
-      const k = FORM_ASSOCIATED
-      plugins[k](k, this.#params, params)
-
-      await super[k]?.(...params)
+      plugins[FORM_ASSOCIATED](this.#params, params)
+      await super[FORM_ASSOCIATED]?.(...params)
     }
 
     async [FORM_DISABLED](...params: Parameters<FormDisabledCallback>) {
-      const k = FORM_DISABLED
-      plugins[k](k, this.#params, params)
-
-      await super[k]?.(...params)
+      plugins[FORM_DISABLED](this.#params, params)
+      await super[FORM_DISABLED]?.(...params)
     }
 
     async [FORM_RESET]() {
-      const k = FORM_RESET
-      plugins[k](k, this.#params)
-
-      await super[k]?.()
+      plugins[FORM_RESET](this.#params)
+      await super[FORM_RESET]?.()
     }
 
     async [FORM_STATE_RESTORE](...params: Parameters<FormStateRestoreCallback>) {
-      const k = FORM_STATE_RESTORE
-      plugins[k](k, this.#params, params)
-
-      await super[k]?.(...params)
+      plugins[FORM_STATE_RESTORE](this.#params, params)
+      await super[FORM_STATE_RESTORE]?.(...params)
     }
 
     get #params(): PluginCallbackProviderParams {
@@ -251,13 +241,13 @@ function createComponentConstructor(
   return Com
 }
 
-type ParsedScript = {
+type ParsedScript = [
   Raw: RawComponentConstructor,
   exports: ModuleExports,
   shadowRootOpts: ShadowRootInit,
   customElementOpts: ElementDefinitionOptions,
   componentOpts: ComponentOpts,
-}
+]
 
 type ComponentOpts = {
   internals: boolean,

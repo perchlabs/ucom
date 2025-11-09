@@ -1,16 +1,13 @@
 import type {
   PluginParseParams,
   Plugin,
-  ComponentDef,
 } from '../ucom'
 
 export default class RelativePlugin implements Plugin {
-  async parse({ident, frags}: PluginParseParams) {
-    this.#parseScript(ident, frags)
-    this.#parseStyle(ident, frags)
-  }
-
-  #parseScript({resolved}: ComponentDef, frags: DocumentFragment) {
+  async parse({
+    frags,
+    ident: {resolved},
+  }: PluginParseParams) {
     for (const script of frags.querySelectorAll('script')) {
       script.text = script.text.replace(
         /(import|from)\s*("|')(\.{0,2}\/.*?[^\\])\2/g,
@@ -20,9 +17,7 @@ export default class RelativePlugin implements Plugin {
         }
       )
     }
-  }
 
-  #parseStyle({resolved}: ComponentDef, frags: DocumentFragment) {
     for (const style of frags.querySelectorAll('style')) {
       style.innerHTML = style.innerHTML.replace(
         /(@import)\s*("|')(\.{0,2}\/.*?[^\\])\2/g,
