@@ -20,7 +20,7 @@
       this.#hasRun = true
 
       const Component = await customElements.whenDefined(name)
-      const tpl = Component.ident.tpl
+      const {tpl} = Component.def
 
       const parent = this.parentElement ?? this.getRootNode()
       if (!parent) {

@@ -1,4 +1,5 @@
 import type {
+  ComponentDef,
   RawComponentConstructor,
   WebComponent,
   WebComponentConstructor,
@@ -102,6 +103,7 @@ export default class VuePlugin implements Plugin {
 
   [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
     const {
+      def,
       [PropDefsKey]: propDefs,
       [StoreMakerKey]: storeMaker,
     } = Com as UpgradeComponentConstructor
@@ -109,7 +111,7 @@ export default class VuePlugin implements Plugin {
 
     return async () => {
       el[CleanupKey] = []
-      connectData(Raw, el, propDefs, shadow, storeMaker)
+      connectData(def, Raw, el, propDefs, shadow, storeMaker)
       el.$nextTick()
     }
   }
@@ -140,6 +142,7 @@ function makePropDefs(propsMaker?: PropsMaker): PropDefs {
 }
 
 function connectData(
+  def: ComponentDef,
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
   propDefs: PropDefs,
@@ -148,7 +151,7 @@ function connectData(
 ) {
   if (el[DataKey]) { return }
 
-  const r = makeReactive(Raw, el, propDefs, storeMaker)
+  const r = makeReactive(def, Raw, el, propDefs, storeMaker)
   Object.assign(el, {
     get [DataKey]() { return r },
   })
@@ -158,12 +161,13 @@ function connectData(
 }
 
 function makeReactive(
+  def: ComponentDef,
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
   propDefs: PropDefs,
   storeMaker?: StoreMaker,
 ) {
-  const {name} = Raw
+  const {name} = def
   const rawProto = Raw.prototype
 
   const storeProtos: Record<string, any> = {}

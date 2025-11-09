@@ -1,5 +1,5 @@
 import type {
-  ComponentDef,
+  ComponentDefRaw,
   ComponentManager,
   ComponentIdentity,
   PluginConstructor,
@@ -26,7 +26,7 @@ export default (pluginClasses: PluginConstructor[]) => {
   // Resolves a component URL.
   const resolve = (url: string) => resolveImport(url, FILE_POSTFIX, DIR_POSTFIX)
 
-  const defineActual = async (ident: ComponentDef) => {
+  const defineActual = async (ident: ComponentDefRaw) => {
     delete lazy?.[ident.name]
     return defineComponent(man, plugins, ident)
   }

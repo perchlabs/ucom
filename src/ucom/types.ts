@@ -3,9 +3,10 @@ export interface ComponentIdentity {
   name: string,
   resolved: string,
 }
-export interface ComponentDef extends ComponentIdentity {
+export interface ComponentDefRaw extends ComponentIdentity {
   tpl: HTMLTemplateElement,
 }
+export type ComponentDef = Readonly<ComponentDefRaw>
 
 export interface PluginConstructor {
   new (...args: any[]): Plugin
@@ -76,8 +77,8 @@ export interface Plugin extends PluginCallbacks {
   construct?: PluginConstruct
 }
 
-export type PluginManagerProvider = (builder: PluginCallbackBuilderParams) => void
-export type PluginManagerProviderWithParams<T extends PluginCallbackType> = (builder: PluginCallbackBuilderParams, params: Parameters<T>) => void
+export type PluginManagerCallback = (builder: PluginCallbackBuilderParams) => void
+export type PluginManagerCallbackWithParams<T extends PluginCallbackType> = (builder: PluginCallbackBuilderParams, params: Parameters<T>) => void
 
 export interface PluginManager extends CallbackRelated {
   start: PluginStart
@@ -85,13 +86,13 @@ export interface PluginManager extends CallbackRelated {
   define: PluginDefine
   construct: PluginConstruct
 
-  attributeChangedCallback: PluginManagerProviderWithParams<AttributeChangedCallback>
-  connectedCallback: PluginManagerProvider
-  disconnectedCallback: PluginManagerProvider
-  formAssociatedCallback: PluginManagerProviderWithParams<FormAssociatedCallback>
-  formDisabledCallback: PluginManagerProviderWithParams<FormDisabledCallback>
-  formResetCallback: PluginManagerProvider
-  formStateRestoreCallback: PluginManagerProviderWithParams<FormStateRestoreCallback>
+  attributeChangedCallback: PluginManagerCallbackWithParams<AttributeChangedCallback>
+  connectedCallback: PluginManagerCallback
+  disconnectedCallback: PluginManagerCallback
+  formAssociatedCallback: PluginManagerCallbackWithParams<FormAssociatedCallback>
+  formDisabledCallback: PluginManagerCallbackWithParams<FormDisabledCallback>
+  formResetCallback: PluginManagerCallback
+  formStateRestoreCallback: PluginManagerCallbackWithParams<FormStateRestoreCallback>
 }
 
 
@@ -109,7 +110,7 @@ export type ComponentResolver = (url: string) => ComponentIdentity
 
 export interface PluginCoreParams {
   man: ComponentManager,
-  ident: ComponentDef
+  def: ComponentDef
 }
 
 export type PluginStartParams = {
@@ -154,7 +155,7 @@ export interface RawComponentConstructor {
 export interface WebComponent extends RawComponent {}
 export interface WebComponentConstructor extends RawComponentConstructor {
   new (...args: any[]): WebComponent
-  get ident(): ComponentDef
+  get def(): ComponentDef
 }
 
 export type QueryableRoot = Document | ShadowRoot | Element | DocumentFragment

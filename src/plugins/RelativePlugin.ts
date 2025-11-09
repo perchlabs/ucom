@@ -6,7 +6,7 @@ import type {
 export default class RelativePlugin implements Plugin {
   async parse({
     frags,
-    ident: {resolved},
+    def: {resolved},
   }: PluginParseParams) {
     for (const script of frags.querySelectorAll('script')) {
       script.text = script.text.replace(

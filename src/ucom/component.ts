@@ -6,6 +6,7 @@ import type {
   WebComponentConstructor,
   PluginManager,
   ComponentManager,
+  ComponentDefRaw,
   ComponentDef,
 
   PluginCallbackBuilderParams,
@@ -83,32 +84,33 @@ export class ComponentFetchError extends Error {
   }
 }
 
-export async function defineComponent(man: ComponentManager, plugins: PluginManager, identMut: ComponentDef) {
-  const ident = Object.freeze(identMut)
-  const {name, tpl} = ident
+export async function defineComponent(man: ComponentManager, plugins: PluginManager, defMut: ComponentDefRaw) {
+  const def = Object.freeze(defMut)
+  const {name, tpl} = def
 
   const frags = (tpl.cloneNode(true) as HTMLTemplateElement).content
   if (frags.querySelector('template[shadowrootmode]')) {
     throw `Component '${name}' used template attribute 'shadowrootmode'. Declarative Shadow Dom (DSD) is not allowed.`
   }
 
-  await plugins.parse({man, ident, frags})
+  await plugins.parse({man, def, frags})
 
   const [Raw, exports, shadowRootOpts, customElementOpts, componentOpts] = await parseScript(name, frags)
+
   const Com = createComponentConstructor(
     man,
     plugins,
-    ident,
+    def,
     Raw,
     frags,
     shadowRootOpts,
     componentOpts,
   )
 
-  await plugins.define({man, ident, Com, Raw, exports})
+  await plugins.define({man, def, Com, Raw, exports})
   customElements.define(name, Com, customElementOpts)
 
-  return ident
+  return def
 }
 
 async function parseScript(name: string, frags: DocumentFragment): Promise<ParsedScript> {
@@ -159,7 +161,7 @@ export function hashContent(data: HTMLTemplateElement | DocumentFragment): strin
 function createComponentConstructor(
   man: ComponentManager,
   plugins: PluginManager,
-  ident: ComponentDef,
+  def: ComponentDef,
   Raw: RawComponentConstructor,
   frags: DocumentFragment,
   shadowRootOpts: ShadowRootInit,
@@ -172,7 +174,7 @@ function createComponentConstructor(
     static [formAssociated] = Raw[formAssociated] ?? false
     static [observedAttributes] = [...(Raw[observedAttributes] ?? [])]
 
-    static get ident() { return ident }
+    static get def() { return def }
 
     #shadow = this.attachShadow(shadowRootOpts)
     #internals = componentOpts.internals ? this.attachInternals() : undefined
@@ -183,7 +185,7 @@ function createComponentConstructor(
       this.#shadow.append(frags.cloneNode(true))
       plugins.construct({
         man,
-        ident,
+        def,
         Com,
         Raw,
         el: this,
