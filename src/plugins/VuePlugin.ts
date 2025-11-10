@@ -15,6 +15,7 @@ import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
+  CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../ucom'
 import {createApp, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
@@ -29,6 +30,7 @@ const CleanupKey = Symbol('clean')
 const persistMap = new Map<string, any>
 const syncMap = new Map<string, any>
 
+const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
 // const PROP_REFLECT_DEFAULT = true
 
@@ -180,6 +182,7 @@ function makeStore(
   }
 
   Object.getOwnPropertyNames(rawProto)
+    .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {
       const v = rawProto[k]
       if (isFunc(v)) {

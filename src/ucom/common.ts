@@ -6,6 +6,16 @@ export const FORM_DISABLED = 'formDisabledCallback'
 export const FORM_RESET = 'formResetCallback'
 export const FORM_STATE_RESTORE = 'formStateRestoreCallback'
 
+export const CUSTOM_CALLBACKS = [
+  ATTRIBUTE_CHANGED,
+  CONNECTED,
+  DISCONNECTED,
+  FORM_ASSOCIATED,
+  FORM_DISABLED,
+  FORM_RESET,
+  FORM_STATE_RESTORE,
+]
+
 export const STATIC_FORM_ASSOCIATED = 'formAssociated'
 export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
