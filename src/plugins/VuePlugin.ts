@@ -1,5 +1,5 @@
 import type {
-  ComponentDef,
+  // ComponentDef,
   RawComponentConstructor,
   WebComponent,
   WebComponentConstructor,
@@ -12,7 +12,6 @@ import type {
   DisconnectedCallback,
 } from '../ucom'
 import {
-  CUSTOM_CALLBACKS,
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
@@ -20,13 +19,12 @@ import {
 import {createApp, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
 
 // Proto constants.
-const PropDefsKey = '$ucom_vue_props'
-const StoreMakerKey = '$ucom_vue_store'
+const PropDefsKey = '$ucom_props'
+const StoreMakerKey = '$ucom_store'
 // Instance constants.
 const DataKey = '$data'
-const CleanupKey = '$__ucom_vue_cleanup__'
+const CleanupKey = Symbol('clean')
 
-const StoreSkip = new Set(['constructor', ...CUSTOM_CALLBACKS])
 const persistMap = new Map<string, any>
 const syncMap = new Map<string, any>
 
@@ -84,38 +82,28 @@ export default class VuePlugin implements Plugin {
   }
 
   [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackBuilderParams): AttributeChangedCallback {
-    const {
-      [PropDefsKey]: propDefs,
-    } = Com as UpgradeComponentConstructor
+    const {[PropDefsKey]: propDefs} = Com as UpgradeComponentConstructor
     const el = elReal as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
-      if (!(k in propDefs)) {
-        return
-      }
-      if (!el[DataKey]) {
+      const data = el[DataKey]
+      if (!data || !(k in propDefs)) {
         return
       }
   
       const val = propDefs[k].cast?.(newValue) ?? newValue
-      if (val !== el[DataKey][k]) {
-        el[DataKey][k] = val
+      if (val !== data[k]) {
+        data[k] = val
       }
     }
   }
 
   [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
-    const {
-      def,
-      [PropDefsKey]: propDefs,
-      [StoreMakerKey]: storeMaker,
-    } = Com as UpgradeComponentConstructor
     const el = elReal as UpgradeComponent
-
     return async () => {
+      if (el[CleanupKey]) { return }
       el[CleanupKey] = []
-      connectData(def, Raw, el, propDefs, shadow, storeMaker)
-      el.$nextTick()
+      connectData(Com as UpgradeComponentConstructor, Raw, el, shadow)
     }
   }
 
@@ -145,50 +133,43 @@ function makePropDefs(propsMaker?: PropsMaker): PropDefs {
 }
 
 function connectData(
-  def: ComponentDef,
+  Com: UpgradeComponentConstructor,
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
-  propDefs: PropDefs,
   shadow: ShadowRoot,
-  storeMaker?: StoreMaker,
 ) {
-  if (el[DataKey]) { return }
-
-  const r = makeReactive(def, Raw, el, propDefs, storeMaker)
+  const r = makeReactive(Com, Raw, el)
   Object.assign(el, {
     get [DataKey]() { return r },
   })
 
   const app = createApp(r)
   app.mount(shadow)
+  // TODO: Is this necessary.
+  el.$nextTick()
 }
 
 function makeReactive(
-  def: ComponentDef,
+  Com: UpgradeComponentConstructor,
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
-  propDefs: PropDefs,
-  storeMaker?: StoreMaker,
 ) {
-  const {name} = def
-  const rawProto = Raw.prototype
-
-  const storeProtos: Record<string, any> = {}
-  Object.entries(rawProto).forEach(([k, v]) => {
-    if (k in StoreSkip) { return }
-    if (k.startsWith('$')) { return }
-    if (typeof v !== 'function') { return }
-    storeProtos[k] = v
-  })
-
+  const {
+    def: {name},
+    [PropDefsKey]: propDefs,
+    [StoreMakerKey]: storeMaker,
+  } = Com
   const proxies: any[] = []
   const props = makePropsProxy(el, proxies, propDefs)
-  const {sync, persist} = makeStore(Raw, el, proxies, props, storeMaker)
+  const [sync, persist] = makeStore(Raw, el, proxies, props, storeMaker)
   makeSync(name, proxies, sync)
   makePersist(name, proxies, persist)
 
   return mergeProxies(proxies)
 }
+
+type SyncStoreData = Record<string, any>
+type PersistStoreData = [k: string, v: any][]
 
 function makeStore(
   Raw: RawComponentConstructor,
@@ -196,7 +177,7 @@ function makeStore(
   proxies: any,
   props: any,
   storeMaker?: StoreMaker,
-) {
+): [SyncStoreData, PersistStoreData] {
   const rawProto = Raw.prototype
 
   const d: Record<string, any> = {
@@ -204,12 +185,11 @@ function makeStore(
   }
 
   Object.getOwnPropertyNames(rawProto)
-    .filter(k => !StoreSkip.has(k))
     .forEach(k => {
       const v = rawProto[k]
-      if (typeof v !== 'function') { return }
-      if (k.startsWith('$')) { return }
-      d[k] = v.bind(el)
+      if (typeof v === 'function') {
+        d[k] = v.bind(el)
+      }
     })
 
   const store = storeMaker?.({
@@ -218,16 +198,13 @@ function makeStore(
     sync: (v: any) => new Sync(v),
   }) ?? {}
 
-  const persist: Record<string, any> = {}
-  const sync: Record<string, any> = {}
+  const sync: SyncStoreData = {}
+  const persist: PersistStoreData = []
   for (let [k, v] of Object.entries(store)) {
-    if (typeof v === 'function') { throw `VuePlugin: function '${k}' should not be placed directly on the store.` }
-    if (k.startsWith('$')) { throw `VuePlugin: don't prefix store names with a '$'.` }
-
     if (v instanceof Sync) {
       sync[k] = v.v
     } else if (v instanceof Persist) {
-      persist[k] = v.v
+      persist.push([k, v.v])
     } else {
       d[k] = v
     }
@@ -235,10 +212,10 @@ function makeStore(
 
   proxies.push(reactive(d))
 
-  return {sync, persist}
+  return [sync, persist]
 }
 
-function makeSync(name: string, proxies: any[], sync: object) {
+function makeSync(name: string, proxies: any[], sync: SyncStoreData) {
   if (!Object.keys(sync).length) {
     return
   }
@@ -249,9 +226,8 @@ function makeSync(name: string, proxies: any[], sync: object) {
   proxies.push(syncMap.get(name))
 }
 
-function makePersist( name: string, proxies: any[], persist: object) {
-  const persistEntries = Object.entries(persist)
-  if (!persistEntries.length) {
+function makePersist(name: string, proxies: any[], persist: PersistStoreData) {
+  if (!persist.length) {
     return
   }
 
@@ -264,7 +240,7 @@ function makePersist( name: string, proxies: any[], persist: object) {
     }
     const setItem = (k: string): void => localStorage.setItem(storeId(k), JSON.stringify(r[k]))
 
-    const entries = persistEntries.map(([k, v]): [string, object] => [k, getItem(k) ?? v])
+    const entries = persist.map(([k, v]) => [k, getItem(k) ?? v])
 
     const r = reactive(Object.fromEntries(entries))
     entries.forEach(([k, v]) => {
@@ -359,11 +335,10 @@ function collapseProxies(this: object) {
 }
 
 class StoreValue {
-  #v
+  v: any
   constructor(v: any) {
-    this.#v = v
+    this.v = v
   }
-  get v() { return this.#v }
 }
 
 class Persist extends StoreValue {}

@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in two flavors:
 
-* petite-vue (`32.4k` minified) (`13.0k` gzipped)
+* petite-vue (`31.8k` minified) (`12.8k` gzipped)
 * lite (`8.5k` minified) (`3.4k` gzipped)
 
 **Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
