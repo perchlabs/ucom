@@ -24,13 +24,14 @@ export default (pluginClasses: PluginConstructor[] = []) => {
       await man.start()
     },
     resolve: man.resolve,
-    async define(...params: [name: string | null, tpl: HTMLTemplateElement]) {
+    async define(name: string | null, tpl: HTMLTemplateElement) {
       checkStarted()
-      return man.define(...params)
+      return man.define(name, tpl)
     },
-    async import(...params: [url: string, tpl?: HTMLTemplateElement]) {
+    async import(url: string, tpl?: HTMLTemplateElement) {
       checkStarted()
-      return man.import(...params)
+      return man.import(url, tpl)
     },
+
   }
 }
