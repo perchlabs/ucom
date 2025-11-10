@@ -156,6 +156,7 @@ export interface WebComponent extends RawComponent {}
 export interface WebComponentConstructor extends RawComponentConstructor {
   new (...args: any[]): WebComponent
   get def(): ComponentDef
+  observedAttributes: string[]
 }
 
 export type QueryableRoot = Document | ShadowRoot | Element | DocumentFragment

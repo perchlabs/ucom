@@ -29,6 +29,9 @@ import {
   FORM_DISABLED,
   FORM_RESET,
   FORM_STATE_RESTORE,
+
+  STATIC_FORM_ASSOCIATED,
+  STATIC_OBSERVED_ATTRIBUTES,
 } from './common.ts'
 
 export function resolveImport(url: string, postfixFile: string, postfixDir: string): ComponentIdentity {
@@ -167,12 +170,9 @@ function createComponentConstructor(
   shadowRootOpts: ShadowRootInit,
   componentOpts: ComponentOpts,
 ): WebComponentConstructor {
-  const formAssociated = 'formAssociated'
-  const observedAttributes = 'observedAttributes'
-
   const Com = class extends Raw implements WebComponent {
-    static [formAssociated] = Raw[formAssociated] ?? false
-    static [observedAttributes] = [...(Raw[observedAttributes] ?? [])]
+    static [STATIC_FORM_ASSOCIATED] = Raw[STATIC_FORM_ASSOCIATED] ?? false
+    static [STATIC_OBSERVED_ATTRIBUTES] = [...(Raw[STATIC_OBSERVED_ATTRIBUTES] ?? [])]
 
     static get def() { return def }
 

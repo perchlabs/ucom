@@ -6,15 +6,8 @@ export const FORM_DISABLED = 'formDisabledCallback'
 export const FORM_RESET = 'formResetCallback'
 export const FORM_STATE_RESTORE = 'formStateRestoreCallback'
 
-export const CUSTOM_CALLBACKS = [
-  'attributeChangedCallback',
-  'connectedCallback',
-  'disconnectedCallback',
-  'formAssociatedCallback',
-  'formDisabledCallback',
-  'formResetCallback',
-  'formStateRestoreCallback',
-]
+export const STATIC_FORM_ASSOCIATED = 'formAssociated'
+export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
 export const $attr = (elem: HTMLElement | null, name: string, fallback?: any): any => {
   const attr = elem?.getAttribute(name)

@@ -15,12 +15,13 @@ import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
+  STATIC_OBSERVED_ATTRIBUTES,
 } from '../ucom'
 import {createApp, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
 
-// Proto constants.
-const PropDefsKey = '$ucom_props'
-const StoreMakerKey = '$ucom_store'
+// Proto and constructor constants.
+const PropsKey = '$props'
+const StoreKey = '$store'
 // Instance constants.
 const DataKey = '$data'
 const CleanupKey = Symbol('clean')
@@ -28,26 +29,24 @@ const CleanupKey = Symbol('clean')
 const persistMap = new Map<string, any>
 const syncMap = new Map<string, any>
 
+
 // const PROP_REFLECT_DEFAULT = true
 
 export default class VuePlugin implements Plugin {
   async define({Com, exports}: PluginDefineParams) {
-    const proto = Com.prototype
-
     const Upgrade = Com as UpgradeComponentConstructor
+    const proto = Upgrade.prototype
     const {$props, $store} = exports as UpgradeExports
 
     const propDefs = makePropDefs($props)
     Object.assign(Upgrade, {
-      [PropDefsKey]: propDefs,
-      [StoreMakerKey]: $store,
+      [PropsKey]: propDefs,
+      [StoreKey]: $store,
     })
 
     const propKeys = Object.keys(propDefs)
-    const attrKeysOld = Com.observedAttributes ?? []
-    const attrKeysNew = propKeys.filter(k => !attrKeysOld.includes(k))
-    const attrKeysMerged = [...attrKeysOld, ...attrKeysNew]
-    Object.defineProperty(Com, 'observedAttributes', { get() { return attrKeysMerged } })
+    const attrKeysOld = Com[STATIC_OBSERVED_ATTRIBUTES]
+    Com[STATIC_OBSERVED_ATTRIBUTES] = [...new Set([...propKeys, ...attrKeysOld])]
 
     for (const k of propKeys) {
       Object.defineProperty(proto, k, {
@@ -82,7 +81,7 @@ export default class VuePlugin implements Plugin {
   }
 
   [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackBuilderParams): AttributeChangedCallback {
-    const {[PropDefsKey]: propDefs} = Com as UpgradeComponentConstructor
+    const {[PropsKey]: propDefs} = Com as UpgradeComponentConstructor
     const el = elReal as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
@@ -114,20 +113,16 @@ export default class VuePlugin implements Plugin {
 }
 
 function makePropDefs(propsMaker?: PropsMaker): PropDefs {
-  const rawDefs = propsMaker?.() ?? {}
-
   const defs: PropDefs = {}
-  Object.entries(rawDefs).map(([k, v]) => {
-    if (typeof v !== 'object') {
-      v = {
-        default: v,
-        // reflect: PROP_REFLECT_DEFAULT,
+  Object
+    .entries(propsMaker?.() ?? {})
+    .map(([k, v]) => {
+      if (typeof v === 'object') {
+        v.default ??= ''
+      } else {
+        v = {default: v}
       }
-    }
-    v.default ??= ''
-    // v.reflect ??= PROP_REFLECT_DEFAULT
-
-    defs[k] = v
+      defs[k] = v
   })
   return defs
 }
@@ -156,10 +151,10 @@ function makeReactive(
 ) {
   const {
     def: {name},
-    [PropDefsKey]: propDefs,
-    [StoreMakerKey]: storeMaker,
+    [PropsKey]: propDefs,
+    [StoreKey]: storeMaker,
   } = Com
-  const proxies: any[] = []
+  const proxies: ReactiveProxy[] = []
   const props = makePropsProxy(el, proxies, propDefs)
   const [sync, persist] = makeStore(Raw, el, proxies, props, storeMaker)
   makeSync(name, proxies, sync)
@@ -187,7 +182,7 @@ function makeStore(
   Object.getOwnPropertyNames(rawProto)
     .forEach(k => {
       const v = rawProto[k]
-      if (typeof v === 'function') {
+      if (isFunc(v)) {
         d[k] = v.bind(el)
       }
     })
@@ -215,7 +210,7 @@ function makeStore(
   return [sync, persist]
 }
 
-function makeSync(name: string, proxies: any[], sync: SyncStoreData) {
+function makeSync(name: string, proxies: ReactiveProxy[], sync: SyncStoreData) {
   if (!Object.keys(sync).length) {
     return
   }
@@ -226,14 +221,13 @@ function makeSync(name: string, proxies: any[], sync: SyncStoreData) {
   proxies.push(syncMap.get(name))
 }
 
-function makePersist(name: string, proxies: any[], persist: PersistStoreData) {
+function makePersist(name: string, proxies: ReactiveProxy[], persist: PersistStoreData) {
   if (!persist.length) {
     return
   }
 
   if (!persistMap.has(name)) {
     const storeId = (k: string): string => `${name}-${k}`
-
     const getItem = (k: string): any => {
       const item = localStorage.getItem(storeId(k))
       return item ? JSON.parse(item) : undefined
@@ -241,11 +235,11 @@ function makePersist(name: string, proxies: any[], persist: PersistStoreData) {
     const setItem = (k: string): void => localStorage.setItem(storeId(k), JSON.stringify(r[k]))
 
     const entries = persist.map(([k, v]) => [k, getItem(k) ?? v])
-
     const r = reactive(Object.fromEntries(entries))
     entries.forEach(([k, v]) => {
-      if (typeof v === 'function') { return }
-      effect(() => setItem(k))
+      if (!isFunc(v)) {
+        effect(() => setItem(k))
+      }
     })
 
     persistMap.set(name, r)
@@ -254,7 +248,9 @@ function makePersist(name: string, proxies: any[], persist: PersistStoreData) {
   proxies.push(persistMap.get(name))
 }
 
-function makePropsProxy(el: HTMLElement, proxies: any[], propDefs: PropDefs) {
+const isFunc = (v: any) => typeof v === 'function'
+
+function makePropsProxy(el: HTMLElement, proxies: ReactiveProxy[], propDefs: PropDefs) {
   const entries = Object.entries(propDefs)
   if (!entries.length) {
     return
@@ -267,7 +263,7 @@ function makePropsProxy(el: HTMLElement, proxies: any[], propDefs: PropDefs) {
 
   const d: Record<string, any> = {}
   for (let [k, v] of entries) {
-    const raw = attrs[k] ?? v.default ?? ''
+    const raw = attrs[k] ?? v.default
     d[k] = v.cast?.(raw) ?? raw
   }
 
@@ -321,7 +317,7 @@ const mergeProxyTrap = {
   },
 }
 
-function mergeProxies(objects: object[]) {
+function mergeProxies(objects: ReactiveProxy[]) {
   return new Proxy({ objects }, mergeProxyTrap);
 }
 
@@ -340,12 +336,13 @@ class StoreValue {
     this.v = v
   }
 }
-
 class Persist extends StoreValue {}
 class Sync extends StoreValue {}
 
 type persister = (v: string) => InstanceType<typeof Persist>
 type syncer = (v: string) => InstanceType<typeof Sync>
+
+type ReactiveProxy = ReturnType<typeof reactive>
 
 type StoreMaker = (opts: {
   props: Record<string, any>
@@ -376,8 +373,8 @@ interface UpgradeComponent extends WebComponent {
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {
   new (...args: any[]): UpgradeComponent
-  [PropDefsKey]: Record<string, any>
-  [StoreMakerKey]?: StoreMaker,
+  [PropsKey]: Record<string, any>
+  [StoreKey]?: StoreMaker,
 }
 
 type UpgradeExports = ModuleExports & {
