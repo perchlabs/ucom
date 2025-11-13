@@ -1,3 +1,3 @@
 export { createApp } from './app'
 export { nextTick } from './scheduler'
-export { reactive, effect, stop } from '@vue/reactivity'
+export { effect, reactive, ref, stop } from '@vue/reactivity'

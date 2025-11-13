@@ -1,5 +1,4 @@
 import type {
-  // ComponentDef,
   RawComponentConstructor,
   WebComponent,
   WebComponentConstructor,
@@ -18,7 +17,7 @@ import {
   CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../ucom'
-import {createApp, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
+import {createApp, ref, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
 
 // Proto and constructor constants.
 const PropsKey = '$props'
@@ -27,8 +26,8 @@ const StoreKey = '$store'
 const DataKey = '$data'
 const CleanupKey = Symbol('clean')
 
-const persistMap = new Map<string, any>
-const syncMap = new Map<string, any>
+const persistMap: Record<string, any> = {}
+const syncMap: Record<string, any> = {}
 
 const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
@@ -150,110 +149,87 @@ function makeReactive(
   Com: UpgradeComponentConstructor,
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
-) {
+): ReactiveProxy {
   const {
     def: {name},
     [PropsKey]: propDefs,
     [StoreKey]: storeMaker,
   } = Com
-  const proxies: ReactiveProxy[] = []
-  const props = makePropsProxy(el, proxies, propDefs)
-  const [sync, persist] = makeStore(Raw, el, proxies, props, storeMaker)
-  makeSync(name, proxies, sync)
-  makePersist(name, proxies, persist)
-
-  return mergeProxies(proxies)
+  const props = makeProps(el, propDefs)
+  return makeStore(Raw, name, el, props, storeMaker)
 }
-
-type SyncStoreData = Record<string, any>
-type PersistStoreData = [k: string, v: any][]
 
 function makeStore(
   Raw: RawComponentConstructor,
+  name: string,
   el: UpgradeComponent,
-  proxies: any,
   props: any,
   storeMaker?: StoreMaker,
-): [SyncStoreData, PersistStoreData] {
+): ReactiveProxy {
   const rawProto = Raw.prototype
 
   const d: Record<string, any> = {
+    ...props,
     get $me() { return el },
   }
-
-  Object.getOwnPropertyNames(rawProto)
-    .filter(k => !storeProhibitedFunctions.has(k))
-    .forEach(k => {
-      const v = rawProto[k]
-      if (isFunc(v)) {
-        d[k] = v.bind(el)
-      }
-    })
 
   const store = storeMaker?.({
     props,
     persist: (v: any) => new Persist(v),
     sync: (v: any) => new Sync(v),
   }) ?? {}
+  Object.getOwnPropertyNames(rawProto)
+    .filter(k => !storeProhibitedFunctions.has(k))
+    .forEach(k => {
+      const v = rawProto[k]
+      if (typeof v === 'function') {
+        d[k] = v.bind(el)
+      }
+    })
 
-  const sync: SyncStoreData = {}
-  const persist: PersistStoreData = []
   for (let [k, v] of Object.entries(store)) {
     if (v instanceof Sync) {
-      sync[k] = v.v
+      d[k] = makeSync(name, k, v)
     } else if (v instanceof Persist) {
-      persist.push([k, v.v])
+      d[k] = makePersist(name, k, v)
     } else {
       d[k] = v
     }
   }
 
-  proxies.push(reactive(d))
-
-  return [sync, persist]
+  return reactive(d)
 }
 
-function makeSync(name: string, proxies: ReactiveProxy[], sync: SyncStoreData) {
-  if (!Object.keys(sync).length) {
-    return
-  }
+function makeSync(name: string, key: string, sync: Sync) {
+  const storeId = `${name}-${key}`
 
-  if (!syncMap.has(name)) {
-    syncMap.set(name, reactive(sync))
+  if (!(storeId in syncMap)) {
+    syncMap[storeId] = ref(sync.v)
   }
-  proxies.push(syncMap.get(name))
+  return syncMap[storeId]
 }
 
-function makePersist(name: string, proxies: ReactiveProxy[], persist: PersistStoreData) {
-  if (!persist.length) {
-    return
-  }
+function makePersist(name: string, key: string, persist: Persist) {
+  const storeId = `${name}-${key}`
 
-  if (!persistMap.has(name)) {
-    const storeId = (k: string): string => `${name}-${k}`
-    const getItem = (k: string): any => {
-      const item = localStorage.getItem(storeId(k))
+  if (!(storeId in persistMap)) { 
+    const getItem = () => {
+      const item = localStorage.getItem(storeId)
       return item ? JSON.parse(item) : undefined
     }
-    const setItem = (k: string): void => localStorage.setItem(storeId(k), JSON.stringify(r[k]))
 
-    const entries = persist.map(([k, v]) => [k, getItem(k) ?? v])
-    const r = reactive(Object.fromEntries(entries))
-    entries.forEach(([k, v]) => {
-      if (!isFunc(v)) {
-        effect(() => setItem(k))
-      }
-    })
+    const rf = ref(getItem() ?? persist.v)
+    persistMap[storeId] = rf
 
-    persistMap.set(name, r)
+    const setItem = () => localStorage.setItem(storeId, JSON.stringify(rf.value))
+    effect(() => setItem())
   }
 
-  proxies.push(persistMap.get(name))
+  return persistMap[storeId]
 }
 
-const isFunc = (v: any) => typeof v === 'function'
 
-function makePropsProxy(el: HTMLElement, proxies: ReactiveProxy[], propDefs: PropDefs) {
+function makeProps(el: HTMLElement, propDefs: PropDefs) {
   const entries = Object.entries(propDefs)
   if (!entries.length) {
     return
@@ -270,67 +246,7 @@ function makePropsProxy(el: HTMLElement, proxies: ReactiveProxy[], propDefs: Pro
     d[k] = v.cast?.(raw) ?? raw
   }
 
-  const r = reactive(d)
-  proxies.push(r)
-  return r
-}
-
-type proxySource = {objects: object[]}
-
-const mergeProxyTrap = {
-  ownKeys({ objects }: proxySource) {
-    return Array.from(
-      new Set(objects.flatMap((i) => Object.keys(i)))
-    )
-  },
-
-  has({ objects }: proxySource, name: PropertyKey) {
-    if (name == Symbol.unscopables) {
-      return false
-    }
-
-    return objects.some((obj) =>
-      Object.prototype.hasOwnProperty.call(obj, name) ||
-      Reflect.has(obj, name)
-    )
-  },
-
-  get({ objects }: proxySource, name: PropertyKey, thisProxy: any) {
-    if (name == 'toJSON') {
-      return collapseProxies
-    }
-
-    return Reflect.get(
-      objects.find((obj) => Reflect.has(obj, name)) ?? {},
-      name,
-      thisProxy,
-    )
-  },
-
-  set({ objects }: proxySource, name: PropertyKey, value: any, thisProxy: any) {
-    const target = objects.find((obj) => Object.prototype.hasOwnProperty.call(obj, name))
-      || objects[objects.length - 1]
-    const descriptor = Object.getOwnPropertyDescriptor(target, name)
-
-    if (descriptor && descriptor?.set && descriptor?.get) {
-      // Can't use Reflect.set here due to [upstream bug](https://github.com/vuejs/core/blob/31abdc8adad569d83b476c340e678c4daa901545/packages/reactivity/src/baseHandlers.ts#L148) in @vue/reactivity
-      return descriptor.set.call(thisProxy, value) ?? true
-    }
-    return Reflect.set(target, name, value)
-  },
-}
-
-function mergeProxies(objects: ReactiveProxy[]) {
-  return new Proxy({ objects }, mergeProxyTrap);
-}
-
-function collapseProxies(this: object) {
-  let keys = Reflect.ownKeys(this)
-
-  return keys.reduce((acc: any, key) => {
-    acc[key] = Reflect.get(this, key)
-    return acc
-  }, {})
+  return d
 }
 
 class StoreValue {
