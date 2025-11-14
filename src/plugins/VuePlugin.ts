@@ -167,6 +167,7 @@ function makeReactive(
     persist: (v: any) => new Persist(v),
     sync: (v: any) => new Sync(v),
   }) ?? {}
+
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {

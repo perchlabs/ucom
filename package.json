@@ -13,7 +13,7 @@
     "vite": "^7.2.2"
   },
   "dependencies": {
-    "@vue/shared": "file:./local_modules/vue-shared@3.2.27",
-    "@vue/reactivity": "file:./local_modules/vue-reactivity@3.2.27"
+    "@vue/shared": "file:./local_modules/vue-shared@3.5.21",
+    "@vue/reactivity": "file:./local_modules/vue-reactivity@3.5.21"
   }
 }

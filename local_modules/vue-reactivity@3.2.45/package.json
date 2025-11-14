@@ -1,0 +1,6 @@
+{
+  "name": "@vue/reactivity",
+  "private": true,
+  "type": "module",
+  "types": "./reactivity.d.ts"
+}
