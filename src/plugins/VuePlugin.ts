@@ -139,9 +139,7 @@ function connectData(
     get [DataIndex]() { return r },
   })
 
-  const app = createApp(r)
-  app.mount(shadow)
-  // TODO: Is this necessary.
+  createApp(shadow, r)
   el.$nextTick()
 }
 
