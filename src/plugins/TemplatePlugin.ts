@@ -5,12 +5,15 @@ import type {
   QueryableRoot,
   ComponentManager,
 } from '../ucom'
+import {
+  ATTR_CORE,
+} from '../ucom'
 
 const ATTR_APP = 'u-app'
-const ATTR_COM = 'u-com'
+const ATTR_COM = ATTR_CORE
 const ATTR_LIST = [ATTR_APP, ATTR_COM]
 
-export default class TemplatePlugin implements Plugin {
+export default class implements Plugin {
   async start({man}: PluginStartParams) {
     const root = document
     await processTemplates(man, queryForTemplates(root))

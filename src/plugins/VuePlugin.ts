@@ -33,7 +33,7 @@ const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
 // const PROP_REFLECT_DEFAULT = true
 
-export default class VuePlugin implements Plugin {
+export default class implements Plugin {
   async define({Com, exports}: PluginDefineParams) {
     const Upgrade = Com as UpgradeComponentConstructor
     const proto = Upgrade.prototype

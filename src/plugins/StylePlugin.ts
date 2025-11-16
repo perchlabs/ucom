@@ -4,10 +4,11 @@ import type {
   PluginConstructParams,
   Plugin,
 } from '../ucom'
+import {
+  ATTR_CORE,
+} from '../ucom'
 
-const ATTR_STYLE = 'u-com'
-
-export default class StylePlugin implements Plugin {
+export default class implements Plugin {
   #sheetsLoader?: Promise<CSSStyleSheet[]>
   #sheets: CSSStyleSheet[] = []
 
@@ -64,6 +65,6 @@ export default class StylePlugin implements Plugin {
 }
 
 export function $queryForLibAttr(root: QueryableRoot, ...tagNames: string[]) {
-  const selector = tagNames.map(k => `${k}[${ATTR_STYLE}]`).join(',')
+  const selector = tagNames.map(k => `${k}[${ATTR_CORE}]`).join(',')
   return [...root.querySelectorAll(selector)]
 }

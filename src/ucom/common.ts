@@ -6,6 +6,8 @@ export const FORM_DISABLED = 'formDisabledCallback'
 export const FORM_RESET = 'formResetCallback'
 export const FORM_STATE_RESTORE = 'formStateRestoreCallback'
 
+export const ATTR_CORE = 'u-com'
+
 export const CUSTOM_CALLBACKS = [
   ATTRIBUTE_CHANGED,
   CONNECTED,

@@ -11,6 +11,7 @@ import { evaluate } from './eval'
 import { checkAttr } from './utils'
 import { ref } from './directives/ref'
 import { createScopedContext } from './context'
+import { ATTR_CORE } from '../ucom'
 
 const dirRE = /^(?:u-|:|@)/
 const dirBasicRE = /^(u-[a-z]+)$/
@@ -23,10 +24,7 @@ export const walk = (node: Node, ctx: Context): ChildNode | null | void => {
     // Element
     const el = node as Element
 
-    if (el.hasAttribute('u-pre')) {
-      return
-    }
-    if (el.hasAttribute('u-com')) {
+    if (el.hasAttribute('u-pre') || el.hasAttribute(ATTR_CORE)) {
       return
     }
 

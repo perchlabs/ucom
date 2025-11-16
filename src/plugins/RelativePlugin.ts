@@ -3,7 +3,7 @@ import type {
   Plugin,
 } from '../ucom'
 
-export default class RelativePlugin implements Plugin {
+export default class implements Plugin {
   async parse({
     frags,
     def: {resolved},

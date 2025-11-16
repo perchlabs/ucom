@@ -13,7 +13,7 @@ import { $attrBool } from '../ucom'
 
 // const ATTR_SRC = 'u-src'
 
-export default class ImportPlugin implements Plugin {
+export default class implements Plugin {
   async parse({man, frags}: PluginParseParams) {
     await importRoot(man, frags)
   }

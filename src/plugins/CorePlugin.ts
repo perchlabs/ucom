@@ -6,7 +6,7 @@ import type {
 
 const PROTO_SKIP = new Set('constructor')
 
-export default class CorePlugin implements Plugin {
+export default class implements Plugin {
   async define({Raw, exports}: PluginDefineParams): Promise<void> {
     const rawProto = Raw.prototype
     for (const k in exports) {
