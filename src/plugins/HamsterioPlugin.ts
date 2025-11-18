@@ -20,7 +20,7 @@ import {
 import {
   initRoot, cleanup, createEffect, mkref, createProxyStore, createRefs,
 } from '../hamsterio/index.js'
-import type { Refs } from '../hamsterio/index.js'
+import type { Ref, Refs } from '../hamsterio/index.js'
 
 // Proto and constructor constants.
 const PropsIndex = '$props'
@@ -83,12 +83,11 @@ export default class implements Plugin {
     })
   }
 
-  [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackBuilderParams) {
+  [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
-    const el = elReal as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
-      const data = el[DataIndex]
+      const data = (el as UpgradeComponent)[DataIndex]
       const propDef = propDefs[k]
       if (!data || !propDef) {
         return
@@ -104,7 +103,7 @@ export default class implements Plugin {
   [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams) {
     const el = elReal as UpgradeComponent
     return async () => {
-      connectData(Com as UpgradeComponentConstructor, Raw, el, shadow)
+      connectData(Com as UpgradeComponentConstructor, Raw, el as UpgradeComponent, shadow)
     }
   }
 
@@ -139,9 +138,7 @@ function connectData(
     return
   }
 
-  const store = makeStore(Com, Raw, el)
-
-  const ctx = initRoot(shadow, store)
+  const ctx = initRoot(shadow, makeStore(Com, Raw, el))
   el[CleanupIndex] = () => cleanup(ctx.el)
   Object.assign(el, {
     get [DataIndex]() { return ctx.data },
@@ -156,16 +153,11 @@ function makeStore(
   const {
     def: {name},
     [PropsIndex]: propDefs,
-    [StoreIndex]: storeMaker,
+    [StoreIndex]: userDefinedStore,
   } = Com
   const props = makeProps(el, propDefs)
   const refs = createRefs(props)
 
-  const data = storeMaker?.({
-    props,
-    persist: (v: any) => new Persist(v),
-    sync: (v: any) => new Sync(v),
-  }) ?? {}
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {
@@ -175,20 +167,27 @@ function makeStore(
       }
     })
 
+  const data = userDefinedStore?.({
+    props,
+    persist: (v: any) => new Persist(v),
+    sync: (v: any) => new Sync(v),
+  }) ?? {}
   for (let [k, v] of Object.entries(data)) {
+    let ref: Ref | undefined
     if (v instanceof Sync) {
-      const ref = makeSync(name, k, v)
-      refs[k] = ref
+      ref = makeSync(name, k, v)
     } else if (v instanceof Persist) {
-      const ref = makePersist(name, k, v)
-      if (!ref) {
-        console.error(`persistent ${name}, ${k} does not have a getter`)
-        continue
-      }
-      refs[k] = ref
+      ref = makePersist(name, k, v)
     } else {
-      refs[k] = mkref(k, v)
+      ref = mkref(k, v)
     }
+
+    if (!ref) {
+      console.error(`component '${name}' has a problem on key '${k}'`)
+      continue
+    }
+
+    refs[k] = ref
   }
 
   return createProxyStore(el, refs)
@@ -236,16 +235,17 @@ function makePersist(name: string, key: string, persist: Persist) {
   return persistMap[storeId]
 }
 
-class StoreValue {
-  v: any
-  constructor(v: any) {
+class StoreValue<T = any> {
+  v: T
+  constructor(v: T) {
     this.v = v
   }
 }
-class Persist extends StoreValue {}
-class Sync extends StoreValue {}
 
+class Persist extends StoreValue {}
 type persister = (v: string) => InstanceType<typeof Persist>
+
+class Sync extends StoreValue {}
 type syncer = (v: string) => InstanceType<typeof Sync>
 
 type StoreMaker = (opts: {
