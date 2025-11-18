@@ -1,7 +1,7 @@
 import type { Context } from '../types.ts'
 import { executeStatement } from '../expression.ts'
 
-export function bindEvent(el: HTMLElement, eventName: string, stmt: string, ctx: Context) {
+export function bindEvent(ctx: Context, el: Element, eventName: string, stmt: string) {
   if (!eventName) return
 
   // Create event handler function with access to:
@@ -20,7 +20,5 @@ export function bindEvent(el: HTMLElement, eventName: string, stmt: string, ctx:
   el.addEventListener(eventName, handler)
 
   // Add cleanup to context
-  ctx.cleanup.push(() => {
-    el.removeEventListener(eventName, handler)
-  })
+  ctx.cleanup.push(() => el.removeEventListener(eventName, handler))
 }

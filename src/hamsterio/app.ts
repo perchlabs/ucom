@@ -1,7 +1,9 @@
 import type {
   Context,
+  ContextableElement,
   ProxyStore,
 } from './types.ts'
+import { getParent } from './utils.ts'
 import { createEffect } from './signal.ts'
 import { evaluateExpression } from './expression.ts'
 import { contexts, createContext } from './context.ts'
@@ -20,14 +22,7 @@ function processElement(el: Element, ctx: Context) {
 // Skip text nodes, comments, etc - only process element nodes
   if (el.nodeType !== 1) return
 
-  if (!(el instanceof HTMLElement)) {
-    return
-  }
-
-  // const ctx = getContext(el)
-  if (!ctx) {
-    return
-  }
+  if (!ctx) return
 
 // Process all other directives on this element
   getDirectives(el).forEach(({name, value}) => {
@@ -35,32 +30,30 @@ function processElement(el: Element, ctx: Context) {
     // (e.g. "u-on:click" -> ["u-on", "click"])
     const [directive, modifier] = name.split(':')
     
+    if (directive === 'u-for') {
+      return bindFor(ctx, el, value)
+    }
+
     switch(directive) {
     case 'u-text':
-      bindTextOrHTML(el, value, ctx)
+      bindTextOrHTML(ctx, el as HTMLElement, value)
       break
     case 'u-html':
-      bindTextOrHTML(el, value, ctx, true)
+      bindTextOrHTML(ctx, el as HTMLElement, value, true)
       break
     case 'u-show':
-      bindShow(el, value, ctx)
-      break
-    case 'u-for':
-      bindFor(el, value, ctx)
-      break
-    case 'u-on':
-      bindEvent(el, modifier, value, ctx)
+      bindShow(ctx, el as HTMLElement, value)
       break
     case 'u-bind':
-      bindAttribute(el, modifier, value, ctx)
+      bindAttribute(ctx, el as HTMLElement, modifier, value)
+      break
+    case 'u-on':
+      bindEvent(ctx, el, modifier, value)
       break
     }
   })
 
-  // Process children recursively (unless u-for handled it)
-  if (!el.hasAttribute('u-for')) {
-    Array.from(el.children).forEach(child => processElement(child, ctx))
-  }
+  Array.from(el.children).forEach(child => processElement(child, ctx))
 }
 
 function getDirectives(el: Element) {
@@ -69,7 +62,7 @@ function getDirectives(el: Element) {
     .map(attr => ({ name: attr.name, value: attr.value }))
 }
 
-function bindFor(el: HTMLElement, expr: string, ctx: Context) {
+function bindFor(ctx: Context, el: Element, expr: string) {
   // Parse the expression using regex
   // Matches: "item in items" or "(item, index) in items"
   const match = expr.match(/^\s*(?:\(([^,]+),\s*([^)]+)\)|([^)\s]+))\s+in\s+(.+)$/)
@@ -88,14 +81,14 @@ function bindFor(el: HTMLElement, expr: string, ctx: Context) {
   const templateContent = isTemplate ? (el as HTMLTemplateElement).content : el
 
   // Clone the template and remove u-for to prevent infinite loop (if not template tag)
-  const template = templateContent.cloneNode(true) as HTMLElement
+  const template = templateContent.cloneNode(true) as Element
   if (!isTemplate) {
     template.removeAttribute('u-for')
   }
 
   // Replace original element with a comment marker
   // This marker keeps track of where to insert rendered items
-  const parent = el.parentElement
+  const parent = getParent(el)
   if (!parent) {
     return
   }
@@ -166,36 +159,18 @@ function bindFor(el: HTMLElement, expr: string, ctx: Context) {
   ctx.cleanup.push(dispose)
 }
 
-export function cleanup(el: Element | ShadowRoot) {
+export function cleanup(el: ContextableElement) {
   if (el == null) {
-    console.warn('🐹 [cleanup] Called on a null/undefined element.');
-    return;
+    console.warn('🐹 [cleanup] Called on a null/undefined element.')
+    return
   }
 
-  const ctx = contexts.get(el);
-  if (!ctx) return;
+  const ctx = contexts.get(el)
+  if (!ctx) return
   
   // Run all cleanup functions
-  ctx.cleanup?.forEach(fn => fn());
+  ctx.cleanup?.forEach(fn => fn())
   
   // Remove context (and cleanup array) from WeakMap
-  contexts.delete(el);
-
-  // Also cleanup any nested u-data children
-  // el.querySelectorAll('[u-data]').forEach(child => cleanup(child))
+  contexts.delete(el)
 }
-
-// function getData(el: Element) {
-//   const expr = el.getAttribute('u-data') ?? ''
-//   if (expr.trim()) {
-//     try {
-//       // Parse the JavaScript object expression
-//       // (e.g. "{ count: 0 }" becomes an actual object)
-//       const fn = new Function(`return ${expr}`)
-//       return fn()
-//     } catch (e) {
-//       console.error('🐹 [u-data] Parse error: ', e)
-//     }
-//   }
-//   return {}
-// }

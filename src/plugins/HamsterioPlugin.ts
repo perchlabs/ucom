@@ -18,10 +18,9 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../ucom'
 import {
-  initRoot, cleanup, createEffect, mkref, createProxyStoreFromRefRecord, createRefRecord,
+  initRoot, cleanup, createEffect, mkref, createProxyStore, createRefs,
 } from '../hamsterio/index.js'
-import type { RefRecord } from '../hamsterio/index.js'
-
+import type { Refs } from '../hamsterio/index.js'
 
 // Proto and constructor constants.
 const PropsIndex = '$props'
@@ -30,8 +29,8 @@ const StoreIndex = '$store'
 const DataIndex = '$data'
 const CleanupIndex = Symbol('clean')
 
-const persistMap: RefRecord = {}
-const syncMap: RefRecord = {}
+const persistMap: Refs = {}
+const syncMap: Refs = {}
 
 const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
@@ -142,7 +141,6 @@ function connectData(
 
   const store = makeStore(Com, Raw, el)
 
-
   const ctx = initRoot(shadow, store)
   el[CleanupIndex] = () => cleanup(ctx.el)
   Object.assign(el, {
@@ -161,7 +159,7 @@ function makeStore(
     [StoreIndex]: storeMaker,
   } = Com
   const props = makeProps(el, propDefs)
-  const refs = createRefRecord(props)
+  const refs = createRefs(props)
 
   const data = storeMaker?.({
     props,
@@ -193,9 +191,7 @@ function makeStore(
     }
   }
 
-  const proxyStore = createProxyStoreFromRefRecord(el, refs)
-
-  return proxyStore
+  return createProxyStore(el, refs)
 }
 
 function makeProps(el: HTMLElement, propDefs: PropDefs) {
@@ -251,8 +247,6 @@ class Sync extends StoreValue {}
 
 type persister = (v: string) => InstanceType<typeof Persist>
 type syncer = (v: string) => InstanceType<typeof Sync>
-
-// type ReactiveProxy = Record<string, any>
 
 type StoreMaker = (opts: {
   props: Record<string, string>

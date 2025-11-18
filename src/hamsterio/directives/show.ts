@@ -2,7 +2,9 @@ import type { Context } from '../types.ts'
 import { createEffect } from '../signal.js'
 import { evaluateExpression } from '../expression.ts'
 
-export function bindShow(el: HTMLElement, expr: string, ctx: Context) {
+const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
+
+export function bindShow(ctx: Context, el: HTMLElement, expr: string) {
   // Store original display value to restore when showing (i.e. flex/grid, etc)
   let originalDisplay = getComputedStyle(el).display
   let isCurrentlyVisible = originalDisplay !== 'none'
@@ -13,8 +15,8 @@ export function bindShow(el: HTMLElement, expr: string, ctx: Context) {
   }
 
   // Store transition classes (if present)
-  const enterClass = el.getAttribute('u-transition-enter')?.split(' ').filter(c => c)
-  const leaveClass = el.getAttribute('u-transition-leave')?.split(' ').filter(c => c)
+  const enterClass = attrSplitFilter(el, 'u-transition-enter')
+  const leaveClass = attrSplitFilter(el, 'u-transition-leave')
 
   const dispose = createEffect(() => {
     try {

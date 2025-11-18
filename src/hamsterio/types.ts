@@ -1,8 +1,8 @@
 
-export type Contextable = Element | ShadowRoot
+export type ContextableElement = Element | ShadowRoot
 
 export interface Context {
-  el: Element | ShadowRoot
+  el: ContextableElement
   data: Record<string, any>
   cleanup: (() => void)[]
   signals?: SignalRecord
@@ -16,8 +16,7 @@ export type ProxyRecord = Record<string, any>
 export type SignalRecord = Record<string, SignalPair>
 export type ProxyStore = [ProxyRecord, SignalRecord]
 
-
-export type RefRecord = Record<string, Ref>
+export type Refs = Record<string, Ref>
 
 export type Ref = {
   key: string

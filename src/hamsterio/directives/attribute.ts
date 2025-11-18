@@ -2,19 +2,17 @@ import type { Context } from '../types.ts'
 import { createEffect } from '../signal.ts'
 import { evaluateExpression } from '../expression.ts'
 
-export function bindAttribute(el: HTMLElement, attrName: string, expr: string, ctx: Context) {
+export function bindAttribute(ctx: Context, el: HTMLElement, attrName: string, expr: string) {
   if (!attrName) return
 
   // Special handling for 'class' attribute
   if (attrName === 'class') {
-    bindClass(el, expr, ctx)
-    return
+    return bindClass(el, expr, ctx)
   }
 
   // Special handling for 'style' attribute
   if (attrName === 'style') {
-    bindStyle(el, expr, ctx)
-    return
+    return bindStyle(el, expr, ctx)
   }
 
   // General attribute binding
@@ -47,7 +45,7 @@ export function bindAttribute(el: HTMLElement, attrName: string, expr: string, c
   ctx.cleanup.push(dispose)
 }
 
-export function bindClass(el: HTMLElement, expr: string, ctx: Context) {
+export function bindClass(el: Element, expr: string, ctx: Context) {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
     
@@ -94,7 +92,7 @@ function bindStyle(el: HTMLElement, expr: string, ctx: Context) {
       
       if (typeof value === 'string') {
         // String: "color: red; font-size: 14px"
-        el.style.cssText = originalStyle + '; ' + value
+        el.style.cssText = `${originalStyle}; ${value}`
       }
       else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         // Object: { color: 'red', fontSize: '14px' }

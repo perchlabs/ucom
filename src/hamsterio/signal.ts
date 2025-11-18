@@ -2,7 +2,7 @@ import type { SignalPair } from './types.ts'
 
 type Callback = () => any
 type EffectFunc = {
-  (): void;
+  (): void
   cleanup?: Set<Callback>
 }
 
@@ -29,8 +29,10 @@ export function createSignal(initialValue: any): SignalPair {
 
   const setter = (newValue: any) => {
     // Prevent unnecessary updates if value hasn't changed
-    if (Object.is(value, newValue)) return
-    
+    if (Object.is(value, newValue)) {
+      return
+    }
+   
     value = newValue
     
     // Copy subscribers to prevent unwanted behaviour when resetting
@@ -65,12 +67,12 @@ export function createSignal(initialValue: any): SignalPair {
  * 
  * Example:
  * ```js
- *   const [count, setCount] = createSignal(0);
+ *   const [count, setCount] = createSignal(0)
  *   const dispose = createEffect(() => {
- *     console.log('Count is:', count());
- *   });
- *   setCount(1); // Effect re-runs, logs: "Count is: 1"
- *   dispose();   // Stop the effect, cleanup subscriptions
+ *     console.log('Count is:', count())
+ *   })
+ *   setCount(1) // Effect re-runs, logs: "Count is: 1"
+ *   dispose()   // Stop the effect, cleanup subscriptions
  * 
  * ```
  * @param {Function} fn - The reactive function to execute
