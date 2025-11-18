@@ -3,9 +3,9 @@ import type {
   ContextableElement,
   ProxyStore,
 } from './types.ts'
-import { getParent } from './utils.ts'
+import { getDirectives, getParent } from './utils.ts'
 import { createEffect } from './signal.ts'
-import { evaluateExpression } from './expression.ts'
+import { evaluate } from './expression.ts'
 import { contexts, createContext } from './context.ts'
 import { bindTextOrHTML } from './directives/textOrHtml.ts'
 import { bindShow } from './directives/show.ts'
@@ -14,11 +14,11 @@ import { bindAttribute } from './directives/attribute.ts'
 
 export function initRoot(root: ShadowRoot, proxyStore: ProxyStore) {
   const ctx = createContext(root, proxyStore)
-  Array.from(root.children).forEach(child => processElement(child, ctx))
+  Array.from(root.children).forEach(child => processElement(ctx, child))
   return ctx
 }
 
-function processElement(el: Element, ctx: Context) {
+function processElement(ctx: Context, el: Element) {
 // Skip text nodes, comments, etc - only process element nodes
   if (el.nodeType !== 1) return
 
@@ -30,10 +30,6 @@ function processElement(el: Element, ctx: Context) {
     // (e.g. "u-on:click" -> ["u-on", "click"])
     const [directive, modifier] = name.split(':')
     
-    if (directive === 'u-for') {
-      return bindFor(ctx, el, value)
-    }
-
     switch(directive) {
     case 'u-text':
       bindTextOrHTML(ctx, el as HTMLElement, value)
@@ -44,6 +40,12 @@ function processElement(el: Element, ctx: Context) {
     case 'u-show':
       bindShow(ctx, el as HTMLElement, value)
       break
+    case 'u-is':
+      bindIs(ctx, el, value)
+      break
+    case 'u-for':
+      bindFor(ctx, el, value)
+      break
     case 'u-bind':
       bindAttribute(ctx, el as HTMLElement, modifier, value)
       break
@@ -53,14 +55,11 @@ function processElement(el: Element, ctx: Context) {
     }
   })
 
-  Array.from(el.children).forEach(child => processElement(child, ctx))
+  if (!(el.hasAttribute('u-for') || el.hasAttribute('u-is'))) {
+    Array.from(el.children).forEach(child => processElement(ctx, child))
+  }
 }
 
-function getDirectives(el: Element) {
-  return Array.from(el.attributes)
-    .filter(attr => attr.name.startsWith('u-'))
-    .map(attr => ({ name: attr.name, value: attr.value }))
-}
 
 function bindFor(ctx: Context, el: Element, expr: string) {
   // Parse the expression using regex
@@ -89,9 +88,6 @@ function bindFor(ctx: Context, el: Element, expr: string) {
   // Replace original element with a comment marker
   // This marker keeps track of where to insert rendered items
   const parent = getParent(el)
-  if (!parent) {
-    return
-  }
   const marker = document.createComment('u-for')
   parent.replaceChild(marker, el)
 
@@ -102,7 +98,7 @@ function bindFor(ctx: Context, el: Element, expr: string) {
   const dispose = createEffect(() => {
     try {
       // Evaluate the array expression
-      const items = evaluateExpression(itemsExpr, ctx)
+      const items = evaluate(itemsExpr, ctx)
 
       // Clean up previous render
       saved.forEach(n => {
@@ -141,7 +137,7 @@ function bindFor(ctx: Context, el: Element, expr: string) {
           })
           
           // Process directives on the cloned element
-          processElement(element, ctx)
+          processElement(ctx, element)
           
           // Insert before the marker comment
           parent.insertBefore(element, marker)
@@ -156,6 +152,50 @@ function bindFor(ctx: Context, el: Element, expr: string) {
   })
 
   // Track effect disposal
+  ctx.cleanup.push(dispose)
+}
+
+export function bindIs(ctx: Context, el: Element, expr: string) {
+  if (!expr.trim()) {
+    return console.warn(`u-is expression cannot be empty.`)
+  }
+
+  if (!(el instanceof HTMLTemplateElement)) {
+    return console.warn(`u-is may only be placed on a template.`)
+  }
+
+  const parent = getParent(el)
+  const anchor = new Comment('u-is')
+  parent.insertBefore(anchor, el)
+  parent.removeChild(el)
+
+  let tagName = ''
+  let tag: Element | undefined
+
+  const dispose = createEffect(() => {
+    const v = evaluate(expr, ctx)
+    if (!v || v === tagName) {
+      return console.log('u-is: is empty')
+    }
+
+    if (tag) {
+      parent.insertBefore(anchor, tag)
+      cleanup(tag)
+      tag.remove()
+    }
+
+    tagName = v
+    tag = document.createElement(tagName)
+
+    for (const {name, value} of Array.from(el.attributes).filter(({name}) => name !== 'u-is')) {
+      tag.setAttribute(name, value)
+    }
+    processElement(ctx, tag)
+
+    parent.insertBefore(tag, anchor)
+    parent.removeChild(anchor)
+  })
+
   ctx.cleanup.push(dispose)
 }
 

@@ -1,6 +1,6 @@
 import type { Context } from '../types.ts'
 import { createEffect } from '../signal.js'
-import { evaluateExpression } from '../expression.ts'
+import { evaluate } from '../expression.ts'
 
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
 
@@ -21,7 +21,7 @@ export function bindShow(ctx: Context, el: HTMLElement, expr: string) {
   const dispose = createEffect(() => {
     try {
       // Evaluate expression as boolean
-      const show = evaluateExpression(expr, ctx)
+      const show = evaluate(expr, ctx)
 
       // Showing
       if (show) {

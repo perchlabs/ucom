@@ -1,6 +1,6 @@
 import type { Context } from './types.ts'
 
-export function evaluateExpression(expr: string, context: Context) {
+export function evaluate(expr: string, context: Context) {
   try {
     // Create a function that evaluates the expression
     // The 'with' statement allows: "count" instead of "$data.count"
@@ -10,12 +10,12 @@ export function evaluateExpression(expr: string, context: Context) {
     // Execute and return result
     return fn(context.data, context.el)
   } catch (e) {
-    console.error('🐹 [evaluateExpression] Error: ', expr, e)
+    console.error('🐹 [evaluate] Error: ', expr, e)
     return null
   }
 }
 
-export function executeStatement(code: string, context: Context, event: Event | null = null) {
+export function execute(code: string, context: Context, event: Event | null = null) {
   try {
     // Create an async function to support await
     // Include $event for u-on compatibility
@@ -29,7 +29,7 @@ export function executeStatement(code: string, context: Context, event: Event | 
     // Execute and return promise for error handling
     return fn.call(context.data, event, context.el, context.data)
   } catch (err) {
-    console.error('🐹 [executeStatement] Error: ', err)
+    console.error('🐹 [execute] Error: ', err)
     return Promise.reject(err)
   }
 }

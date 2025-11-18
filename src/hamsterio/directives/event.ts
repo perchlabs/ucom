@@ -1,5 +1,5 @@
 import type { Context } from '../types.ts'
-import { executeStatement } from '../expression.ts'
+import { execute } from '../expression.ts'
 
 export function bindEvent(ctx: Context, el: Element, eventName: string, stmt: string) {
   if (!eventName) return
@@ -10,7 +10,7 @@ export function bindEvent(ctx: Context, el: Element, eventName: string, stmt: st
   // - $data: the reactive data (via 'with' statement)
   const handler = (e: Event) => {
     try {
-      executeStatement(stmt, ctx, e)
+      execute(stmt, ctx, e)
     } catch (err) {
       console.error(`🐹 [u-on:${eventName}] Error: `, err)
     }

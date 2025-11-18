@@ -1,6 +1,6 @@
 import type { Context } from '../types.ts'
 import { createEffect } from '../signal.ts'
-import { evaluateExpression } from '../expression.ts'
+import { evaluate } from '../expression.ts'
 
 export function bindAttribute(ctx: Context, el: HTMLElement, attrName: string, expr: string) {
   if (!attrName) return
@@ -18,7 +18,7 @@ export function bindAttribute(ctx: Context, el: HTMLElement, attrName: string, e
   // General attribute binding
   const dispose = createEffect(() => {
     try {
-      const value = evaluateExpression(expr, ctx)
+      const value = evaluate(expr, ctx)
       
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (typeof value === 'boolean') {
@@ -51,7 +51,7 @@ export function bindClass(el: Element, expr: string, ctx: Context) {
     
   const dispose = createEffect(() => {
     try {
-      const value = evaluateExpression(expr, ctx)
+      const value = evaluate(expr, ctx)
       
       // Start with original classes
       const classes = new Set(originalClasses)
@@ -85,7 +85,7 @@ function bindStyle(el: HTMLElement, expr: string, ctx: Context) {
     
   const dispose = createEffect(() => {
     try {
-      const value = evaluateExpression(expr, ctx)
+      const value = evaluate(expr, ctx)
       
       // Restore original styles first
       el.setAttribute('style', originalStyle)

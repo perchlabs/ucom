@@ -75,8 +75,6 @@ export function createSignal(initialValue: any): SignalPair {
  *   dispose()   // Stop the effect, cleanup subscriptions
  * 
  * ```
- * @param {Function} fn - The reactive function to execute
- * @returns {Function} Function to cleanup and stop the effect
  */
 export function createEffect(fn: () => void) {
   let isDisposed = false
