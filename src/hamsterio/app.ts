@@ -19,17 +19,13 @@ export function initRoot(root: ShadowRoot, proxyStore: ProxyStore) {
 }
 
 function processElement(ctx: Context, el: Element) {
-// Skip text nodes, comments, etc - only process element nodes
+  // Skip text nodes, comments, etc - only process element nodes
   if (el.nodeType !== 1) return
 
   if (!ctx) return
 
-// Process all other directives on this element
-  getDirectives(el).forEach(({name, value}) => {
-    // Split directive name to handle modifiers
-    // (e.g. "u-on:click" -> ["u-on", "click"])
-    const [directive, modifier] = name.split(':')
-    
+  const directives = getDirectives(el)
+  for (const {directive, modifier, value} of Object.values(directives)) {
     switch(directive) {
     case 'u-text':
       bindTextOrHTML(ctx, el as HTMLElement, value)
@@ -53,9 +49,18 @@ function processElement(ctx: Context, el: Element) {
       bindEvent(ctx, el, modifier, value)
       break
     }
-  })
+  }
 
-  if (!(el.hasAttribute('u-for') || el.hasAttribute('u-is'))) {
+  const has = (names: string[]) => {
+    for (const name of names) {
+      if (name in directives) {
+        return true
+      }
+    }
+    return false
+  }
+
+  if (!has(['u-for', 'u-is'])) {
     Array.from(el.children).forEach(child => processElement(ctx, child))
   }
 }

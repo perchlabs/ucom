@@ -31,3 +31,9 @@ export type RefSignal = {
   key: string
   pair: SignalPair
 }
+
+export type DirectiveDef = {
+  directive: string
+  modifier: string
+  value: string
+}

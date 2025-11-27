@@ -1,5 +1,6 @@
 import type {
   ContextableElement,
+  DirectiveDef,
 } from './types.ts'
 
 export function getParent(el: ContextableElement): ContextableElement {
@@ -7,7 +8,18 @@ export function getParent(el: ContextableElement): ContextableElement {
 }
 
 export function getDirectives(el: Element) {
-  return Array.from(el.attributes)
+  const directives: Record<string, DirectiveDef> = {} 
+  Array.from(el.attributes)
     .filter(attr => attr.name.startsWith('u-'))
-    .map(attr => ({ name: attr.name, value: attr.value }))
+    .forEach(({name, value}) => {
+      // Split directive name to handle modifiers
+      // (e.g. "u-on:click" -> ["u-on", "click"])
+      const [directive, modifier] = name.split(':')
+      directives[directive] = {
+        directive,
+        modifier,
+        value,
+      } 
+    })
+  return directives
 }
