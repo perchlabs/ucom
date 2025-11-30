@@ -1,24 +1,29 @@
-import type { Context } from '../types.ts'
+import type { Context, DirectiveDef } from '../types.ts'
 import { createEffect } from '../signal.ts'
 import { evaluate } from '../expression.ts'
 
-export function bindAttribute(ctx: Context, el: HTMLElement, attrName: string, expr: string) {
+export function bindAttribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+  const {
+    modifier: attrName,
+    value: expr,
+  } = dir
+
   if (!attrName) return
 
   // Special handling for 'class' attribute
   if (attrName === 'class') {
-    return bindClass(el, expr, ctx)
+    return bindClass(ctx, el, expr)
   }
 
   // Special handling for 'style' attribute
   if (attrName === 'style') {
-    return bindStyle(el, expr, ctx)
+    return bindStyle(ctx, el, expr)
   }
 
   // General attribute binding
   const dispose = createEffect(() => {
     try {
-      const value = evaluate(expr, ctx)
+      const value = evaluate(ctx, expr)
       
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (typeof value === 'boolean') {
@@ -37,7 +42,7 @@ export function bindAttribute(ctx: Context, el: HTMLElement, attrName: string, e
         el.setAttribute(attrName, value)
       }
     } catch (e) {
-      console.error(`🐹 [u-bind:${attrName}] Error: `, e)
+      console.error(`[u-bind:${attrName}] Error: `, e)
     }
   })
 
@@ -45,13 +50,13 @@ export function bindAttribute(ctx: Context, el: HTMLElement, attrName: string, e
   ctx.cleanup.push(dispose)
 }
 
-export function bindClass(el: Element, expr: string, ctx: Context) {
+export function bindClass(ctx: Context, el: Element, expr: string) {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
     
   const dispose = createEffect(() => {
     try {
-      const value = evaluate(expr, ctx)
+      const value = evaluate(ctx, expr)
       
       // Start with original classes
       const classes = new Set(originalClasses)
@@ -71,7 +76,7 @@ export function bindClass(el: Element, expr: string, ctx: Context) {
       // Apply the final class list
       el.className = Array.from(classes).join(' ')
     } catch (e) {
-      console.error('🐹 [u-bind:class] Error: ', e)
+      console.error('[u-bind:class] Error: ', e)
     }
   })
 
@@ -79,13 +84,13 @@ export function bindClass(el: Element, expr: string, ctx: Context) {
   ctx.cleanup.push(dispose)
 }
 
-function bindStyle(el: HTMLElement, expr: string, ctx: Context) {
+function bindStyle(ctx: Context, el: HTMLElement, expr: string) {
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''
     
   const dispose = createEffect(() => {
     try {
-      const value = evaluate(expr, ctx)
+      const value = evaluate(ctx, expr)
       
       // Restore original styles first
       el.setAttribute('style', originalStyle)
@@ -105,7 +110,7 @@ function bindStyle(el: HTMLElement, expr: string, ctx: Context) {
         }
       }
     } catch (e) {
-      console.error('🐹 [u-bind:style] Error: ', e)
+      console.error('[u-bind:style] Error: ', e)
     }
   })
 

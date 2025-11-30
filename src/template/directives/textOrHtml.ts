@@ -1,16 +1,21 @@
-import type { Context } from '../types.ts'
+import type { Context, DirectiveDef } from '../types.ts'
 import { createEffect } from '../signal.ts'
 import { evaluate } from '../expression.ts'
 
-export function bindTextOrHTML(ctx: Context, el: HTMLElement, expr: string, isHTML = false) {
+export function bindTextOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+  const {
+    key,
+    value: expr,
+  } = dir
+  const index = key === 'u-html' ? 'innerHTML' : 'textContent' 
+
   // Create an effect that automatically re-runs when signals change
   const dispose = createEffect(() => {
-    const index = isHTML ? 'innerHTML' : 'textContent' 
     try {
       // Evaluate the expression (e.g., "count" or "firstName + ' ' + lastName")
-      el[index] = evaluate(expr, ctx) ?? ''
+      el[index] = evaluate(ctx, expr) ?? ''
     } catch (e) {
-      console.error('🐹 [u-text] Error: ', e)
+      console.error('[u-text] Error: ', e)
     }
   })
 

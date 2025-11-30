@@ -7,20 +7,29 @@ export function getParent(el: ContextableElement): ContextableElement {
   return el.parentElement ?? el.getRootNode() as ShadowRoot
 }
 
+const controllers: Readonly<Set<string>> = new Set([
+  'u-show',
+  'u-for',
+  'u-is',
+])
+
 export function getDirectives(el: Element) {
-  const hitmap: Record<string, boolean> = {}
-  const directives = Array.from(el.attributes)
+  const control: Record<string, DirectiveDef> = {}
+  const normal: DirectiveDef[] = []
+  
+  Array.from(el.attributes)
     .filter(attr => attr.name.startsWith('u-'))
-    .map(({name, value}): DirectiveDef => {
+    .forEach(({name, value}) => {
       // Split directive name to handle modifiers
       // (e.g. "u-on:click" -> ["u-on", "click"])
-      const [directive, modifier] = name.split(':')
-      hitmap[directive] = true
-      return {
-        directive,
-        modifier,
-        value,
+      const [key, modifier] = name.split(':')
+      const def = {key, modifier, value}
+
+      if (controllers.has(key)) {
+        control[key] = def
+      } else {
+        normal.push(def)
       }
     })
-  return {directives, hitmap}
+  return {control, normal}
 }

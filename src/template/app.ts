@@ -1,6 +1,7 @@
 import type {
   Context,
   ContextableElement,
+  DirectiveDef,
   ProxyStore,
 } from './types.ts'
 import { getDirectives, getParent } from './utils.ts'
@@ -15,66 +16,69 @@ import { bindRef } from './directives/ref.ts'
 
 export function initRoot(root: ShadowRoot, proxyStore: ProxyStore) {
   const ctx = createContext(root, proxyStore)
-  Array.from(root.children).forEach(child => processElement(ctx, child))
+  walkChildren(ctx, root)
   return ctx
 }
 
-function processElement(ctx: Context, el: Element) {
+function walk(ctx: Context, node: Node): ChildNode | null | void {
   // Skip text nodes, comments, etc - only process element nodes
-  if (el.nodeType !== 1) return
-
+  if (node.nodeType !== 1) return
   if (!ctx) return
 
-  const {directives, hitmap} = getDirectives(el)
-  const has = (names: string[]) => {
-    for (const name of names) {
-      if (name in hitmap) {
-        return true
-      }
-    }
-    return false
+  const el = node as Element
+
+  const {control, normal} = getDirectives(el)
+  const getCtrl = (name: string) => control[name]
+
+  let dir: DirectiveDef | null
+  if ((dir = getCtrl('u-show'))) {
+    bindShow(ctx, el as HTMLElement, dir)
+  }
+  if ((dir = getCtrl('u-for'))) {
+    bindFor(ctx, el, dir)
+    return
+  }
+  if ((dir = getCtrl('u-is'))) {
+    bindIs(ctx, el, dir)
+    return
   }
 
-  directivesLoop: for (const {directive, modifier, value} of Object.values(directives)) {
-    switch(directive) {
-    case 'u-show':
-      bindShow(ctx, el as HTMLElement, value)
-      break
-    case 'u-for':
-      bindFor(ctx, el, value)
-      break directivesLoop
-    case 'u-is':
-      bindIs(ctx, el, value)
-      break
+  for (const dir of Object.values(normal)) {
+    switch(dir.key) {
     case 'u-bind':
-      bindAttribute(ctx, el as HTMLElement, modifier, value)
+      bindAttribute(ctx, el as HTMLElement, dir)
       break
     case 'u-on':
-      bindEvent(ctx, el, modifier, value)
+      bindEvent(ctx, el, dir)
       break
     case 'u-text':
-      bindTextOrHTML(ctx, el as HTMLElement, value)
-      break
     case 'u-html':
-      bindTextOrHTML(ctx, el as HTMLElement, value, true)
+      bindTextOrHTML(ctx, el as HTMLElement, dir)
       break
     case 'u-ref':
-      bindRef(ctx, el, value, modifier === 'global')
+      bindRef(ctx, el, dir)
+      break
     }
   }
 
+  walkChildren(ctx, el)
+}
 
-  if (!has(['u-for', 'u-is'])) {
-    Array.from(el.children).forEach(child => processElement(ctx, child))
+function walkChildren(ctx: Context, node: Element | DocumentFragment) {
+  let child = node.firstChild
+  while (child) {
+    child = walk(ctx, child) || child.nextSibling
   }
 }
 
-function bindFor(ctx: Context, el: Element, expr: string) {
+function bindFor(ctx: Context, el: Element, dir: DirectiveDef) {
+  const {value: expr} = dir
+
   // Parse the expression using regex
   // Matches: "item in items" or "(item, index) in items"
   const match = expr.match(/^\s*(?:\(([^,]+),\s*([^)]+)\)|([^)\s]+))\s+in\s+(.+)$/)
   if (!match) {
-    console.error('🐹 [u-for] Invalid syntax: ', expr)
+    console.error('[u-for] Invalid syntax: ', expr)
     return
   }
 
@@ -106,7 +110,7 @@ function bindFor(ctx: Context, el: Element, expr: string) {
   const dispose = createEffect(() => {
     try {
       // Evaluate the array expression
-      const items = evaluate(itemsExpr, ctx)
+      const items = evaluate(ctx, itemsExpr)
 
       // Clean up previous render
       saved.forEach(n => {
@@ -144,7 +148,7 @@ function bindFor(ctx: Context, el: Element, expr: string) {
           contexts.set(element, subCtx)
           
           // Process directives on the cloned element
-          processElement(subCtx, element)
+          walk(subCtx, element)
           
           // Insert before the marker comment
           parent.insertBefore(element, marker)
@@ -163,7 +167,7 @@ function bindFor(ctx: Context, el: Element, expr: string) {
         items.forEach(iter)
       }
     } catch (e) {
-      console.error('🐹 [u-for] Error: ', e)
+      console.error('[u-for] Error: ', e)
     }
   })
 
@@ -171,7 +175,9 @@ function bindFor(ctx: Context, el: Element, expr: string) {
   ctx.cleanup.push(dispose)
 }
 
-export function bindIs(ctx: Context, el: Element, expr: string) {
+export function bindIs(ctx: Context, el: Element, dir: DirectiveDef) {
+  const {value: expr} = dir
+
   if (!expr.trim()) {
     return console.warn(`u-is expression cannot be empty.`)
   }
@@ -189,7 +195,7 @@ export function bindIs(ctx: Context, el: Element, expr: string) {
   let tag: Element | undefined
 
   const dispose = createEffect(() => {
-    const v = evaluate(expr, ctx)
+    const v = evaluate(ctx, expr)
     if (!v || v === tagName) {
       return
     }
@@ -206,7 +212,7 @@ export function bindIs(ctx: Context, el: Element, expr: string) {
     for (const {name, value} of Array.from(el.attributes).filter(({name}) => name !== 'u-is')) {
       tag.setAttribute(name, value)
     }
-    processElement(ctx, tag)
+    walk(ctx, tag)
 
     parent.insertBefore(tag, anchor)
     parent.removeChild(anchor)
@@ -217,7 +223,7 @@ export function bindIs(ctx: Context, el: Element, expr: string) {
 
 export function cleanup(el: ContextableElement) {
   if (el == null) {
-    console.warn('🐹 [cleanup] Called on a null/undefined element.')
+    console.warn('[cleanup] Called on a null/undefined element.')
     return
   }
 

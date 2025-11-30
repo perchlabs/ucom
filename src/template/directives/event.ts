@@ -1,7 +1,12 @@
-import type { Context } from '../types.ts'
+import type { Context, DirectiveDef } from '../types.ts'
 import { execute } from '../expression.ts'
 
-export function bindEvent(ctx: Context, el: Element, eventName: string, stmt: string) {
+export function bindEvent(ctx: Context, el: Element, dir: DirectiveDef) {
+  const {
+    modifier: eventName,
+    value: stmt,
+  } = dir
+
   if (!eventName) return
 
   // Create event handler function with access to:
@@ -10,9 +15,9 @@ export function bindEvent(ctx: Context, el: Element, eventName: string, stmt: st
   // - $data: the reactive data (via 'with' statement)
   const handler = (e: Event) => {
     try {
-      execute(stmt, ctx, e)
+      execute(ctx, stmt, e)
     } catch (err) {
-      console.error(`🐹 [u-on:${eventName}] Error: `, err)
+      console.error(`[u-on:${eventName}] Error: `, err)
     }
   }
 

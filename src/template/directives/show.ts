@@ -1,10 +1,13 @@
-import type { Context } from '../types.ts'
+import type { Context, DirectiveDef } from '../types.ts'
 import { createEffect } from '../signal.js'
 import { evaluate } from '../expression.ts'
 
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
 
-export function bindShow(ctx: Context, el: HTMLElement, expr: string) {
+export function bindShow(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+  const {value: expr} = dir
+  // expr: string
+
   // Store original display value to restore when showing (i.e. flex/grid, etc)
   let originalDisplay = getComputedStyle(el).display
   let isCurrentlyVisible = originalDisplay !== 'none'
@@ -15,13 +18,13 @@ export function bindShow(ctx: Context, el: HTMLElement, expr: string) {
   }
 
   // Store transition classes (if present)
-  const enterClass = attrSplitFilter(el, 'u-transition-enter')
-  const leaveClass = attrSplitFilter(el, 'u-transition-leave')
+  const enterClass = attrSplitFilter(el, 'u-show-enter')
+  const leaveClass = attrSplitFilter(el, 'u-show-leave')
 
   const dispose = createEffect(() => {
     try {
       // Evaluate expression as boolean
-      const show = evaluate(expr, ctx)
+      const show = evaluate(ctx, expr)
 
       // Showing
       if (show) {
@@ -70,7 +73,7 @@ export function bindShow(ctx: Context, el: HTMLElement, expr: string) {
         }
       }
     } catch (e) {
-      console.error('🐹 [u-show] Error: ', e)
+      console.error('[u-show] Error: ', e)
     }
   })
 
