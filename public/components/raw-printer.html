@@ -1,0 +1,35 @@
+<script>
+  export default class extends HTMLElement {
+    static get observedAttributes() {
+      return ['name']
+    }
+
+    async connectedCallback() {
+      this.#tryRun(this.getAttribute('name'))
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      this.#tryRun(newValue)
+    }
+
+    #hasRun = false
+    async #tryRun(name) {
+      if (this.#hasRun || !name) {
+        return
+      }
+      this.#hasRun = true
+
+      const Component = await customElements.whenDefined(name)
+      const {tpl} = Component.def
+
+      const parent = this.parentElement ?? this.getRootNode()
+      if (!parent) {
+        console.error('Could not find parent.')
+        return
+      }
+
+      parent.insertBefore(tpl.cloneNode(true), this)
+      parent.removeChild(this)
+    }
+  }
+</script>

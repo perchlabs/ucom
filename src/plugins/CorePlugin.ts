@@ -2,7 +2,7 @@ import type {
   Plugin,
   PluginDefineParams,
   PluginConstructParams,
-} from '../ucom'
+} from '../core'
 
 const PROTO_SKIP = new Set('constructor')
 

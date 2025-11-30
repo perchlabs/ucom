@@ -1,7 +1,7 @@
 import type {
   PluginParseParams,
   Plugin,
-} from '../ucom'
+} from '../core'
 
 export default class implements Plugin {
   async parse({

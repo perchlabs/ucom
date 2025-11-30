@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "./build.sh vue lite",
+    "build": "./build.sh ucom ucom_vue ucom_lite",
     "tsc": "tsc"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "vite": "^7.2.2"
+    "vite": "^7.2.4"
   },
   "dependencies": {
     "@vue/shared": "file:./local_modules/vue-shared@3.2.27",

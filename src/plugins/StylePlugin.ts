@@ -3,10 +3,10 @@ import type {
   PluginStartParams,
   PluginConstructParams,
   Plugin,
-} from '../ucom'
+} from '../core'
 import {
   ATTR_CORE,
-} from '../ucom'
+} from '../core'
 
 export default class implements Plugin {
   #sheetsLoader?: Promise<CSSStyleSheet[]>
