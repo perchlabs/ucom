@@ -5,11 +5,14 @@ import RelativePlugin from './plugins/RelativePlugin.ts'
 import ImportPlugin from './plugins/ImportPlugin.ts'
 import StylePlugin from './plugins/StylePlugin.ts'
 
+import TemplatePlugin from './plugins/TemplatePlugin.ts'
+
 const ucom = Ucom([
   CorePlugin,
   DOMPlugin,
   RelativePlugin,
   ImportPlugin,
   StylePlugin,
+  TemplatePlugin,
 ])
 ucom.start()

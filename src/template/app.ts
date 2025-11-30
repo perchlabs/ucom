@@ -27,12 +27,6 @@ function processElement(ctx: Context, el: Element) {
   const directives = getDirectives(el)
   for (const {directive, modifier, value} of Object.values(directives)) {
     switch(directive) {
-    case 'u-text':
-      bindTextOrHTML(ctx, el as HTMLElement, value)
-      break
-    case 'u-html':
-      bindTextOrHTML(ctx, el as HTMLElement, value, true)
-      break
     case 'u-show':
       bindShow(ctx, el as HTMLElement, value)
       break
@@ -47,6 +41,12 @@ function processElement(ctx: Context, el: Element) {
       break
     case 'u-on':
       bindEvent(ctx, el, modifier, value)
+      break
+    case 'u-text':
+      bindTextOrHTML(ctx, el as HTMLElement, value)
+      break
+    case 'u-html':
+      bindTextOrHTML(ctx, el as HTMLElement, value, true)
       break
     }
   }

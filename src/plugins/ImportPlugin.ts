@@ -8,8 +8,8 @@ import type {
   ComponentIdentity,
   ComponentManager,
   ComponentImporter,
-} from '../ucom'
-import { $attrBool } from '../ucom'
+} from '../core'
+import { $attrBool } from '../core'
 
 // const ATTR_SRC = 'u-src'
 

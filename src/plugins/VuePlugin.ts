@@ -9,14 +9,14 @@ import type {
   AttributeChangedCallback,
   ConnectedCallback,
   DisconnectedCallback,
-} from '../ucom'
+} from '../core'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
   CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
-} from '../ucom'
+} from '../core'
 import {createApp, ref, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
 
 // Proto and constructor constants.

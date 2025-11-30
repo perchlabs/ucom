@@ -11,7 +11,7 @@ import { evaluate } from './eval'
 import { checkAttr } from './utils'
 import { ref } from './directives/ref'
 import { createScopedContext } from './context'
-import { ATTR_CORE } from '../ucom'
+import { ATTR_CORE } from '../core'
 
 const dirRE = /^(?:u-|:|@)/
 const dirBasicRE = /^(u-[a-z]+)$/

@@ -1,0 +1,64 @@
+
+HOME ROUTE
+
+<te-st name="qwerwe"></te-st>
+
+<te-st name="abcdef"></te-st>
+
+<template u-is="tagName"></template>
+
+
+<script>
+  export function $store() {
+    return {
+      tagName: 'tag-one',
+    }
+  }
+</script>
+
+<button u-on:click="tagName = 'tag-one'">tag-one</button>
+<button u-on:click="tagName = 'tag-two'">tag-two</button>
+<button u-on:click="tagName = 'tag-three'">tag-three</button>
+
+
+<template u-com="tag-one">
+  <div>TAG-ONE</div>
+</template>
+
+<template u-com="tag-two">
+  <div>TAG-TWO</div>
+</template>
+
+<template u-com="tag-three">
+  <div>TAG-THREE</div>
+</template>
+
+
+<template u-com="te-st">
+  <div>
+    <div u-text="name"></div>
+    <button u-on:click="count++">🐹 Feed the hamster</button>
+    <p u-text="count"></p>
+    <p u-show="count > 5">The hamster is getting chubby!</p>
+  </div>
+  
+  <script>
+    export function $props() {
+      return {
+        name: 'GOOD STUFF',
+        // count: {
+        //   default: 0,
+        //   cast: parseInt,
+        // },
+      }
+    }
+  
+    export function $store({sync, persist}) {
+      return {
+        // count: 0,
+        // count: sync(1),
+        count: persist(1),
+      }
+    }
+  </script>
+</template>
