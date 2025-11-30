@@ -10,7 +10,7 @@ import type {
   // ConnectedCallback,
   // DisconnectedCallback,
 } from '../core'
-import type { Ref, Refs } from '../template'
+import type { ProxyRef, ProxyRefRecord } from '../template'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
@@ -19,7 +19,7 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../core'
 import {
-  initRoot, cleanup, createEffect, mkref, createProxyStore, createRefs, nextTick,
+  initRoot, cleanup, createEffect, makeProxyRef, createProxyStore, createProxyRefs, nextTick,
 } from '../template'
 
 // Proto and constructor constants.
@@ -29,8 +29,8 @@ const StoreIndex = '$store'
 const DataIndex = '$data'
 const CleanupIndex = Symbol('clean')
 
-const persistMap: Refs = {}
-const syncMap: Refs = {}
+const persistMap: ProxyRefRecord = {}
+const syncMap: ProxyRefRecord = {}
 
 const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
@@ -72,7 +72,6 @@ export default class implements Plugin {
     }
 
     proto.$effect = function(f: () => {}) {
-      // createEffect(f)
       this[CleanupIndex].push(createEffect(f))
     }
 
@@ -156,14 +155,14 @@ function makeStore(
     [StoreIndex]: userDefinedStore,
   } = Com
   const props = makeProps(el, propDefs)
-  const refs = createRefs(props)
+  const refs = createProxyRefs(props)
 
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {
       const v = rawProto[k]
       if (typeof v === 'function') {
-        refs[k] = mkref(k, v)
+        refs[k] = makeProxyRef(k, v)
       }
     })
 
@@ -173,13 +172,13 @@ function makeStore(
     sync: (v: any) => new Sync(v),
   }) ?? {}
   for (let [k, v] of Object.entries(data)) {
-    let ref: Ref | undefined
+    let ref: ProxyRef | undefined
     if (v instanceof Sync) {
       ref = makeSync(name, k, v)
     } else if (v instanceof Persist) {
       ref = makePersist(name, k, v)
     } else {
-      ref = mkref(k, v)
+      ref = makeProxyRef(k, v)
     }
 
     if (!ref) {
@@ -205,7 +204,7 @@ function makeProps(el: HTMLElement, propDefs: PropDefs) {
 function makeSync(name: string, key: string, sync: Sync) {
   const storeId = `${name}-${key}`
   if (!(storeId in syncMap)) {
-    syncMap[storeId] = mkref(key, sync.v)
+    syncMap[storeId] = makeProxyRef(key, sync.v)
   }
   return syncMap[storeId]
 }
@@ -219,7 +218,7 @@ function makePersist(name: string, key: string, persist: Persist) {
       return item ? JSON.parse(item) : undefined
     }
 
-    const ref = mkref(key, getItem() ?? persist.v)
+    const ref = makeProxyRef(key, getItem() ?? persist.v)
     persistMap[storeId] = ref
 
     if (!ref.pair) {

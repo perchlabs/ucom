@@ -4,15 +4,17 @@ import type {
   SignalRecord,
   ProxyRecord,
   ProxyStore,
-  Ref,
-  Refs
+  ProxyRef,
+  ProxyRefRecord,
+  RefRecord,
 } from './types.ts'
 import { createSignal } from './signal.js'
 
 export const contexts = new WeakMap<ContextableElement, Context>()
+export const globalRefs: RefRecord = {}
 
-export function mkref(key: string, value: any): Ref {
-  const ref: Ref = {key}
+export function makeProxyRef(key: string, value: any): ProxyRef {
+  const ref: ProxyRef = {key}
   if (typeof value === 'function') {
     ref.func = value
   } else {
@@ -21,15 +23,15 @@ export function mkref(key: string, value: any): Ref {
   return ref
 }
 
-export function createRefs(data: Record<string, any>) {
-  const refs: Refs = {}
+export function createProxyRefs(data: Record<string, any>) {
+  const refs: ProxyRefRecord = {}
   for (const [key, value] of Object.entries(data)) {
-    refs[key] = mkref(key, value)
+    refs[key] = makeProxyRef(key, value)
   }
   return refs
 }
 
-export function createProxyStore(el: ContextableElement, refs: Refs): ProxyStore {
+export function createProxyStore(el: ContextableElement, refs: ProxyRefRecord): ProxyStore {
   const proxy: ProxyRecord = {}
   const signals: SignalRecord = {}
 
@@ -53,14 +55,27 @@ export function createProxyStore(el: ContextableElement, refs: Refs): ProxyStore
 
 export function createContext(el: ContextableElement, [data, signals]: ProxyStore) {
   // Create the context object that gets passed to all directives
-  const context: Context = {
+  const ctx: Context = {
     el, // The element itself
     data, // Reactive data proxy
     signals, // Raw signals (for advanced use)
+    refs: {},
     cleanup: [], // Cleanup functions
   }
 
-  contexts.set(el, context)
+  contexts.set(el, ctx)
 
-  return context
+  return ctx
+}
+
+export function createSubContext(ctx: Context, el: ContextableElement, data: Record<string, any>): Context {
+  return {
+    el,
+    data: {
+      ...ctx.data,
+      ...data,
+    },
+    refs: {...ctx.refs},
+    cleanup: [],
+  }
 }

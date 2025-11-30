@@ -5,8 +5,11 @@ export interface Context {
   el: ContextableElement
   data: Record<string, any>
   cleanup: (() => void)[]
+  refs: RefRecord
   signals?: SignalRecord
 }
+
+export type RefRecord = Record<string, WeakRef<ContextableElement>>
 
 export type SignalGetter = () => any
 export type SignalSetter = (newValue: any) => void
@@ -16,9 +19,9 @@ export type ProxyRecord = Record<string, any>
 export type SignalRecord = Record<string, SignalPair>
 export type ProxyStore = [ProxyRecord, SignalRecord]
 
-export type Refs = Record<string, Ref>
+export type ProxyRefRecord = Record<string, ProxyRef>
 
-export type Ref = {
+export type ProxyRef = {
   key: string
   func?: (...args: any[]) => any
   pair?: SignalPair

@@ -32,7 +32,6 @@
   <nav>
     <a u-for="tab in tabs" u-bind:href="tab[0]" u-text="tab[1]"></a>
     <!-- <a u-for="([hash, label]) in tabs" u-bind:href="hash" u-text="label"></a> -->
-
   </nav>
 
   <rou-ter u-on:routes="routesInit($event)">

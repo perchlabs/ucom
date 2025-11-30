@@ -6,11 +6,12 @@ import type {
 import { getDirectives, getParent } from './utils.ts'
 import { createEffect } from './signal.ts'
 import { evaluate } from './expression.ts'
-import { contexts, createContext } from './context.ts'
+import { contexts, createContext, createSubContext } from './context.ts'
 import { bindTextOrHTML } from './directives/textOrHtml.ts'
 import { bindShow } from './directives/show.ts'
 import { bindEvent } from './directives/event.ts'
 import { bindAttribute } from './directives/attribute.ts'
+import { bindRef } from './directives/ref.ts'
 
 export function initRoot(root: ShadowRoot, proxyStore: ProxyStore) {
   const ctx = createContext(root, proxyStore)
@@ -25,6 +26,15 @@ function processElement(ctx: Context, el: Element) {
   if (!ctx) return
 
   const {directives, hitmap} = getDirectives(el)
+  const has = (names: string[]) => {
+    for (const name of names) {
+      if (name in hitmap) {
+        return true
+      }
+    }
+    return false
+  }
+
   directivesLoop: for (const {directive, modifier, value} of Object.values(directives)) {
     switch(directive) {
     case 'u-show':
@@ -48,17 +58,11 @@ function processElement(ctx: Context, el: Element) {
     case 'u-html':
       bindTextOrHTML(ctx, el as HTMLElement, value, true)
       break
+    case 'u-ref':
+      bindRef(ctx, el, value, modifier === 'global')
     }
   }
 
-  const has = (names: string[]) => {
-    for (const name of names) {
-      if (name in hitmap) {
-        return true
-      }
-    }
-    return false
-  }
 
   if (!has(['u-for', 'u-is'])) {
     Array.from(el.children).forEach(child => processElement(ctx, child))
@@ -121,21 +125,26 @@ function bindFor(ctx: Context, el: Element, expr: string) {
         elements.forEach(element => {
           // Create a new scoped context with loop variables
           // This adds "item" and "index" to the parent context
-          const scopedCtx = {
-            el: element,
-            data: {
-              ...ctx.data,
-              [itemName]: item, // e.g. item = "Apple"
-              [indexName]: idx // e.g. index = 0
-            },
-            cleanup: [],
-          }
+          const subCtx = createSubContext(ctx, element, {
+            [itemName]: item, // e.g. item = "Apple"
+            [indexName]: idx // e.g. index = 0
+          })
+          
+          // {
+          //   el: element,
+          //   data: {
+          //     ...ctx.data,
+          //     [itemName]: item, // e.g. item = "Apple"
+          //     [indexName]: idx // e.g. index = 0
+          //   },
+          //   cleanup: [],
+          // }
 
           // Store scoped context for this cloned element
-          contexts.set(element, scopedCtx)
+          contexts.set(element, subCtx)
           
           // Process directives on the cloned element
-          processElement(scopedCtx, element)
+          processElement(subCtx, element)
           
           // Insert before the marker comment
           parent.insertBefore(element, marker)
