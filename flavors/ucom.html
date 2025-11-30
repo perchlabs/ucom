@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Ucom Lite</title>
+  <title>Ucom</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- <link u-com rel="stylesheet" href="/style/chota-0.8.1.min.css"> -->
@@ -29,28 +29,33 @@
 <template u-app>
   <source src="@com/rou-ter.html">
 
-  <!-- <nav>
-    <a u-for="([hash, label]) in tabs" :href="hash">{{ label }}</a>
-  </nav> -->
+  <nav>
+    <a u-for="tab in tabs" u-bind:href="tab[0]" u-text="tab[1]"></a>
+    <!-- <a u-for="([hash, label]) in tabs" u-bind:href="hash" u-text="label"></a> -->
 
-  <rou-ter>
+  </nav>
+
+  <rou-ter u-on:routes="routesInit($event)">
     <base href="@com/routes/" lazy>
     <source src="route-unknown.html"  loc="#unknown"  unknown>
     <source src="route-home.html"     loc="#home"     tab="Home" default>
+    <source src="route-counter.html"  loc="#counter"  tab="Counter">
+    <source src="route-slotgame.html" loc="#slotgame" tab="Slot Game">
+    <source src="route-mutation.html" loc="#mutation" tab="Mutation">
   </rou-ter>
 
   <script>
-    export function connectedCallback() {
-      const router = this.$qs('rou-ter')
-      router.addEventListener('routes', e => {
-        console.log(e.detail)
-      })
+    export function $store() {
+      return {
+        tabs: [],
+      }
     }
-    // export function routesInit(e) {
-    //   this.$data.tabs = e.detail
-    //     .filter(v => !!v.attributes.tab)
-    //     .map(v => [v.loc, v.attributes.tab])
-    // }
+
+    export function routesInit(e) {
+      this.$data.tabs = e.detail
+        .filter(v => !!v.attributes.tab)
+        .map(v => [v.loc, v.attributes.tab])
+    }
   </script>
 
   <style>

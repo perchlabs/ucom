@@ -1,18 +1,22 @@
 <slot></slot>
-<main></main>
+
+<template u-is="routeName"></template>
 
 <script>
+  export function $store() {
+    return {
+      routeName: '',
+    }
+  }
+
   export default class extends HTMLElement {
+    #routes
     #routeDefault
     #routeUnknown
-    #routes
-    #route
-    #main
 
     async connectedCallback() {
       const {$data} = this
       const slot = this.$qs('slot')
-      this.#main = this.$qs('main')
 
       this.#routes = makeRoutes(await this.$importRoot(slot))
       this.dispatchEvent(new CustomEvent('routes', {
@@ -25,7 +29,10 @@
       }
       this.#routeUnknown = this.#routes.find(r => r.unknown)
 
-      this.#route = this.setRoute(window.location.href)
+      const route = this.getRoute(window.location.href)
+      Object.assign($data, {
+        routeName: route.name,
+      })
 
       window.addEventListener('hashchange', this.hashchangeEvent)
     }
@@ -36,15 +43,10 @@
 
     // Save the event as an instance member.
     hashchangeEvent = e => {
-      this.setRoute(e.newURL)
-    }
-
-    setRoute(href) {
-      this.#route = this.getRoute(href)
-
-      this.#main.innerHTML = ''
-      const elRoute = document.createElement(this.#route.name)
-      this.#main.append(elRoute)
+      const route = this.getRoute(e.newURL)
+      Object.assign(this.$data, {
+        routeName: route.name,
+      })
     }
 
     getRoute(href) {

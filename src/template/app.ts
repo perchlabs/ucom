@@ -24,17 +24,17 @@ function processElement(ctx: Context, el: Element) {
 
   if (!ctx) return
 
-  const directives = getDirectives(el)
-  for (const {directive, modifier, value} of Object.values(directives)) {
+  const {directives, hitmap} = getDirectives(el)
+  directivesLoop: for (const {directive, modifier, value} of Object.values(directives)) {
     switch(directive) {
     case 'u-show':
       bindShow(ctx, el as HTMLElement, value)
       break
-    case 'u-is':
-      bindIs(ctx, el, value)
-      break
     case 'u-for':
       bindFor(ctx, el, value)
+      break directivesLoop
+    case 'u-is':
+      bindIs(ctx, el, value)
       break
     case 'u-bind':
       bindAttribute(ctx, el as HTMLElement, modifier, value)
@@ -53,7 +53,7 @@ function processElement(ctx: Context, el: Element) {
 
   const has = (names: string[]) => {
     for (const name of names) {
-      if (name in directives) {
+      if (name in hitmap) {
         return true
       }
     }
@@ -64,7 +64,6 @@ function processElement(ctx: Context, el: Element) {
     Array.from(el.children).forEach(child => processElement(ctx, child))
   }
 }
-
 
 function bindFor(ctx: Context, el: Element, expr: string) {
   // Parse the expression using regex
@@ -112,37 +111,31 @@ function bindFor(ctx: Context, el: Element, expr: string) {
       })
       saved = []
 
-      // Ensure we have an array
-      if (!Array.isArray(items)) return
-
-      // Render each item
-      items.forEach((item, idx) => {
+      const iter = (item: any, idx: Number) => {
         // Clone the template for this item
         const clone = template.cloneNode(true) as Element
 
         // Get actual elements to process
-        const elements = isTemplate 
-          ? Array.from(clone.children) 
-          : [clone]
+        const elements = isTemplate ? Array.from(clone.children) : [clone]
 
         elements.forEach(element => {
           // Create a new scoped context with loop variables
           // This adds "item" and "index" to the parent context
-          const scopedData = {
-            ...ctx.data,
-            [itemName]: item, // e.g. item = "Apple"
-            [indexName]: idx // e.g. index = 0
+          const scopedCtx = {
+            el: element,
+            data: {
+              ...ctx.data,
+              [itemName]: item, // e.g. item = "Apple"
+              [indexName]: idx // e.g. index = 0
+            },
+            cleanup: [],
           }
 
           // Store scoped context for this cloned element
-          contexts.set(element, {
-            el: element,
-            data: scopedData,
-            cleanup: [],
-          })
+          contexts.set(element, scopedCtx)
           
           // Process directives on the cloned element
-          processElement(ctx, element)
+          processElement(scopedCtx, element)
           
           // Insert before the marker comment
           parent.insertBefore(element, marker)
@@ -150,7 +143,16 @@ function bindFor(ctx: Context, el: Element, expr: string) {
           // Track for cleanup on next render
           saved.push(element)
         })
-      })
+      }
+
+      // Render each item
+      if (Number.isInteger(items)) {
+        for (let i = 0; i < items as unknown as number; i++) {
+          iter(i, i)
+        }
+      } else if (Array.isArray(items)) {
+        items.forEach(iter)
+      }
     } catch (e) {
       console.error('🐹 [u-for] Error: ', e)
     }
@@ -180,7 +182,7 @@ export function bindIs(ctx: Context, el: Element, expr: string) {
   const dispose = createEffect(() => {
     const v = evaluate(expr, ctx)
     if (!v || v === tagName) {
-      return console.log('u-is: is empty')
+      return
     }
 
     if (tag) {

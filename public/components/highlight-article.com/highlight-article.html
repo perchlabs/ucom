@@ -1,0 +1,87 @@
+
+<div hidden>
+  <slot></slot>
+</div>
+<main></main>
+
+<script>
+  import hljs from './highlight.min.js'
+  import cssLanguage from './languages/css.min.js'
+  import xmlLanguage from './languages/xml.min.js'
+  import jsLanguage from './languages/javascript.min.js'
+  hljs.registerLanguage('css', cssLanguage)
+  hljs.registerLanguage('html', xmlLanguage)
+  hljs.registerLanguage('javascript', jsLanguage)
+
+  export function connectedCallback() {
+    const main = this.$querySelector('main')
+    const slot = this.$querySelector('slot')
+
+    const change = () => {
+      const tpl = [...slot.assignedNodes()].find(e => e instanceof HTMLTemplateElement)
+      if (!tpl) {
+        return
+      }
+  
+      const code = document.createElement('code')
+      code.classList.add('html', 'javascript', 'css')
+      code.innerHTML = escapeHTML(tpl.innerHTML)
+  
+      const pre = document.createElement('pre')
+      pre.append(code)
+      hljs.highlightElement(code)
+
+      main.replaceChildren(pre)
+    }
+
+    slot.addEventListener('slotchange', change)
+    change()
+  }
+
+  function escapeHTML(s) { 
+    return s
+      .replace(/^(\r\n|\n|\r)+|(\r\n|\n|\r)+$/g, '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+  }
+</script>
+
+<style>
+  @import './styles/stackoverflow-light.min.css';
+
+  :host {
+    display: block;
+    width: 1000px;
+  }
+
+  div[hidden] {
+    display: none;
+  }
+
+  main {
+    display: block;
+    line-height: 1.3rem;
+
+    & > pre {
+      display: block;
+
+      & > code {
+        text-wrap: wrap;
+
+        color: rgb(52, 61, 88);
+        background-color: rgba(201, 199, 199, 0.3);
+        border: 1px solid #dad9d9;
+        padding: 12px 3px 12px 0px !important;
+      }
+    }
+  }
+
+  code {
+    color: rgb(52, 61, 88);
+    background-color: rgba(201, 199, 199, 0.3);
+    border: 1px solid #e1e1e1;
+    padding: 0px 3px 0px 0px;
+  }
+</style>

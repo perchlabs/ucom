@@ -1,0 +1,18 @@
+
+<mut-test></mut-test>
+
+<script>
+  setTimeout(() => {
+    const tpl = document.createElement('template')
+    tpl.setAttribute('u-com', 'mut-test')
+    tpl.innerHTML = `
+Mutation Test was successful!
+<style>
+  :host {
+    color: green
+  } 
+</style>
+`
+    document.querySelector('body')?.appendChild(tpl)
+  }, 400)
+</script>

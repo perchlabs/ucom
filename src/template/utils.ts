@@ -8,18 +8,19 @@ export function getParent(el: ContextableElement): ContextableElement {
 }
 
 export function getDirectives(el: Element) {
-  const directives: Record<string, DirectiveDef> = {} 
-  Array.from(el.attributes)
+  const hitmap: Record<string, boolean> = {}
+  const directives = Array.from(el.attributes)
     .filter(attr => attr.name.startsWith('u-'))
-    .forEach(({name, value}) => {
+    .map(({name, value}): DirectiveDef => {
       // Split directive name to handle modifiers
       // (e.g. "u-on:click" -> ["u-on", "click"])
       const [directive, modifier] = name.split(':')
-      directives[directive] = {
+      hitmap[directive] = true
+      return {
         directive,
         modifier,
         value,
-      } 
+      }
     })
-  return directives
+  return {directives, hitmap}
 }

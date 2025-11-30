@@ -1,0 +1,64 @@
+<base href="@com/">
+<source src="slot-game.html">
+
+<header>
+  Game Size:
+  <input u-bind:value="rows" u-on:input="rows = $event.target.value">
+  x
+  <input u-bind:value="cols" u-on:input="cols = $event.target.value">
+  <span u-text="rows"></span> x <span u-text="cols"></span>
+</header>
+
+<slot-game u-bind:rows="rows" u-bind:cols="cols">
+  <div slot="cell:0:3">
+    HERE
+  </div>
+</slot-game>
+
+<script>
+  export function $store({persist}) {
+    return {
+      MAX_LENGTH: 8,
+      rows: persist(4),
+      cols: persist(4),
+      // rows: 4,
+      // cols: 4,
+    }
+  }
+
+  export function connectedCallback() {
+    const {$data} = this
+
+    this.$game = this.$querySelector('slot-game')
+  }
+
+  export function inputData(name) {
+    const {$data} = this
+    return {
+      get value() {
+        return $data[name]
+      },
+      set value(text) {
+        const val = parseInt(text)
+        if (val <= $data.MAX_LENGTH && val > 0) {
+          $data[name] = val
+        }
+      },
+    }
+  }
+</script>
+
+<style>
+  :host {
+    font-family: monospace;
+  }
+
+  header {
+    margin-bottom: 10px;
+  }
+
+  input {
+    width: 3rem;
+    text-align: center;
+  }
+</style>

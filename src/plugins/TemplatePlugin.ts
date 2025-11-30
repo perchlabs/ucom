@@ -10,6 +10,7 @@ import type {
   // ConnectedCallback,
   // DisconnectedCallback,
 } from '../core'
+import type { Ref, Refs } from '../template'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
@@ -18,9 +19,8 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../core'
 import {
-  initRoot, cleanup, createEffect, mkref, createProxyStore, createRefs,
+  initRoot, cleanup, createEffect, mkref, createProxyStore, createRefs, nextTick,
 } from '../template'
-import type { Ref, Refs } from '../template'
 
 // Proto and constructor constants.
 const PropsIndex = '$props'
@@ -72,14 +72,13 @@ export default class implements Plugin {
     }
 
     proto.$effect = function(f: () => {}) {
-      createEffect(f)
-      // const e = createEffect(f)
-      // this[CleanupIndex].push(e)
+      // createEffect(f)
+      this[CleanupIndex].push(createEffect(f))
     }
 
     Object.assign(proto, {
       // $reactive: reactive,
-      // $nextTick: nextTick,
+      $nextTick: nextTick,
     })
   }
 
@@ -109,7 +108,7 @@ export default class implements Plugin {
 
   [DISCONNECTED]({el: elReal}: PluginCallbackBuilderParams) {
     const el = elReal as UpgradeComponent
-    return () => el[CleanupIndex]?.()
+    return () => el[CleanupIndex]?.forEach(f => f())
   }
 }
 
@@ -137,9 +136,10 @@ function connectData(
   if (el[CleanupIndex]) {
     return
   }
+  el[CleanupIndex] = []
 
   const ctx = initRoot(shadow, makeStore(Com, Raw, el))
-  el[CleanupIndex] = () => cleanup(ctx.el)
+  el[CleanupIndex].push?.(() => cleanup(ctx.el))
   Object.assign(el, {
     get [DataIndex]() { return ctx.data },
   })
@@ -269,8 +269,8 @@ type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
   [DataIndex]: Record<string, any>
-  // [CleanupIndex]: Record<string, any>
-  [CleanupIndex]: () => void
+  [CleanupIndex]: (() => void)[]
+  $nextTick: () => {}
 }
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {

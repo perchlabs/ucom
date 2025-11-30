@@ -1,0 +1,98 @@
+
+<main>
+  <h3>Counter: <span u-text="name"></span>
+  </h3>
+
+  <section>
+    <button u-on:click="count--">(-)<sub>1</sub></button>
+    <button u-on:click="count++">(+)<sub>1</sub></button>
+    <button u-on:click="incRef($data)">(+)<sub>2</sub></button>
+    <div>Property: <span u-text="count"></span></div>
+  </section>
+  <section>
+    <button u-on:click="$me.$data.local--">(-)<sub>1</sub></button>
+    <button u-on:click="local++">(+)<sub>1</sub></button>
+    <button u-on:click="incLocal()">(+)<sub>2</sub></button>
+    <div>Local: <span u-text="local"></span></div>
+  </section>
+  <section>
+    <button u-on:click="sync--">(-)<sub>1</sub></button>
+    <button u-on:click="$data.sync--">(-)<sub>2</sub></button>
+    <button u-on:click="incShare()">(+)<sub>2</sub></button>
+    <div>Syncronized: <span u-text="sync"></span></div>
+  </section>
+  <section>
+    <button u-on:click="persist--">-</button>
+    <button u-on:click="persist++">+</button>
+    <div>Persistent: <span u-text="persist"></span></div>
+  </section>
+</main>
+
+<script>
+  export function $props() {
+    return {
+      name: '',
+      count: {
+        default: 0,
+        cast: parseInt,
+      },
+    }
+  }
+
+  export function $store({persist, sync}) {
+    return {
+      local: 0,
+      persist: persist(0),
+      sync: sync(0),
+    }
+  }
+
+  class CountEvent extends Event {
+    constructor(count) {
+      super('count')
+      this.count = count
+    }
+  }
+
+  export default class extends HTMLElement {
+    incLocal() { this.$data.local++ }
+    incRef(base) { base.count++ }
+    incShare() { this.$data.sync += 1}
+
+    async connectedCallback() {
+      this.$effect(async () => {
+        // Custom event classes have better ergonomics on the receiving end.
+        this.dispatchEvent(new CountEvent(this.$data.count))
+      })
+    }
+  }
+</script>
+
+<style>
+  main {
+    display: inline-block;
+    padding: 0 8px 4px 8px;
+    border-width: 1px;
+    width: 24rem;
+    border-style: solid;
+    border-color: black;
+    font-family: monospace;
+    & > h3 > span {
+      color: green;
+    }
+  }
+  section {
+    font-size: 1.0rem;
+    margin-bottom: 0.8rem;
+
+    & > div {
+      float: right;
+      text-align: right;
+
+      & > div {
+        float: right;
+        width: 3rem;
+      }
+    }
+  }
+</style>

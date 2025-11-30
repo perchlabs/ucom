@@ -1,64 +1,220 @@
+<source src="@com/highlight-article.com">
+<source src="@com/raw-printer.html">
 
-HOME ROUTE
+<template u-com="example-run">
+  <template u-is="name"></template>
 
-<te-st name="qwerwe"></te-st>
+  <highlight-article>
+    <raw-printer u-bind:name="name"></raw-printer>
+  </highlight-article>
 
-<te-st name="abcdef"></te-st>
-
-<template u-is="tagName"></template>
-
-
-<script>
-  export function $store() {
-    return {
-      tagName: 'tag-one',
-    }
-  }
-</script>
-
-<button u-on:click="tagName = 'tag-one'">tag-one</button>
-<button u-on:click="tagName = 'tag-two'">tag-two</button>
-<button u-on:click="tagName = 'tag-three'">tag-three</button>
-
-
-<template u-com="tag-one">
-  <div>TAG-ONE</div>
-</template>
-
-<template u-com="tag-two">
-  <div>TAG-TWO</div>
-</template>
-
-<template u-com="tag-three">
-  <div>TAG-THREE</div>
-</template>
-
-
-<template u-com="te-st">
-  <div>
-    <div u-text="name"></div>
-    <button u-on:click="count++">🐹 Feed the hamster</button>
-    <p u-text="count"></p>
-    <p u-show="count > 5">The hamster is getting chubby!</p>
-  </div>
-  
   <script>
     export function $props() {
       return {
-        name: 'GOOD STUFF',
-        // count: {
-        //   default: 0,
-        //   cast: parseInt,
-        // },
-      }
-    }
-  
-    export function $store({sync, persist}) {
-      return {
-        // count: 0,
-        // count: sync(1),
-        count: persist(1),
+        name: '',
       }
     }
   </script>
+
+  <style>
+    :host {
+      display: block;
+      margin-bottom: 2.0rem;
+    }
+  </style>
 </template>
+
+
+
+<template u-com="example-01">
+  This is a component
+</template>
+<example-run name="example-01"></example-run>
+
+
+
+<template u-com="example-02">
+  <header id="myheader">My Component</header>
+  <main>
+    Element IDs are sandboxed to each custom element via shadow dom.
+    Use semantic html tags for clean CSS.
+  </main>
+
+  <style>
+    :host {
+      color: rgb(44, 44, 44);
+    }
+    #myheader {
+      font-size: 1.2rem;
+    }
+    main {
+      color: green;
+    }
+  </style>
+</template>
+<example-run name="example-02"></example-run>
+
+
+
+<template u-com="example-03">
+  You can export or include a class method of <code>attributeChangedCallback</code>, <code>connectedCallback</code> and <code>disconnectedCallback</code> to attach it to the custom element.
+  <br>
+  Exported functions will be attached to the prototype of the custom element.
+
+  <script>
+    export default class extends HTMLElement {
+      connectedCallback() {
+        console.log('My component was added to the DOM.')
+      }
+
+      disconnectedCallback() {
+        console.log('My component was removed from the DOM.')
+      }
+    }
+
+    export function attributeChangedCallback(name, oldValue, newValue) {
+      console.log(`Attribute ${name}, ${oldValue}, ${newValue}`)
+    }
+  </script>
+
+  <style>
+    code {
+      color: rgb(52, 61, 88);
+      background-color: rgba(201, 199, 199, 0.3);
+      border: 1px solid #e1e1e1;
+      padding: 0px 3px 0px 0px;
+    }
+  </style>
+</template>
+<example-run name="example-03"></example-run>
+
+
+
+<template u-com="example-04">
+  Use helpers to access shadowRoot:
+  <br>
+  <code>$</code>: <code>querySelector</code>
+  <br>
+  <code>$$</code>: <code>querySelectorAll</code>
+  <br>
+
+  <div>
+    Use CSS variables and element attributes together.
+  </div>
+
+  <main>
+    My Main Content
+  </main>
+
+  <script>
+    export function connectedCallback() {
+      this.main = this.$querySelector('main')
+    }
+
+    export function attributeChangedCallback(name, oldValue, newValue) {
+      if (name === 'background') {
+        this.main.style.setProperty('--background-color', newValue)
+      }
+    }
+  </script>
+
+  <style>
+    main {
+      --default-background: yellow;
+      background-color: var(--background-color, var(--default-background));
+    }
+  </style>
+</template>
+<example-run name="example-04"></example-run>
+
+
+
+<template u-com="example-05">
+  <div>You can use Vue style template syntax for event handlers.</div>
+  <div>Count: <span u-text="count"></span></div>
+  <div>Number is: <span u-text="countType"></span></div>
+  <nav>
+    <button u-on:click="count--">Less</button>
+    <button u-on:click="count++">More</button>
+  </nav>
+
+  <script>
+    export function $props() {
+      return {
+        count: {
+          default: 0,
+          cast: parseInt,
+        },
+      }
+    }
+
+    export function $store({props}) {
+      return {
+        count: props.count,
+        countType: findType(props.count),
+      }
+    }
+
+    export function connectedCallback() {
+      const {$data} = this
+      this.$effect(() => {
+        $data.countType = findType($data.count)
+      })
+    }
+
+    function findType(num) {
+      return num % 2 === 0 ? 'even' : 'odd'
+    }
+  </script>
+</template>
+<example-run name="example-05"></example-run>
+
+
+
+<template u-com="example-06">
+  Use <code>&lt;template u-com&gt;&lt;/template></code> to gain access to Univue.
+  <br>
+  Use this to gain access to the Univue functionality in your layouts, routers, and tests.
+  <br>
+  Use a persistent store variable for reactive local storage.
+  <br>
+  Unnamed custom elements such as this will be remembered by a hash of their text definition.
+
+  <div id="count">You've loaded this component {{ count }} time(s).</div>
+
+  <script>
+    export function $store({persist}) {
+      return {
+        count: persist(0),
+      }
+    }
+
+    export function connectedCallback() {
+      this.$data.count++
+    }
+  </script>
+
+  <style>
+    #count {
+      font-size: 1.1rem;
+      margin: 0.3rem 0 0.3rem 0;
+    }
+
+    code {
+      color: rgb(52, 61, 88);
+      background-color: rgba(201, 199, 199, 0.3);
+      border: 1px solid #e1e1e1;
+      padding: 0px 3px 0px 0px;
+    }
+  </style>
+</template>
+<example-run name="example-06"></example-run>
+
+
+
+<style>
+  example-run {
+    display: block;
+    margin-bottom: 5.0rem;
+  }
+</style>

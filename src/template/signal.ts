@@ -80,7 +80,7 @@ export function createEffect(fn: () => void) {
   let isDisposed = false
   const cleanup = new Set<Callback>
 
-  const effect = (() => {
+  const effect: EffectFunc = (() => {
     if (isDisposed) return
 
     // Save current effect and push to stack (handles nested effects)
@@ -94,7 +94,7 @@ export function createEffect(fn: () => void) {
       effectStack.pop()
       currentEffect = effectStack[effectStack.length - 1] || null
     }
-  }) as EffectFunc
+  })
 
   // Store cleanup functions so signals can add unsubscribe callbacks
   effect.cleanup = cleanup
@@ -113,3 +113,6 @@ export function createEffect(fn: () => void) {
   // Return cleanup 
   return dispose
 }
+
+const p = Promise.resolve()
+export const nextTick = () => p.then()
