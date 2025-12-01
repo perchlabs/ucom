@@ -2,7 +2,7 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
-import { createSubContext, cleanup, contexts } from '../context.ts'
+import { createSubContext, cleanup } from '../context.ts'
 import { createEffect } from '../signal.ts'
 import { evaluate } from '../expression.ts'
 import { getParent } from '../utils.ts'
@@ -66,16 +66,13 @@ export function dirFor(ctx: Context, el: Element, dir: DirectiveDef) {
         elements.forEach(element => {
           // Create a new scoped context with loop variables
           // This adds "item" and "index" to the parent context
-          const subCtx = createSubContext(ctx, element, {
+          const subctx = createSubContext(ctx, element, {
             [itemName]: item, // e.g. item = "Apple"
             [indexName]: idx // e.g. index = 0
           })
-
-          // Store scoped context for this cloned element
-          contexts.set(element, subCtx)
           
           // Process directives on the cloned element
-          walk(subCtx, element)
+          walk(subctx, element)
           
           // Insert before the marker comment
           parent.insertBefore(element, marker)

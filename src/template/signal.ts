@@ -1,4 +1,12 @@
-import type { SignalPair } from './types.ts'
+import type {
+  ContextableElement,
+  SignalPair,
+  SignalRecord,
+  ProxyRef,
+  ProxyRefRecord,
+  ProxyRecord,
+  ProxyStore,
+} from './types.ts'
 
 type Callback = () => any
 type EffectFunc = {
@@ -9,6 +17,46 @@ type EffectFunc = {
 let currentEffect: EffectFunc
 
 const effectStack: EffectFunc[] = []
+
+export function makeProxyRef(key: string, value: any): ProxyRef {
+  const ref: ProxyRef = {key}
+  if (typeof value === 'function') {
+    ref.func = value
+  } else {
+    ref.pair = createSignal(value)
+  }
+  return ref
+}
+
+export function createProxyRefs(data: Record<string, any>) {
+  const refs: ProxyRefRecord = {}
+  for (const [key, value] of Object.entries(data)) {
+    refs[key] = makeProxyRef(key, value)
+  }
+  return refs
+}
+
+export function createProxyStore(el: ContextableElement, refs: ProxyRefRecord): ProxyStore {
+  const proxy: ProxyRecord = {}
+  const signals: SignalRecord = {}
+
+  for (const {key, func, pair} of Object.values(refs)) {
+    if (func) {
+      proxy[key] = func.bind(el)
+    } else if (pair) {
+      signals[key] = pair
+
+      const [get, set] = pair
+      Object.defineProperty(proxy, key, {
+        get() { return get() },
+        set(val) { set(val) },
+        enumerable: true
+      })
+    }
+  }
+
+  return [proxy, signals]
+}
 
 export function createSignal(initialValue: any): SignalPair {
   let value = initialValue

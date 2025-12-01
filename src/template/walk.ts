@@ -1,7 +1,4 @@
-import type {
-  Context,
-  DirectiveDef,
-} from './types.ts'
+import type {Context, DirectiveDef} from './types.ts'
 import { getDirectives } from './utils.ts'
 import { dirTextOrHTML } from './directives/textOrHtml.ts'
 import { dirShow } from './directives/show.ts'
