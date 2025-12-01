@@ -29,3 +29,9 @@ export type DirectiveDef = {
   modifier: string
   value: string
 }
+
+export type Callback = () => void
+export type EffectFunc = {
+  (): void
+  cleanup?: Set<Callback>
+}

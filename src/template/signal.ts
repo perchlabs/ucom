@@ -6,17 +6,15 @@ import type {
   ProxyRefRecord,
   ProxyRecord,
   ProxyStore,
+  Callback,
+  EffectFunc,
 } from './types.ts'
 
-type Callback = () => any
-type EffectFunc = {
-  (): void
-  cleanup?: Set<Callback>
-}
-
+const effectStack: EffectFunc[] = []
 let currentEffect: EffectFunc
 
-const effectStack: EffectFunc[] = []
+const p = Promise.resolve()
+export const nextTick = () => p.then()
 
 export function makeProxyRef(key: string, value: any): ProxyRef {
   const ref: ProxyRef = {key}
@@ -161,6 +159,3 @@ export function createEffect(fn: () => void) {
   // Return cleanup 
   return dispose
 }
-
-const p = Promise.resolve()
-export const nextTick = () => p.then()
