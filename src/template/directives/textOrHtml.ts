@@ -2,7 +2,7 @@ import type { Context, DirectiveDef } from '../types.ts'
 import { createEffect } from '../signal.ts'
 import { evaluate } from '../expression.ts'
 
-export function bindTextOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function dirTextOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const {
     key,
     value: expr,

@@ -1,7 +1,7 @@
 import type { Context, DirectiveDef } from '../types.ts'
 import { execute } from '../expression.ts'
 
-export function bindEvent(ctx: Context, el: Element, dir: DirectiveDef) {
+export function dirEvent(ctx: Context, el: Element, dir: DirectiveDef) {
   const {
     modifier: eventName,
     value: stmt,

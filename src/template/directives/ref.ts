@@ -6,7 +6,7 @@ import {
   globalRefs,
 } from '../context.ts'
 
-export function bindRef(ctx: Context, el: Element, dir: DirectiveDef) {
+export function dirRef(ctx: Context, el: Element, dir: DirectiveDef) {
   const {
     value: refName,
     modifier,

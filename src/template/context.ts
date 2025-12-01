@@ -79,3 +79,19 @@ export function createSubContext(ctx: Context, el: ContextableElement, data: Rec
     cleanup: [],
   }
 }
+
+export function cleanup(el: ContextableElement) {
+  if (el == null) {
+    console.warn('[cleanup] Called on a null/undefined element.')
+    return
+  }
+
+  const ctx = contexts.get(el)
+  if (!ctx) return
+  
+  // Run all cleanup functions
+  ctx.cleanup?.forEach(fn => fn())
+  
+  // Remove context (and cleanup array) from WeakMap
+  contexts.delete(el)
+}

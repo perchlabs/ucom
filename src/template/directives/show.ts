@@ -4,7 +4,7 @@ import { evaluate } from '../expression.ts'
 
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
 
-export function bindShow(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function dirShow(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const {value: expr} = dir
   // expr: string
 
