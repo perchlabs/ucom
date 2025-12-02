@@ -6,28 +6,34 @@ import type {
   PluginDefineParams,
   PluginCallbackBuilderParams,
   ModuleExports,
+  PluginConstructParams,
   // AttributeChangedCallback,
   // ConnectedCallback,
   // DisconnectedCallback,
-} from '../core'
-import type { ProxyRef, ProxyRefRecord } from '../template'
+} from '../../core'
+import type {
+  ProxyRef, 
+  ProxyRefRecord,
+  SignalRecord,
+} from './types'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
   CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
-} from '../core'
-import {
-  initRoot, cleanup, createEffect, makeProxyRef, createProxyStore, createProxyRefs, nextTick,
-} from '../template'
+} from '../../core'
+import { computed, effect } from './alien-signals'
+import { cleanup, createContext } from './context.ts'
+import { walkChildren } from './walk.ts'
+import { makeProxyRef, createProxyStore, createProxyRefs } from './store.ts'
 
 // Proto and constructor constants.
 const PropsIndex = '$props'
 const StoreIndex = '$store'
 // Instance constants.
+const CleanupIndex = Symbol()
 const DataIndex = '$data'
-const CleanupIndex = Symbol('clean')
 
 const persistMap: ProxyRefRecord = {}
 const syncMap: ProxyRefRecord = {}
@@ -72,25 +78,29 @@ export default class implements Plugin {
     }
 
     proto.$effect = function(f: () => {}) {
-      this[CleanupIndex].push(createEffect(f))
+      this[CleanupIndex].push(effect(f))
     }
 
     Object.assign(proto, {
-      // $reactive: reactive,
-      $nextTick: nextTick,
+      $computed: computed,
     })
   }
 
   [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
+    const up = el as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
-      const data = (el as UpgradeComponent)[DataIndex]
-      const propDef = propDefs[k]
-      if (!data || !propDef) {
+      const data = up[DataIndex]
+      if (!data) {
         return
       }
-  
+
+      const propDef = propDefs[k]
+      if (!propDef) {
+        return
+      }
+
       const val = propDef.cast?.(newValue) ?? newValue
       if (val !== data[k]) {
         data[k] = val
@@ -137,11 +147,13 @@ function connectData(
   }
   el[CleanupIndex] = []
 
-  const ctx = initRoot(shadow, makeStore(Com, Raw, el))
-  el[CleanupIndex].push?.(() => cleanup(ctx.el))
+  const ctx = createContext(shadow, makeStore(Com, Raw, el))
   Object.assign(el, {
     get [DataIndex]() { return ctx.data },
   })
+  walkChildren(ctx, shadow)
+
+  el[CleanupIndex].push?.(() => cleanup(ctx.el))
 }
 
 function makeStore(
@@ -192,8 +204,10 @@ function makeStore(
   return createProxyStore(el, refs)
 }
 
-function makeProps(el: HTMLElement, propDefs: PropDefs) {
-  const d: Record<string, any> = {}
+function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
+  const d: Record<string, any> = {
+    get $me() { return el },
+  }
   for (let [k, v] of Object.entries(propDefs)) {
     const raw = el.getAttribute(k) ?? v.default
     d[k] = v.cast?.(raw) ?? raw
@@ -221,14 +235,12 @@ function makePersist(name: string, key: string, persist: Persist) {
     const ref = makeProxyRef(key, getItem() ?? persist.v)
     persistMap[storeId] = ref
 
-    if (!ref.pair) {
+    if (!ref.item) {
       return
     }
-    
-    const [get] = ref.pair
-
+    const get = ref.item
     const setItem = () => localStorage.setItem(storeId, JSON.stringify(get()))
-    createEffect(() => setItem())
+    effect(() => setItem())
   }
 
   return persistMap[storeId]
@@ -247,10 +259,16 @@ type persister = (v: string) => InstanceType<typeof Persist>
 class Sync extends StoreValue {}
 type syncer = (v: string) => InstanceType<typeof Sync>
 
+type ComputedFunction = () => any
+type ComputedWrapper = ($data: SignalRecord) => ComputedFunction
+class Computed extends StoreValue<ComputedWrapper>{}
+type computer = (v: ComputedWrapper) => InstanceType<typeof Computed>
+
 type StoreMaker = (opts: {
   props: Record<string, string>
   persist: persister
   sync: syncer
+  compute?: computer
 }) => Record<string, any>
 
 type PropsMaker = () => PropRawDefs
@@ -269,7 +287,8 @@ type PropDefs = Record<string, PropDef>
 interface UpgradeComponent extends WebComponent {
   [DataIndex]: Record<string, any>
   [CleanupIndex]: (() => void)[]
-  $nextTick: () => {}
+  $computed: () => any
+  $effect: () => any
 }
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {

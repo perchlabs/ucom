@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`16.6k` minified) (`6.5k` gzipped)
+* ucom (`19.7k` minified) (`7.6k` gzipped)
 * ucom_vue (`30.8k` minified) (`12.4k` gzipped)
 * ucom_lite (`8.5k` minified) (`3.4k` gzipped)
 
@@ -11,7 +11,7 @@ Ucom is a buildless declarative [custom element](https://developer.mozilla.org/e
 ### Installation
 
 ```html
-<script src="/js/ucom_vue.js" type="module"></script>
+<script src="/js/ucom.js" type="module"></script>
 ```
 
 ### Declare Components
@@ -216,17 +216,15 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
   </head>
 ```
 
-### Vue
+### Alpine
 
-Ucom has vue-style templating, with the `u-` prefix.
+Ucom has Alpine-style templating, with the `u-` prefix.
 
-Classic  directives include; `u-bind`, `u-effect`, `u-for`, `u-html`, `u-if`, `u-model`, `u-on`, `u-ref`, `u-show`, `u-text`.
-
-New ucom-only directives include; `u-is`.
+Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`.
 
 ```html
 <template u-app>
-  <div u-for="n in 10">{{ n }}</div>
+  <div u-for="n in 10" u-text="n"></div>
 </template>
 ```
 
@@ -234,7 +232,7 @@ You can use the store to gain access to reactive data.
 
 ```html
 <template u-app>
-  <button @click="count++">{{ count }} times</button>
+  <button u-on:click="count++"><span u-text="count"></span> times</button>
   <script>
     export const $store = {count: 0}
 
@@ -258,14 +256,14 @@ If you wrap a store value with the `sync` and `persistent` function then it will
 ```html
 <template u-app>
   <!-- Normal store counter -->
-  <button @click="normal++">{{ normal }} times</button>
+  <button u-on:click="normal++"><span u-text="normal"></span> times</button>
 
   <!-- Changes to this counter will be syncronized across all elements of the same name. -->
-  <button @click="sync++">{{ sync }} times</button>
+  <button u-on:click="sync++"><span u-text="sync"></span> times</button>
 
   <!-- This counter will be both syncronized and persisted across all instances of this element -->
   <!-- of the same name (and page refreshes of this self-instantiated custom element) -->
-  <button @click="persist++">{{ persist }} times</button>
+  <button u-on:click="persist++"><span u-text="persist"></span> times</button>
 
   <script>
     export function $store({persist, sync}) {
@@ -285,7 +283,7 @@ It's easy to add js properties and html attributes to your components.
 <my-counter count="5"></my-counter>
 
 <template u-com="my-counter">
-  <button @click="count++">{{ count }} times</button>
+  <button u-on:click="count++"><span u-text="count"></span> times</button>
 
   <script>
     export function $props() {
@@ -302,7 +300,7 @@ It's easy to add js properties and html attributes to your components.
 
 #### Dynamic Element Creation
 
-Ucom added a new `u-is` directive to its petite-vue inheritance.  `u-is` allows for a dynamic element name to be defined based upon a store value.  This is useful for routing and other situations.  You don't know that you need it until you need it.
+Ucom added a new `u-is` directive to its petite-vue inheritance.  `u-is` allows for a dynamic element name to be defined based upon a store value.  This is useful for routing and other situations.
 
 ```html
 <dyn-amic name="my-other-component"></dyn-amic>

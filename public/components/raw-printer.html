@@ -1,15 +1,16 @@
+
 <script>
+  export function $props() {
+    return {
+      name: '',
+    }
+  }
+
   export default class extends HTMLElement {
-    static get observedAttributes() {
-      return ['name']
-    }
-
     async connectedCallback() {
-      this.#tryRun(this.getAttribute('name'))
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-      this.#tryRun(newValue)
+      this.$effect(() => {
+        this.#tryRun(this.$data.name)
+      })
     }
 
     #hasRun = false
@@ -17,10 +18,10 @@
       if (this.#hasRun || !name) {
         return
       }
-      this.#hasRun = true
 
-      const Component = await customElements.whenDefined(name)
-      const {tpl} = Component.def
+      this.#hasRun = true
+      const Com = await customElements.whenDefined(name)
+      const {tpl} = Com.def
 
       const parent = this.parentElement ?? this.getRootNode()
       if (!parent) {

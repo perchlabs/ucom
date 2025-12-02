@@ -19,8 +19,8 @@
       }
       this.#hasRun = true
 
-      const Component = await customElements.whenDefined(name)
-      const {tpl} = Component.def
+      const Com = await customElements.whenDefined(name)
+      const {tpl} = Com.def
 
       const parent = this.parentElement ?? this.getRootNode()
       if (!parent) {

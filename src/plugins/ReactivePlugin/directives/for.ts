@@ -2,8 +2,8 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
+import { effect } from '../alien-signals'
 import { createSubContext, cleanup } from '../context.ts'
-import { createEffect } from '../signal.ts'
 import { evaluate } from '../expression.ts'
 import { getParent } from '../utils.ts'
 import { walk } from '../walk.ts'
@@ -44,7 +44,7 @@ export function dirFor(ctx: Context, el: Element, dir: DirectiveDef) {
   let saved: Element[] = []
 
   // Create effect that re-renders whenever array changes
-  const dispose = createEffect(() => {
+  const dispose = effect(() => {
     try {
       // Evaluate the array expression
       const items = evaluate(ctx, itemsExpr)

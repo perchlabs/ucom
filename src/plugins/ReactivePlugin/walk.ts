@@ -18,18 +18,19 @@ export function walk(ctx: Context, node: Node): ChildNode | null | void {
   const {control, normal} = getDirectives(el)
   const getCtrl = (name: string) => control[name]
 
+
   let dir: DirectiveDef | null
   if ((dir = getCtrl('u-show'))) {
     dirShow(ctx, el as HTMLElement, dir)
   }
   if ((dir = getCtrl('u-for'))) {
-    dirFor(ctx, el, dir)
-    return
+    return dirFor(ctx, el, dir)
   }
   if ((dir = getCtrl('u-is'))) {
-    dirIs(ctx, el, dir)
-    return
+    return dirIs(ctx, el, dir)
   }
+
+  let next: ChildNode | null | void = null
 
   for (const dir of Object.values(normal)) {
     switch(dir.key) {
@@ -50,6 +51,8 @@ export function walk(ctx: Context, node: Node): ChildNode | null | void {
   }
 
   walkChildren(ctx, el)
+
+  return next
 }
 
 export function walkChildren(ctx: Context, node: Element | DocumentFragment) {

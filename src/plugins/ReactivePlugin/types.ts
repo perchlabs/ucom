@@ -1,8 +1,13 @@
 
 export type SignalGetter = () => any
 export type SignalSetter = (newValue: any) => void
-export type SignalPair = [SignalGetter, SignalSetter]
-export type SignalRecord = Record<string, SignalPair>
+// export type SignalPair = [SignalGetter, SignalSetter]
+export type Signal = {
+  (): number;
+  (value: number): void;
+}
+// export type SignalRecord = Record<string, SignalPair>
+export type SignalRecord = Record<string, Signal>
 
 export type ContextableElement = ShadowRoot | Element
 export type RefRecord = Record<string, WeakRef<ContextableElement>>
@@ -20,7 +25,8 @@ export type ProxyStore = [ProxyRecord, SignalRecord]
 export type ProxyRef = {
   key: string
   func?: (...args: any[]) => any
-  pair?: SignalPair
+  item?: Signal
+  // pair?: SignalPair
 }
 export type ProxyRefRecord = Record<string, ProxyRef>
 
@@ -30,8 +36,8 @@ export type DirectiveDef = {
   value: string
 }
 
-export type Callback = () => void
-export type EffectFunc = {
-  (): void
-  cleanup?: Set<Callback>
-}
+// export type Callback = () => void
+// export type EffectFunc = {
+//   (): void
+//   cleanup?: Set<Callback>
+// }

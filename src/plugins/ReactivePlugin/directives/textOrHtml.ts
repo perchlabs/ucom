@@ -1,5 +1,5 @@
 import type { Context, DirectiveDef } from '../types.ts'
-import { createEffect } from '../signal.ts'
+import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function dirTextOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
@@ -10,7 +10,7 @@ export function dirTextOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) 
   const index = key === 'u-html' ? 'innerHTML' : 'textContent' 
 
   // Create an effect that automatically re-runs when signals change
-  const dispose = createEffect(() => {
+  const dispose = effect(() => {
     try {
       // Evaluate the expression (e.g., "count" or "firstName + ' ' + lastName")
       el[index] = evaluate(ctx, expr) ?? ''

@@ -1,5 +1,5 @@
 import type { Context, DirectiveDef } from '../types.ts'
-import { createEffect } from '../signal.ts'
+import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function dirAttribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
@@ -21,10 +21,10 @@ export function dirAttribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   }
 
   // General attribute binding
-  const dispose = createEffect(() => {
+  const dispose = effect(() => {
     try {
       const value = evaluate(ctx, expr)
-      
+
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (typeof value === 'boolean') {
         if (value) {
@@ -54,7 +54,7 @@ export function bindClass(ctx: Context, el: Element, expr: string) {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
     
-  const dispose = createEffect(() => {
+  const dispose = effect(() => {
     try {
       const value = evaluate(ctx, expr)
       
@@ -88,7 +88,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string) {
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''
     
-  const dispose = createEffect(() => {
+  const dispose = effect(() => {
     try {
       const value = evaluate(ctx, expr)
       

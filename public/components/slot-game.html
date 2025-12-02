@@ -1,5 +1,12 @@
 <div>
-  SLOT GAME <span u-text="rows"></span> x <span u-text="cols"></span>
+  <!-- SLOT GAME <span u-text="rows"></span> x <span u-text="cols"></span> -->
+  SLOT GAME <span u-text="`${rows} x ${cols}`"></span>
+
+  <template u-for="i in 3">
+    <template u-for="j in 3">
+      <div u-text="i"></div>
+    </template>
+  </template>
 </div>
 
 <main u-bind:style="{'--rows': rows, '--cols': cols}">
@@ -32,11 +39,69 @@
     }
   }
 
+  export function mkblah($data) {
+    return this.$computed(() => {
+      const cellList = []
+      for (let i = 0; i < $data.rows; i++) {
+        for (let j = 0; j < $data.cols; j++) {
+          cellList.push(`${i}:${j}`)
+        }
+      }
+      return [...cellList]
+    })
+  }
+
   export async function connectedCallback({root}) {
     const {$data} = this
 
+
+    // const blah = this.$computed(() => {
+    //   const cellList = []
+    //   for (let i = 0; i < $data.rows; i++) {
+    //     for (let j = 0; j < $data.cols; j++) {
+    //       cellList.push(`${i}:${j}`)
+    //     }
+    //   }
+    //   return [...cellList]
+    // })
+
+    // const blah = this.mkblah($data)
+
+    // this.$effect(() => {
+    //   console.log('blah: ', blah())
+    // })
+
+
+//     this.$effect(() => {
+// console.log('$effect: 1')
+
+//       this.$nextTick().then(() => {
+//         // await this.$nextTick()
+//   console.log('$effect: 2')
+
+//   console.log($data.rows, $data.cols)
+
+//         const cellList = []
+//         for (let i = 0; i < $data.rows; i++) {
+//           for (let j = 0; j < $data.cols; j++) {
+//             cellList.push(`${i}:${j}`)
+//           }
+//         }
+//   console.log('cellList: ', cellList.length)
+
+//         $data.cellList = [...cellList]
+
+//       })
+//     })
+
+
     this.$effect(async () => {
-      await this.$nextTick()
+console.log('$effect: 1')
+      // await this.$nextTick()
+console.log('$effect: 2')
+
+
+console.log($data.rows, $data.cols)
 
       const cellList = []
       for (let i = 0; i < $data.rows; i++) {
@@ -44,6 +109,7 @@
           cellList.push(`${i}:${j}`)
         }
       }
+console.log('cellList: ', cellList.length)
 
       $data.cellList = [...cellList]
     })

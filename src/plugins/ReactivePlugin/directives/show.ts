@@ -1,5 +1,5 @@
 import type { Context, DirectiveDef } from '../types.ts'
-import { createEffect } from '../signal.js'
+import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
@@ -21,7 +21,7 @@ export function dirShow(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const enterClass = attrSplitFilter(el, 'u-show-enter')
   const leaveClass = attrSplitFilter(el, 'u-show-leave')
 
-  const dispose = createEffect(() => {
+  const dispose = effect(() => {
     try {
       // Evaluate expression as boolean
       const show = evaluate(ctx, expr)

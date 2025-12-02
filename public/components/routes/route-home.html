@@ -1,7 +1,8 @@
-<source src="@com/highlight-article.com">
-<source src="@com/raw-printer.html">
 
 <template u-com="example-run">
+  <source src="@com/highlight-article.com">
+  <source src="@com/raw-printer.html">
+
   <template u-is="name"></template>
 
   <highlight-article>
@@ -19,19 +20,16 @@
   <style>
     :host {
       display: block;
-      margin-bottom: 2.0rem;
+      margin-bottom: 5.0rem;
     }
   </style>
 </template>
-
 
 
 <template u-com="example-01">
   This is a component
 </template>
 <example-run name="example-01"></example-run>
-
-
 
 <template u-com="example-02">
   <header id="myheader">My Component</header>
@@ -130,7 +128,7 @@
 
 
 <template u-com="example-05">
-  <div>You can use Vue style template syntax for event handlers.</div>
+  <div>You can use Alpine style template syntax for event handlers.</div>
   <div>Count: <span u-text="count"></span></div>
   <div>Number is: <span u-text="countType"></span></div>
   <nav>
@@ -172,15 +170,15 @@
 
 
 <template u-com="example-06">
-  Use <code>&lt;template u-com&gt;&lt;/template></code> to gain access to Univue.
+  Use <code>&lt;template u-com&gt;&lt;/template></code> to gain access to Unicom.
   <br>
-  Use this to gain access to the Univue functionality in your layouts, routers, and tests.
+  Use this to gain access to the Unicom functionality in your layouts, routers, and tests.
   <br>
   Use a persistent store variable for reactive local storage.
   <br>
   Unnamed custom elements such as this will be remembered by a hash of their text definition.
 
-  <div id="count">You've loaded this component {{ count }} time(s).</div>
+  <div id="count">You've loaded this component <span u-text="count"></span> time(s).</div>
 
   <script>
     export function $store({persist}) {
@@ -190,7 +188,7 @@
     }
 
     export function connectedCallback() {
-      this.$data.count++
+      this.$effect(() => this.$data.count++)
     }
   </script>
 
@@ -209,12 +207,3 @@
   </style>
 </template>
 <example-run name="example-06"></example-run>
-
-
-
-<style>
-  example-run {
-    display: block;
-    margin-bottom: 5.0rem;
-  }
-</style>

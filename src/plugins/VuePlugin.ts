@@ -187,7 +187,7 @@ function makeReactive(
   return reactive(d)
 }
 
-function makeProps(el: HTMLElement, propDefs: PropDefs) {
+function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   const d: Record<string, any> = {}
   for (let [k, v] of Object.entries(propDefs)) {
     const raw = el.getAttribute(k) ?? v.default
