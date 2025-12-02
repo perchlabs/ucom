@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`19.7k` minified) (`7.6k` gzipped)
+* ucom (`20.3k` minified) (`7.8k` gzipped)
 * ucom_vue (`30.1k` minified) (`12.2k` gzipped)
 * ucom_lite (`8.3k` minified) (`3.4k` gzipped)
 
@@ -216,7 +216,7 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
   </head>
 ```
 
-### Alpine
+### Templating
 
 Ucom has Alpine-style templating, with the `u-` prefix.
 

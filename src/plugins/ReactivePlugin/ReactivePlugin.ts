@@ -6,15 +6,18 @@ import type {
   PluginDefineParams,
   PluginCallbackBuilderParams,
   ModuleExports,
-  PluginConstructParams,
   // AttributeChangedCallback,
   // ConnectedCallback,
   // DisconnectedCallback,
 } from '../../core'
 import type {
   ProxyRef, 
-  ProxyRefRecord,
-  SignalRecord,
+  ValueWrapper,
+  persister,
+  syncer,
+  computer,
+  ComputedFunctionMaker,
+  ProxyRecord,
 } from './types'
 import {
   ATTRIBUTE_CHANGED,
@@ -23,20 +26,23 @@ import {
   CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../../core'
-import { computed, effect } from './alien-signals'
+import { computed, signal, effect, effectScope, trigger } from './alien-signals'
 import { cleanup, createContext } from './context.ts'
 import { walkChildren } from './walk.ts'
-import { makeProxyRef, createProxyStore, createProxyRefs } from './store.ts'
+import {
+  Store,
+  proxyRef,
+  computedRef,
+  syncRef,
+  persistRef,
+} from './store.ts'
 
 // Proto and constructor constants.
-const PropsIndex = '$props'
-const StoreIndex = '$store'
+const PropsIndex = Symbol()
+const StoreIndex = Symbol()
 // Instance constants.
 const CleanupIndex = Symbol()
 const DataIndex = '$data'
-
-const persistMap: ProxyRefRecord = {}
-const syncMap: ProxyRefRecord = {}
 
 const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
@@ -83,6 +89,9 @@ export default class implements Plugin {
 
     Object.assign(proto, {
       $computed: computed,
+      $effectScope: effectScope,
+      $signal: signal,
+      $trigger: trigger,
     })
   }
 
@@ -147,9 +156,10 @@ function connectData(
   }
   el[CleanupIndex] = []
 
-  const ctx = createContext(shadow, makeStore(Com, Raw, el))
+  const store = makeStore(Com, Raw, el)
+  const ctx = createContext(shadow, store)
   Object.assign(el, {
-    get [DataIndex]() { return ctx.data },
+    get [DataIndex]() { return store.data },
   })
   walkChildren(ctx, shadow)
 
@@ -167,41 +177,40 @@ function makeStore(
     [StoreIndex]: userDefinedStore,
   } = Com
   const props = makeProps(el, propDefs)
-  const refs = createProxyRefs(props)
+  const store = new Store(el, props)
 
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {
       const v = rawProto[k]
       if (typeof v === 'function') {
-        refs[k] = makeProxyRef(k, v)
+        store.add(k, v)
       }
     })
 
-  const data = userDefinedStore?.({
+
+  const raw = userDefinedStore?.({
     props,
     persist: (v: any) => new Persist(v),
     sync: (v: any) => new Sync(v),
+    computed: (v: ComputedFunctionMaker) => new Computed(v)
   }) ?? {}
-  for (let [k, v] of Object.entries(data)) {
-    let ref: ProxyRef | undefined
-    if (v instanceof Sync) {
-      ref = makeSync(name, k, v)
+
+  for (const [k, v] of Object.entries(raw)) {
+    let ref: ProxyRef
+    if (v instanceof Computed) {
+      ref = computedRef(store, k, v.v)
+    } else if (v instanceof Sync) {
+      ref = syncRef(name, k, v.v)
     } else if (v instanceof Persist) {
-      ref = makePersist(name, k, v)
+      ref = persistRef(name, k, v.v)
     } else {
-      ref = makeProxyRef(k, v)
+      ref = proxyRef(k, v)
     }
-
-    if (!ref) {
-      console.error(`component '${name}' has a problem on key '${k}'`)
-      continue
-    }
-
-    refs[k] = ref
+    store.addRef(ref)
   }
 
-  return createProxyStore(el, refs)
+  return store
 }
 
 function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
@@ -215,64 +224,24 @@ function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   return d
 }
 
-function makeSync(name: string, key: string, sync: Sync) {
-  const storeId = `${name}-${key}`
-  if (!(storeId in syncMap)) {
-    syncMap[storeId] = makeProxyRef(key, sync.v)
-  }
-  return syncMap[storeId]
-}
-
-function makePersist(name: string, key: string, persist: Persist) {
-  const storeId = `${name}-${key}`
-
-  if (!(storeId in persistMap)) { 
-    const getItem = () => {
-      const item = localStorage.getItem(storeId)
-      return item ? JSON.parse(item) : undefined
-    }
-
-    const ref = makeProxyRef(key, getItem() ?? persist.v)
-    persistMap[storeId] = ref
-
-    if (!ref.item) {
-      return
-    }
-    const get = ref.item
-    const setItem = () => localStorage.setItem(storeId, JSON.stringify(get()))
-    effect(() => setItem())
-  }
-
-  return persistMap[storeId]
-}
-
-class StoreValue<T = any> {
+class StoreValue<T = any> implements ValueWrapper<T> {
   v: T
   constructor(v: T) {
     this.v = v
   }
 }
-
-class Persist extends StoreValue {}
-type persister = (v: string) => InstanceType<typeof Persist>
-
-class Sync extends StoreValue {}
-type syncer = (v: string) => InstanceType<typeof Sync>
-
-type ComputedFunction = () => any
-type ComputedWrapper = ($data: SignalRecord) => ComputedFunction
-class Computed extends StoreValue<ComputedWrapper>{}
-type computer = (v: ComputedWrapper) => InstanceType<typeof Computed>
+export class Sync extends StoreValue {}
+export class Persist extends StoreValue {}
+export class Computed extends StoreValue<ComputedFunctionMaker>{}
 
 type StoreMaker = (opts: {
   props: Record<string, string>
   persist: persister
   sync: syncer
-  compute?: computer
+  computed: computer
 }) => Record<string, any>
 
 type PropsMaker = () => PropRawDefs
-
 type PropRawDefs = Record<string, PropRawDef>
 type PropRawDef = string | PropDef
 
@@ -285,16 +254,19 @@ type PropDef = {
 type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
-  [DataIndex]: Record<string, any>
+  [DataIndex]: ProxyRecord
   [CleanupIndex]: (() => void)[]
   $computed: () => any
   $effect: () => any
+  $effectScope: () => any
+  $signal: () => any
+  $trigger: () => any
 }
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {
   new (...args: any[]): UpgradeComponent
-  [PropsIndex]: Record<string, any>
-  [StoreIndex]?: StoreMaker,
+  [PropsIndex]: PropDefs
+  [StoreIndex]?: StoreMaker
 }
 
 type UpgradeExports = ModuleExports & {

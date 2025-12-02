@@ -9,7 +9,7 @@ export const globalRefs: RefRecord = {}
 
 const contexts = new WeakMap<ContextableElement, Context>()
 
-export function createContext(el: ContextableElement, [data, signals]: ProxyStore) {
+export function createContext(el: ContextableElement, {data, signals}: ProxyStore) {
   // Create the context object that gets passed to all directives
   const ctx: Context = {
     el, // The element itself

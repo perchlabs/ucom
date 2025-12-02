@@ -146,18 +146,10 @@
       }
     }
 
-    export function $store({props}) {
+    export function $store({props, computed}) {
       return {
-        count: props.count,
-        countType: findType(props.count),
+        countType: computed($data => findType($data.count)),
       }
-    }
-
-    export function connectedCallback() {
-      const {$data} = this
-      this.$effect(() => {
-        $data.countType = findType($data.count)
-      })
     }
 
     function findType(num) {

@@ -1,16 +1,10 @@
 <div>
   <!-- SLOT GAME <span u-text="rows"></span> x <span u-text="cols"></span> -->
   SLOT GAME <span u-text="`${rows} x ${cols}`"></span>
-
-  <template u-for="i in 3">
-    <template u-for="j in 3">
-      <div u-text="i"></div>
-    </template>
-  </template>
 </div>
 
 <main u-bind:style="{'--rows': rows, '--cols': cols}">
-  <section u-for="cell in cellList">
+  <section u-for="cell in cells">
     <slot u-bind:name="cell">
       <div u-text="cell"></div>
     </slot>
@@ -31,27 +25,18 @@
     }
   }
 
-  export function $store() {
+  export function $store({computed}) {
     return {
-      // rows: 4,
-      // cols: 3,
-      cellList: [],
-    }
-  }
-
-  export async function connectedCallback({root}) {
-    const {$data} = this
-
-    this.$effect(async () => {
-      const cellList = []
-      for (let i = 0; i < $data.rows; i++) {
-        for (let j = 0; j < $data.cols; j++) {
-          cellList.push(`${i}:${j}`)
+      cells: computed($data => {
+        const cells = []
+        for (let i = 0; i < $data.rows; i++) {
+          for (let j = 0; j < $data.cols; j++) {
+            cells.push(`${i}:${j}`)
+          }
         }
-      }
-
-      $data.cellList = [...cellList]
-    })
+        return cells
+      }),
+    }
   }
 </script>
 
