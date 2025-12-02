@@ -5,7 +5,7 @@ import type {
   ProxyRefRecord,
   ProxyRecord,
   ProxyStore,
-  ComputedFunction,
+  ProxyItemFunc,
   ComputedFunctionMaker,
 } from './types.ts'
 import { computed, effect, signal as createSignal } from './alien-signals'
@@ -35,40 +35,55 @@ export class Store implements ProxyStore {
     this.addRef(proxyRef(key, val))
   }
 
-  addRef({key, func, signal}: ProxyRef) {
+  addRef({key, type, item}: ProxyRef) {
     const {data, signals} = this
 
     if (key in data) {
       return console.error(`Element store already has a key '${key}'.`, this.#el)
     }
 
-    if (func) {
-      data[key] = func.bind(this.#el)
-    } else if (signal) {
+    if (type === 'func') {
+      data[key] = item.bind(this.#el)
+    } else {
       Object.defineProperty(data, key, {
-        get() { return signal() },
-        set(val) { signal(val) },
+        get() { return item() },
+        set(val) { item(val) },
         enumerable: true
       })
-      signals[key] = signal
+      signals[key] = item
     }
   }
 }
 
 export function proxyRef(key: string, value: any): ProxyRef {
-  const ref: ProxyRef = {key}
   if (typeof value === 'function') {
-    ref.func = value
+    return functionRef(key, value)
   } else {
-    ref.signal = createSignal(value)
+    return signalRef(key, value)
   }
-  return ref
+}
+
+export function functionRef(key: string, value: ProxyItemFunc): ProxyRef {
+  return {
+    key,
+    type: 'func',
+    item: value,
+  }
+}
+
+export function signalRef(key: string, value: ProxyItemFunc): ProxyRef {
+  return {
+    key,
+    type: 'signal',
+    item: createSignal(value),
+  }
 }
 
 export function computedRef(store: Store, key: string, value: ComputedFunctionMaker): ProxyRef {
   return {
     key,
-    signal: computed(() => value(store.data)),
+    type: 'signal',
+    item: computed(() => value(store.data)),
   }
 }
 
@@ -84,7 +99,7 @@ export function persistRef(name: string, key: string, value: any) {
   const storeId = `${name}-${key}`
   if (!(storeId in persistMap)) {
     if (typeof value === 'function') {
-      return persistMap[storeId] = proxyRef(key, value)
+      return persistMap[storeId] = functionRef(key, value)
     }
 
     const getItem = () => {
@@ -92,9 +107,9 @@ export function persistRef(name: string, key: string, value: any) {
       return json ? JSON.parse(json) : undefined
     }
 
-    const {signal} = persistMap[storeId] = proxyRef(key, getItem() ?? value)
-    if (signal) {
-      const setItem = () => localStorage.setItem(storeId, JSON.stringify(signal()))
+    const {item} = persistMap[storeId] = signalRef(key, getItem() ?? value)
+    if (item) {
+      const setItem = () => localStorage.setItem(storeId, JSON.stringify(item()))
       effect(() => setItem())
     }
   }
