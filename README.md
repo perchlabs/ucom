@@ -3,8 +3,8 @@
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
 * ucom (`19.7k` minified) (`7.6k` gzipped)
-* ucom_vue (`30.8k` minified) (`12.4k` gzipped)
-* ucom_lite (`8.5k` minified) (`3.4k` gzipped)
+* ucom_vue (`30.1k` minified) (`12.2k` gzipped)
+* ucom_lite (`8.3k` minified) (`3.4k` gzipped)
 
 **Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
 
@@ -52,7 +52,7 @@ Create an immediately executed component app with a `u-app` attribute.
 
 ```html
 <template u-app>
-  <source src="/components/my-component.com/">
+  <source src="/components/my-component.ucom/">
 
   This is an inline, self-instantiated app.
   You can use this to bootstrap, to create layouts, or to write quick one-offs.
@@ -140,18 +140,18 @@ Components can be imported lazily by adding the `"lazy"` attribute to either a `
 
 ### Importing Components As Directory
 
-Components can be specified as directory by using suffix `.com`.  This is useful for bundling libraries, themes and data files into an easily redistributable component.
+Components can be specified as directory by using suffix `.ucom`.  This is useful for bundling libraries, themes and data files into an easily redistributable component.
 
 ```html
 <template u-app>
-  <!-- To specify a component directory end with .com -->
-  <source src="/components/complex-component.com">
+  <!-- To specify a component directory end with .ucom -->
+  <source src="/components/complex-component.ucom">
 </template>
 ```
 
-The component will be a `.html` file with the same name as the `.com` directory.
+The component will be a `.html` file with the same name as the `.ucom` directory.
 ```
-@com/complex-component.com/
+@com/complex-component.ucom/
 +-- complex-component.html
 +-- important_library.js
 +-- data_theme.css
@@ -159,7 +159,7 @@ The component will be a `.html` file with the same name as the `.com` directory.
 ```
 
 ```html
-<!-- /components/complex-component.com/complex-component.html -->
+<!-- /components/complex-component.ucom/complex-component.html -->
 
 <header>This component does a lot of complicated things.</header>
 <main></main>

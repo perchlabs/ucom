@@ -15,7 +15,7 @@ import plugMan from './plugman.ts'
 
 const AUTO_NAME_PREFIX = 'ucom'
 const FILE_POSTFIX = '.html'
-const DIR_POSTFIX = '.com'
+const DIR_POSTFIX = '.ucom'
 
 export default (pluginClasses: PluginConstructor[]) => {
   const plugins = plugMan(pluginClasses)
