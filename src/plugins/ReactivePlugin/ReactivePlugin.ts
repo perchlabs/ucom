@@ -26,7 +26,7 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../../core'
 import { computed, signal, effect, effectScope, trigger } from './alien-signals'
-import { cleanup, createContext } from './context.ts'
+import { cleanup, createRootContext } from './context.ts'
 import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
 
@@ -150,7 +150,7 @@ function connectData(
   el[CleanupIndex] = []
 
   const store = makeStore(Com, Raw, el)
-  const ctx = createContext(shadow, store)
+  const ctx = createRootContext(shadow, store)
   Object.assign(el, {
     get [DataIndex]() { return store.data },
   })

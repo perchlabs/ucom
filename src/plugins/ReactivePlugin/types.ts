@@ -24,8 +24,6 @@ export type ProxyRefRecord = Record<string, ProxyRef>
 
 export type ProxyRecord = Record<string, Signal>
 
-export type ProxyStoreAdd = (key: string, val: any) => void
-
 export interface ProxyStore {
   signals: SignalRecord
   data: ProxyRecord
@@ -34,6 +32,7 @@ export interface ProxyStore {
   sync: ProxyStoreAdd
   persist: ProxyStoreAdd
 }
+export type ProxyStoreAdd = (key: string, val: any) => void
 
 export type ContextableElement = ShadowRoot | Element
 
@@ -42,9 +41,8 @@ export type RefRecord = Record<string, WeakRef<ContextableElement>>
 export interface Context {
   el: ContextableElement
   data: Record<string, any>
-  cleanup: (() => void)[]
   refs: RefRecord
-  signals?: SignalRecord
+  cleanup: (() => void)[]
 }
 
 export type DirectiveDef = {

@@ -44,6 +44,7 @@ export function createStore(el: ContextableElement, name: string) {
       isFunc,
     ]
   }
+
   return {
     signals,
     data,
