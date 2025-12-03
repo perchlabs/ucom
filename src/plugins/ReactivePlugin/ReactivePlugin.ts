@@ -11,7 +11,6 @@ import type {
   // DisconnectedCallback,
 } from '../../core'
 import type {
-  ProxyRef, 
   ValueWrapper,
   persister,
   syncer,
@@ -29,13 +28,7 @@ import {
 import { computed, signal, effect, effectScope, trigger } from './alien-signals'
 import { cleanup, createContext } from './context.ts'
 import { walkChildren } from './walk.ts'
-import {
-  createStore,
-  proxyRef,
-  computedRef,
-  syncRef,
-  persistRef,
-} from './store.ts'
+import { createStore } from './store.ts'
 
 // Proto and constructor constants.
 const PropsIndex = Symbol()
@@ -176,9 +169,10 @@ function makeStore(
     [PropsIndex]: propDefs,
     [StoreIndex]: userDefinedStore,
   } = Com
+  const store = createStore(el, name)
   const props = makeProps(el, propDefs)
-  const store = createStore(el, props)
 
+  store.addRaw(props)
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {
@@ -196,17 +190,15 @@ function makeStore(
   }) ?? {}
 
   for (const [k, v] of Object.entries(raw)) {
-    let ref: ProxyRef
     if (v instanceof Computed) {
-      ref = computedRef(store, k, v.v)
+      store.computed(k, v.v)
     } else if (v instanceof Sync) {
-      ref = syncRef(name, k, v.v)
+      store.sync(k, v.v)
     } else if (v instanceof Persist) {
-      ref = persistRef(name, k, v.v)
+      store.persist(k, v.v)
     } else {
-      ref = proxyRef(k, v)
+      store.add(k, v)
     }
-    store.addRef(ref)
   }
 
   return store
@@ -214,7 +206,7 @@ function makeStore(
 
 function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   const d: Record<string, any> = {
-    get $me() { return el },
+    // get $el() { return el },
   }
   for (let [k, v] of Object.entries(propDefs)) {
     const raw = el.getAttribute(k) ?? v.default

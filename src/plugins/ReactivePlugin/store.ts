@@ -4,8 +4,6 @@ import type {
   ProxyRef,
   ProxyRefRecord,
   ProxyRecord,
-  ProxyStore,
-  ProxyItemFunc,
   ComputedFunctionMaker,
 } from './types.ts'
 import { computed, effect, signal as createSignal } from './alien-signals'
@@ -15,16 +13,16 @@ const syncMap: ProxyRefRecord = {}
 
 type StoreRawRecord = Record<string, any>
 
-export function createStore(el: ContextableElement, raw: StoreRawRecord = {}) {
+export function createStore(el: ContextableElement, name: string) {
   const data: ProxyRecord = {}
   const signals: SignalRecord = {}
 
-  const addRef = ({key, type, item}: ProxyRef) => {
+  const addRef = ([key, item, isFunc = false]: ProxyRef) => {
     if (key in data) {
       return console.error(`Element store already has a key '${key}'.`, el)
     }
 
-    if (type === 'func') {
+    if (isFunc) {
       data[key] = item.bind(el)
     } else {
       Object.defineProperty(data, key, {
@@ -36,73 +34,58 @@ export function createStore(el: ContextableElement, raw: StoreRawRecord = {}) {
     }
   }
 
-  Object.entries(raw).forEach(([k, v]) => addRef(proxyRef(k, v)))
+  const add = (key: string, val: any) => addRef(simpleRef(key, val))
 
+  const simpleRef = (key: string, value: any): ProxyRef => {
+    const isFunc = typeof value === 'function'
+    return [
+      key,
+      isFunc ? value : createSignal(value),
+      isFunc,
+    ]
+  }
   return {
-    add: (key: string, val: any) => addRef(proxyRef(key, val)),
-    addRef,
     signals,
     data,
+    add,
+    addRaw: (raw: StoreRawRecord) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
+
+    computed(key: string, value: ComputedFunctionMaker) {
+      addRef([
+        key,
+        computed(() => value(data)),
+      ])
+    },
+
+    sync(key: string, value: any) {
+      const storeId = `${name}-${key}`
+      if (!(storeId in syncMap)) {
+        syncMap[storeId] = simpleRef(key, value)
+      }
+      addRef(syncMap[storeId])
+    },
+
+    persist(key: string, value: any) {
+      const storeId = `${name}-${key}`
+      if (!(storeId in persistMap)) {
+        if (typeof value === 'function') {
+          persistMap[storeId] = [key, value, true]
+        } else {
+          const getItem = () => {
+            const json = localStorage.getItem(storeId)
+            return json ? JSON.parse(json) : undefined
+          }
+  
+          const [,signal] = persistMap[storeId] = simpleRef(key, getItem() ?? value)
+          if (signal) {
+            const setItem = () => localStorage.setItem(storeId, JSON.stringify(signal()))
+            effect(() => setItem())
+          }
+        }
+      }
+
+      addRef(persistMap[storeId])
+    },
   }
 }
 
-export function proxyRef(key: string, value: any): ProxyRef {
-  if (typeof value === 'function') {
-    return functionRef(key, value)
-  } else {
-    return signalRef(key, value)
-  }
-}
-
-export function functionRef(key: string, value: ProxyItemFunc): ProxyRef {
-  return {
-    key,
-    type: 'func',
-    item: value,
-  }
-}
-
-export function signalRef(key: string, value: ProxyItemFunc): ProxyRef {
-  return {
-    key,
-    type: 'signal',
-    item: createSignal(value),
-  }
-}
-
-export function computedRef(store: ProxyStore, key: string, value: ComputedFunctionMaker): ProxyRef {
-  return {
-    key,
-    type: 'signal',
-    item: computed(() => value(store.data)),
-  }
-}
-
-export function syncRef(name: string, key: string, value: any) {
-  const storeId = `${name}-${key}`
-  if (!(storeId in syncMap)) {
-    syncMap[storeId] = proxyRef(key, value)
-  }
-  return syncMap[storeId]
-}
-
-export function persistRef(name: string, key: string, value: any) {
-  const storeId = `${name}-${key}`
-  if (!(storeId in persistMap)) {
-    if (typeof value === 'function') {
-      return persistMap[storeId] = functionRef(key, value)
-    }
-
-    const getItem = () => {
-      const json = localStorage.getItem(storeId)
-      return json ? JSON.parse(json) : undefined
-    }
-
-    const {item} = persistMap[storeId] = signalRef(key, getItem() ?? value)
-    if (item) {
-      const setItem = () => localStorage.setItem(storeId, JSON.stringify(item()))
-      effect(() => setItem())
-    }
-  }
-  return persistMap[storeId]
-}

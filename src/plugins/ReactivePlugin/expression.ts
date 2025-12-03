@@ -25,7 +25,7 @@ export function execute(ctx: Context, code: string, event: Event | null = null) 
           ${code}
         }
       })();`)
-    
+
     // Execute and return promise for error handling
     return fn.call(ctx.data, event, ctx.el, ctx.data)
   } catch (err) {

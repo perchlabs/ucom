@@ -18,7 +18,6 @@ export function walk(ctx: Context, node: Node): ChildNode | null | void {
   const {control, normal} = getDirectives(el)
   const getCtrl = (name: string) => control[name]
 
-
   let dir: DirectiveDef | null
   if ((dir = getCtrl('u-show'))) {
     dirShow(ctx, el as HTMLElement, dir)

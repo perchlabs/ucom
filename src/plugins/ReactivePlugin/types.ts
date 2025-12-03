@@ -14,21 +14,25 @@ export type ComputedFunction = () => any
 export type computer = (v: ComputedFunctionMaker) => ValueWrapper<ComputedFunctionMaker>
 
 export type ProxyItemFunc = (...args: any[]) => any
-export type ProxyRef = {
-  key: string
-  type: 'signal' | 'func'
-  item: Signal | ProxyItemFunc
-}
+export type ProxyRef = [
+  key: string,
+  item: Signal | (() => ComputedFunction),
+  isFunc?: boolean,
+]
 
 export type ProxyRefRecord = Record<string, ProxyRef>
 
 export type ProxyRecord = Record<string, Signal>
 
+export type ProxyStoreAdd = (key: string, val: any) => void
+
 export interface ProxyStore {
   signals: SignalRecord
   data: ProxyRecord
-  add: (key: string, val: any) => void
-  addRef: (ref: ProxyRef) => void
+  add: ProxyStoreAdd
+  computed: ProxyStoreAdd
+  sync: ProxyStoreAdd
+  persist: ProxyStoreAdd
 }
 
 export type ContextableElement = ShadowRoot | Element
