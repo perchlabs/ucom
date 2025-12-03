@@ -10,10 +10,9 @@ export const globalRefs: RefRecord = {}
 const contexts = new WeakMap<ContextableElement, Context>()
 
 // Create the root context object that gets passed to all directives.
+// The data property here is all reactive data because it comes directly from the
+// proxy store.
 export function createRootContext(el: ContextableElement, {data}: Store) {
-  // The data property here is all reactive data because it comes directly from the
-  // proxy store.
-
   const ctx: Context = {
     el,
     data,
@@ -25,10 +24,9 @@ export function createRootContext(el: ContextableElement, {data}: Store) {
 }
 
 // Create a sub context for sub blocks.
+// The data parameter here is not reactive.  It is mixed in with reactive data from
+// the root context.
 export function createSubContext(ctx: Context, el: ContextableElement, data: Record<string, any>): Context {
-  // The data parameter here is not reactive.  It is mixed in with reactive data from
-  // the root context.
-
   const subctx = {
     el,
     data: {

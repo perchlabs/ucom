@@ -52,8 +52,7 @@ export default (pluginClasses: PluginConstructor[]) => {
       const {name, resolved} = resolve(url)
       try {
         tpl ??= await fetchTemplate(resolved)
-        idents[name] ??= defineActual({name, tpl, resolved})
-        return idents[name]
+        return idents[name] ??= defineActual({name, tpl, resolved})
       } catch (e) {
         if (e instanceof ComponentFetchError) {
           console.error(`Problem fetching component '${e.resolved}'. Hint: ${e.reason}.`)

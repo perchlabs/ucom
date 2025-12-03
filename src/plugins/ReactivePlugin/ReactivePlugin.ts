@@ -30,6 +30,46 @@ import { cleanup, createRootContext } from './context.ts'
 import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
 
+type StoreMaker = (opts: {
+  props: Record<string, string>
+  persist: persister
+  sync: syncer
+  computed: computer
+}) => Record<string, any>
+
+type PropsMaker = () => PropRawDefs
+type PropRawDefs = Record<string, PropRawDef>
+type PropRawDef = string | PropDef
+
+type PropDef = {
+  default: any
+  // TODO: Investigate ways to control reflective attributes/properties
+  // reflect: boolean,
+  cast?: (value: any) => any
+}
+type PropDefs = Record<string, PropDef>
+
+interface UpgradeComponent extends WebComponent {
+  [DataIndex]: ProxyRecord
+  [CleanupIndex]: (() => void)[]
+  $computed: () => any
+  $effect: () => any
+  $effectScope: () => any
+  $signal: () => any
+  $trigger: () => any
+}
+
+interface UpgradeComponentConstructor extends WebComponentConstructor {
+  new (...args: any[]): UpgradeComponent
+  [PropsIndex]: PropDefs
+  [StoreIndex]?: StoreMaker
+}
+
+type UpgradeExports = ModuleExports & {
+  $props?: PropsMaker
+  $store?: StoreMaker
+}
+
 // Proto and constructor constants.
 const PropsIndex = Symbol()
 const StoreIndex = Symbol()
@@ -224,43 +264,3 @@ class StoreValue<T = any> implements ValueWrapper<T> {
 export class Sync extends StoreValue {}
 export class Persist extends StoreValue {}
 export class Computed extends StoreValue<ComputedFunctionMaker>{}
-
-type StoreMaker = (opts: {
-  props: Record<string, string>
-  persist: persister
-  sync: syncer
-  computed: computer
-}) => Record<string, any>
-
-type PropsMaker = () => PropRawDefs
-type PropRawDefs = Record<string, PropRawDef>
-type PropRawDef = string | PropDef
-
-type PropDef = {
-  default: any
-  // TODO: Investigate ways to control reflective attributes/properties
-  // reflect: boolean,
-  cast?: (value: any) => any
-}
-type PropDefs = Record<string, PropDef>
-
-interface UpgradeComponent extends WebComponent {
-  [DataIndex]: ProxyRecord
-  [CleanupIndex]: (() => void)[]
-  $computed: () => any
-  $effect: () => any
-  $effectScope: () => any
-  $signal: () => any
-  $trigger: () => any
-}
-
-interface UpgradeComponentConstructor extends WebComponentConstructor {
-  new (...args: any[]): UpgradeComponent
-  [PropsIndex]: PropDefs
-  [StoreIndex]?: StoreMaker
-}
-
-type UpgradeExports = ModuleExports & {
-  $props?: PropsMaker
-  $store?: StoreMaker
-}

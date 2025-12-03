@@ -48,10 +48,10 @@ For the event lifecycle use the element callbacks `attributeChangedCallback`, `c
 
 ### App
 
-Create an immediately executed component app with a `u-app` attribute.
+Create an immediately executed component app with an empty `u-com` attribute.
 
 ```html
-<template u-app>
+<template u-com>
   <source src="/components/my-component.ucom/">
 
   This is an inline, self-instantiated app.
@@ -91,7 +91,7 @@ You may use an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Ref
   }
 }</script>
 
-<template u-app>
+<template u-com>
   <source src="@com/widget-component.html">
   <source src="@com/second-component.html">
 
@@ -109,7 +109,7 @@ Use a `base` element to reduce redundancy.  Settings on `base` are sticky until 
   }
 }</script>
 
-<template u-app>
+<template u-com>
   <base href="@com/">
   <source src="widget-component.html">
   <source src="second-component.html">
@@ -128,7 +128,7 @@ Components can be imported lazily by adding the `"lazy"` attribute to either a `
   }
 }</script>
 
-<template u-app>
+<template u-com>
   <base href="@com/" lazy>
   <source src="widget-component.html">
   <source src="second-component.html">
@@ -143,7 +143,7 @@ Components can be imported lazily by adding the `"lazy"` attribute to either a `
 Components can be specified as directory by using suffix `.ucom`.  This is useful for bundling libraries, themes and data files into an easily redistributable component.
 
 ```html
-<template u-app>
+<template u-com>
   <!-- To specify a component directory end with .ucom -->
   <source src="/components/complex-component.ucom">
 </template>
@@ -186,7 +186,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 Element IDs are sandboxed via shadow dom.
 
 ```html
-<template u-app>
+<template u-com>
   <header id="header">Stylized Component</header>
   <main>Component Body</main>
 
@@ -223,7 +223,7 @@ Ucom has Alpine-style templating, with the `u-` prefix.
 Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`.
 
 ```html
-<template u-app>
+<template u-com>
   <div u-for="n in 10" u-text="n"></div>
 </template>
 ```
@@ -231,7 +231,7 @@ Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-t
 You can use the store to gain access to reactive data.
 
 ```html
-<template u-app>
+<template u-com>
   <button u-on:click="count++"><span u-text="count"></span> times</button>
   <script>
     export const $store = {count: 0}
@@ -254,7 +254,7 @@ You can use the store to gain access to reactive data.
 If you wrap a store value with the `sync` and `persistent` function then it will gain some features.
 
 ```html
-<template u-app>
+<template u-com>
   <!-- Normal store counter -->
   <button u-on:click="normal++"><span u-text="normal"></span> times</button>
 

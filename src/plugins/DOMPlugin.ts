@@ -9,10 +9,6 @@ import {
   ATTR_CORE,
 } from '../core'
 
-const ATTR_APP = 'u-app'
-const ATTR_COM = ATTR_CORE
-const ATTR_LIST = [ATTR_APP, ATTR_COM]
-
 export default class implements Plugin {
   async start({man}: PluginStartParams) {
     const root = document
@@ -27,17 +23,24 @@ export default class implements Plugin {
 
 async function processTemplates(man: ComponentManager, tplArr: HTMLTemplateElement[]) {
   await templateHandler(tplArr, async (tpl) => {
-    if (tpl.hasAttribute(ATTR_APP)) {
+    const ref = tpl.getAttribute(ATTR_CORE)
+
+    if (ref) {
+      tpl.remove()
+      if (/^[a-z]+\-[a-z0-9]+$/.test(ref)) {
+        // Strict component name
+        await man.define(ref, tpl)
+      } else {
+        // Contains path characters
+        // This allows for server side inline definitions that still allows relative component paths.
+        await man.import(ref, tpl)
+      }
+    } else {
+      // Annonymous bootstrap app
       const ident = await man.define(null, tpl)
       if (ident) {
         tpl.replaceWith(document.createElement(ident.name))
       }
-    } else if (tpl.hasAttribute(ATTR_COM)) {
-      tpl.remove()
-      const ref = tpl.getAttribute(ATTR_COM) ?? ''
-      ref.includes('/')
-        ? await man.import(ref, tpl)
-        : await man.define(ref, tpl)
     }
   })
 }
@@ -52,13 +55,12 @@ function observeMutations(man: ComponentManager, root: QueryableRoot) {
 }
 
 function queryForTemplates(root: QueryableRoot) {
-  const sel = ATTR_LIST.map(v => `template[${v}]`).join(',')
-  return [...root.querySelectorAll(sel)]
+  return [...root.querySelectorAll(`template[${ATTR_CORE}]`)]
     .filter(v => v instanceof HTMLTemplateElement)
 }
 
 function getMutationTemplates(muts: MutationRecord[]) {
-  const has = (el: Element) => el.hasAttribute(ATTR_APP) || el.hasAttribute(ATTR_COM)
+  const has = (el: Element) => el.hasAttribute(ATTR_CORE)
 
   return [...muts].map(v => [...v.addedNodes])
     .flat()
