@@ -15,35 +15,17 @@ const syncMap: ProxyRefRecord = {}
 
 type StoreRawRecord = Record<string, any>
 
-export class Store implements ProxyStore {
-  #el: ContextableElement
-  data: ProxyRecord = {}
-  signals: SignalRecord = {}
+export function createStore(el: ContextableElement, raw: StoreRawRecord = {}) {
+  const data: ProxyRecord = {}
+  const signals: SignalRecord = {}
 
-  constructor(el: ContextableElement, raw: StoreRawRecord = {}) {
-    this.#el = el
-    this.addRawRecord(raw)
-  }
-
-  addRawRecord(raw: StoreRawRecord) {
-    for (const [k, v] of Object.entries(raw)) {
-      this.addRef(proxyRef(k, v))
-    }
-  }
-
-  add(key: string, val: any) {
-    this.addRef(proxyRef(key, val))
-  }
-
-  addRef({key, type, item}: ProxyRef) {
-    const {data, signals} = this
-
+  const addRef = ({key, type, item}: ProxyRef) => {
     if (key in data) {
-      return console.error(`Element store already has a key '${key}'.`, this.#el)
+      return console.error(`Element store already has a key '${key}'.`, el)
     }
 
     if (type === 'func') {
-      data[key] = item.bind(this.#el)
+      data[key] = item.bind(el)
     } else {
       Object.defineProperty(data, key, {
         get() { return item() },
@@ -52,6 +34,15 @@ export class Store implements ProxyStore {
       })
       signals[key] = item
     }
+  }
+
+  Object.entries(raw).forEach(([k, v]) => addRef(proxyRef(k, v)))
+
+  return {
+    add: (key: string, val: any) => addRef(proxyRef(key, val)),
+    addRef,
+    signals,
+    data,
   }
 }
 
@@ -79,7 +70,7 @@ export function signalRef(key: string, value: ProxyItemFunc): ProxyRef {
   }
 }
 
-export function computedRef(store: Store, key: string, value: ComputedFunctionMaker): ProxyRef {
+export function computedRef(store: ProxyStore, key: string, value: ComputedFunctionMaker): ProxyRef {
   return {
     key,
     type: 'signal',

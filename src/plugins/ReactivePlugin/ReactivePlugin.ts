@@ -30,7 +30,7 @@ import { computed, signal, effect, effectScope, trigger } from './alien-signals'
 import { cleanup, createContext } from './context.ts'
 import { walkChildren } from './walk.ts'
 import {
-  Store,
+  createStore,
   proxyRef,
   computedRef,
   syncRef,
@@ -177,7 +177,7 @@ function makeStore(
     [StoreIndex]: userDefinedStore,
   } = Com
   const props = makeProps(el, propDefs)
-  const store = new Store(el, props)
+  const store = createStore(el, props)
 
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
@@ -187,7 +187,6 @@ function makeStore(
         store.add(k, v)
       }
     })
-
 
   const raw = userDefinedStore?.({
     props,

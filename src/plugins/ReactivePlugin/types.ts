@@ -27,6 +27,8 @@ export type ProxyRecord = Record<string, Signal>
 export interface ProxyStore {
   signals: SignalRecord
   data: ProxyRecord
+  add: (key: string, val: any) => void
+  addRef: (ref: ProxyRef) => void
 }
 
 export type ContextableElement = ShadowRoot | Element
