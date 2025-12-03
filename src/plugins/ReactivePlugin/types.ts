@@ -2,6 +2,7 @@ import type { signal} from './alien-signals'
 
 export type Signal = typeof signal
 export type SignalRecord = Record<string, Signal>
+export type ProxyRecord = Record<string, Signal>
 
 export interface ValueWrapper<T = any> {
   v: T
@@ -13,26 +14,15 @@ export type ComputedFunctionMaker = ($data: SignalRecord) => ComputedFunction
 export type ComputedFunction = () => any
 export type computer = (v: ComputedFunctionMaker) => ValueWrapper<ComputedFunctionMaker>
 
-export type ProxyItemFunc = (...args: any[]) => any
-export type ProxyRef = [
-  key: string,
-  item: Signal | (() => ComputedFunction),
-  isFunc?: boolean,
-]
-
-export type ProxyRefRecord = Record<string, ProxyRef>
-
-export type ProxyRecord = Record<string, Signal>
-
-export interface ProxyStore {
+export interface Store {
   signals: SignalRecord
   data: ProxyRecord
-  add: ProxyStoreAdd
-  computed: ProxyStoreAdd
-  sync: ProxyStoreAdd
-  persist: ProxyStoreAdd
+  add: StoreAdder
+  computed: StoreAdder
+  sync: StoreAdder
+  persist: StoreAdder
 }
-export type ProxyStoreAdd = (key: string, val: any) => void
+export type StoreAdder = (key: string, val: any) => void
 
 export type ContextableElement = ShadowRoot | Element
 

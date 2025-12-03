@@ -1,42 +1,45 @@
 import type {
   ContextableElement,
-  SignalRecord,
-  ProxyRef,
-  ProxyRefRecord,
-  ProxyRecord,
   ComputedFunctionMaker,
+  ProxyRecord,
+  SignalRecord,
 } from './types.ts'
 import { computed, effect, signal as createSignal } from './alien-signals'
 
-const persistMap: ProxyRefRecord = {}
-const syncMap: ProxyRefRecord = {}
+type Item = [
+  key: string,
+  value: (...args: any[]) => any,
+  isFunc?: boolean,
+]
+type ItemRecord = Record<string, Item>
 
-type StoreRawRecord = Record<string, any>
+const persistMap: ItemRecord = {}
+const syncMap: ItemRecord = {}
 
 export function createStore(el: ContextableElement, name: string) {
   const data: ProxyRecord = {}
   const signals: SignalRecord = {}
 
-  const addRef = ([key, item, isFunc = false]: ProxyRef) => {
+  const addItem = ([key, value, isFunc = false]: Item) => {
     if (key in data) {
       return console.error(`Element store already has a key '${key}'.`, el)
     }
 
     if (isFunc) {
-      data[key] = item.bind(el)
+      data[key] = value.bind(el)
     } else {
       Object.defineProperty(data, key, {
-        get() { return item() },
-        set(val) { item(val) },
+        get() { return value() },
+        set(val) { value(val) },
         enumerable: true
       })
-      signals[key] = item
+      signals[key] = value
     }
   }
 
-  const add = (key: string, val: any) => addRef(simpleRef(key, val))
+  const add = (key: string, val: any) => addItem(simpleItem(key, val))
 
-  const simpleRef = (key: string, value: any): ProxyRef => {
+  const simpleItem = (key: string, value: any): Item => {
     const isFunc = typeof value === 'function'
     return [
       key,
@@ -49,10 +52,10 @@ export function createStore(el: ContextableElement, name: string) {
     signals,
     data,
     add,
-    addRaw: (raw: StoreRawRecord) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
+    addRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
 
     computed(key: string, value: ComputedFunctionMaker) {
-      addRef([
+      addItem([
         key,
         computed(() => value(data)),
       ])
@@ -61,9 +64,9 @@ export function createStore(el: ContextableElement, name: string) {
     sync(key: string, value: any) {
       const storeId = `${name}-${key}`
       if (!(storeId in syncMap)) {
-        syncMap[storeId] = simpleRef(key, value)
+        syncMap[storeId] = simpleItem(key, value)
       }
-      addRef(syncMap[storeId])
+      addItem(syncMap[storeId])
     },
 
     persist(key: string, value: any) {
@@ -77,7 +80,7 @@ export function createStore(el: ContextableElement, name: string) {
             return json ? JSON.parse(json) : undefined
           }
   
-          const [,signal] = persistMap[storeId] = simpleRef(key, getItem() ?? value)
+          const [,signal] = persistMap[storeId] = simpleItem(key, getItem() ?? value)
           if (signal) {
             const setItem = () => localStorage.setItem(storeId, JSON.stringify(signal()))
             effect(() => setItem())
@@ -85,7 +88,7 @@ export function createStore(el: ContextableElement, name: string) {
         }
       }
 
-      addRef(persistMap[storeId])
+      addItem(persistMap[storeId])
     },
   }
 }

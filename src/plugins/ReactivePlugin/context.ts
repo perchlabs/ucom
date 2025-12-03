@@ -1,7 +1,7 @@
 import type {
   Context,
   ContextableElement,
-  ProxyStore,
+  Store,
   RefRecord,
 } from './types.ts'
 
@@ -10,7 +10,7 @@ export const globalRefs: RefRecord = {}
 const contexts = new WeakMap<ContextableElement, Context>()
 
 // Create the root context object that gets passed to all directives.
-export function createRootContext(el: ContextableElement, {data}: ProxyStore) {
+export function createRootContext(el: ContextableElement, {data}: Store) {
   // The data property here is all reactive data because it comes directly from the
   // proxy store.
 
