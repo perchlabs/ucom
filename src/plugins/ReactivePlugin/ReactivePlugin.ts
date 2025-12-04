@@ -32,8 +32,8 @@ import { createStore } from './store.ts'
 
 type StoreMaker = (opts: {
   props: Record<string, string>
-  persist: persister
-  sync: syncer
+  persisted: persister
+  synced: syncer
   computed: computer
 }) => Record<string, any>
 
@@ -224,17 +224,17 @@ function makeStore(
 
   const raw = userDefinedStore?.({
     props,
-    persist: (v: any) => new Persist(v),
-    sync: (v: any) => new Sync(v),
+    persisted: (v: any) => new Persisted(v),
+    synced: (v: any) => new Synced(v),
     computed: (v: ComputedFunctionMaker) => new Computed(v)
   }) ?? {}
 
   for (const [k, v] of Object.entries(raw)) {
     if (v instanceof Computed) {
       store.computed(k, v.v)
-    } else if (v instanceof Sync) {
+    } else if (v instanceof Synced) {
       store.sync(k, v.v)
-    } else if (v instanceof Persist) {
+    } else if (v instanceof Persisted) {
       store.persist(k, v.v)
     } else {
       store.add(k, v)
@@ -261,6 +261,6 @@ class StoreValue<T = any> implements ValueWrapper<T> {
     this.v = v
   }
 }
-export class Sync extends StoreValue {}
-export class Persist extends StoreValue {}
+export class Synced extends StoreValue {}
+export class Persisted extends StoreValue {}
 export class Computed extends StoreValue<ComputedFunctionMaker>{}

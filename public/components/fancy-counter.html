@@ -39,11 +39,11 @@
     }
   }
 
-  export function $store({persist, sync}) {
+  export function $store({persisted, synced}) {
     return {
       local: 0,
-      persist: persist(0),
-      sync: sync(0),
+      persist: persisted(0),
+      sync: synced(0),
     }
   }
 

@@ -162,8 +162,8 @@ function makeReactive(
 
   const store = storeMaker?.({
     props,
-    persist: (v: any) => new Persist(v),
-    sync: (v: any) => new Sync(v),
+    persisted: (v: any) => new Persisted(v),
+    synced: (v: any) => new Synced(v),
   }) ?? {}
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !storeProhibitedFunctions.has(k))
@@ -175,10 +175,10 @@ function makeReactive(
     })
 
   for (let [k, v] of Object.entries(store)) {
-    if (v instanceof Sync) {
-      d[k] = makeSync(name, k, v)
-    } else if (v instanceof Persist) {
-      d[k] = makePersist(name, k, v)
+    if (v instanceof Synced) {
+      d[k] = makeSynced(name, k, v)
+    } else if (v instanceof Persisted) {
+      d[k] = makePersisted(name, k, v)
     } else {
       d[k] = v
     }
@@ -196,7 +196,7 @@ function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   return d
 }
 
-function makeSync(name: string, key: string, sync: Sync) {
+function makeSynced(name: string, key: string, sync: Synced) {
   const storeId = `${name}-${key}`
 
   if (!(storeId in syncMap)) {
@@ -205,7 +205,7 @@ function makeSync(name: string, key: string, sync: Sync) {
   return syncMap[storeId]
 }
 
-function makePersist(name: string, key: string, persist: Persist) {
+function makePersisted(name: string, key: string, persist: Persisted) {
   const storeId = `${name}-${key}`
 
   if (!(storeId in persistMap)) { 
@@ -230,18 +230,18 @@ class StoreValue {
     this.v = v
   }
 }
-class Persist extends StoreValue {}
-class Sync extends StoreValue {}
+class Persisted extends StoreValue {}
+class Synced extends StoreValue {}
 
-type persister = (v: string) => InstanceType<typeof Persist>
-type syncer = (v: string) => InstanceType<typeof Sync>
+type persister = (v: string) => InstanceType<typeof Persisted>
+type syncer = (v: string) => InstanceType<typeof Synced>
 
 type ReactiveProxy = ReturnType<typeof reactive>
 
 type StoreMaker = (opts: {
   props: Record<string, string>
-  persist: persister
-  sync: syncer
+  persisted: persister
+  synced: syncer
 }) => Record<string, any>
 
 type PropsMaker = () => PropRawDefs

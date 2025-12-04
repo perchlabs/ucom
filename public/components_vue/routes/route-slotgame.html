@@ -16,11 +16,11 @@
 </slot-game>
 
 <script>
-  export function $store({persist}) {
+  export function $store({persisted}) {
     return {
       MAX_LENGTH: 8,
-      rows: persist(4),
-      cols: persist(4),
+      rows: persisted(4),
+      cols: persisted(4),
 
       // rows: 4,
       // cols: 4,

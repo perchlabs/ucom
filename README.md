@@ -251,7 +251,7 @@ You can use the store to gain access to reactive data.
 
 #### Syncronized and Persistent Reactive Data
 
-If you wrap a store value with the `sync` and `persistent` function then it will gain some features.
+If you wrap a store value with the `synced` and `persisted` function then it will gain some features.
 
 ```html
 <template u-com>
@@ -266,11 +266,11 @@ If you wrap a store value with the `sync` and `persistent` function then it will
   <button u-on:click="persist++"><span u-text="persist"></span> times</button>
 
   <script>
-    export function $store({persist, sync}) {
+    export function $store({persisted, synced}) {
       return {
         normal: 0,
-        persist: persist(0),
-        sync: sync(0),
+        persist: persisted(0),
+        sync: synced(0),
       }
     }
   </script>

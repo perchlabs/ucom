@@ -60,14 +60,12 @@ function queryForTemplates(root: QueryableRoot) {
 }
 
 function getMutationTemplates(muts: MutationRecord[]) {
-  const has = (el: Element) => el.hasAttribute(ATTR_CORE)
-
   return [...muts].map(v => [...v.addedNodes])
     .flat()
     .filter(el => el.nodeType === 1)
     .map(el => {
       if (el instanceof HTMLTemplateElement) {
-        return has(el) ? el : null
+        return el.hasAttribute(ATTR_CORE) ? el : null
       } else if (el instanceof HTMLElement) {
         return queryForTemplates(el)
       }

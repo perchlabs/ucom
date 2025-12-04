@@ -183,9 +183,9 @@
   <div id="count">You've loaded this component {{ count }} time(s).</div>
 
   <script>
-    export function $store({persist}) {
+    export function $store({persisted}) {
       return {
-        count: persist(0),
+        count: persisted(0),
       }
     }
 
