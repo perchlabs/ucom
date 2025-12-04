@@ -300,7 +300,7 @@ It's easy to add js properties and html attributes to your components.
 
 #### Dynamic Element Creation
 
-Ucom added a new `u-is` directive to its petite-vue inheritance.  `u-is` allows for a dynamic element name to be defined based upon a store value.  This is useful for routing and other situations.
+`u-is` allows for a dynamic tag to be defined based upon a store value.
 
 ```html
 <dyn-amic name="my-other-component"></dyn-amic>
