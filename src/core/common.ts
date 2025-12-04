@@ -23,7 +23,6 @@ export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
 export const coreFunctionsSet = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
-
 export function isSystemKey(k: string) {
   if (k in coreFunctionsSet) return true
   if (k.startsWith('$')) return true

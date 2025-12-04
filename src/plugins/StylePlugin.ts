@@ -37,11 +37,8 @@ export default class implements Plugin {
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
   async #loadSheets(): Promise<CSSStyleSheet[]> {
-    const loading = $queryForLibAttr(document.head, 'link', 'style')
+    const loading = $queryForStyles(document.head)
       .map(el => {
-        if (!(el instanceof HTMLStyleElement || el instanceof HTMLLinkElement)) {
-          return
-        }
         return new Promise((resolve, reject) => {
           if (el.sheet) {
             return resolve(el.sheet)
@@ -64,7 +61,7 @@ export default class implements Plugin {
   }
 }
 
-export function $queryForLibAttr(root: QueryableRoot, ...tagNames: string[]) {
-  const selector = tagNames.map(k => `${k}[${ATTR_CORE}]`).join(',')
-  return [...root.querySelectorAll(selector)]
+function $queryForStyles(root: QueryableRoot) {
+  const selector = ['LINK', 'STYLE'].map(k => `${k}[${ATTR_CORE}]`).join(',')
+  return [...root.querySelectorAll(selector)] as (HTMLStyleElement | HTMLLinkElement)[]
 }
