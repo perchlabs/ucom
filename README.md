@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`20.0k` minified) (`7.7k` gzipped)
+* ucom (`19.9k` minified) (`7.7k` gzipped)
 * ucom_vue (`29.9k` minified) (`12.1k` gzipped)
 * ucom_lite (`8.2k` minified) (`3.3k` gzipped)
 

@@ -3,16 +3,16 @@ import type {
   PluginDefineParams,
   PluginConstructParams,
 } from '../core'
-
-const PROTO_SKIP = new Set('constructor')
+import {
+  isSystemKey,
+} from '../core'
 
 export default class implements Plugin {
   async define({Raw, exports}: PluginDefineParams): Promise<void> {
     const rawProto = Raw.prototype
     for (const k in exports) {
-      if (k in PROTO_SKIP) { continue }
+      if (isSystemKey(k)) { continue }
       if (k in rawProto) { continue }
-      if (k.startsWith('$')) { continue }
       rawProto[k] = exports[k]
     }
   }

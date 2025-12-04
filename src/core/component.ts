@@ -66,7 +66,7 @@ export async function fetchTemplate(resolved: string): Promise<HTMLTemplateEleme
   }
 
   const tpl = document.createElement('template')
-  tpl.innerHTML =  text
+  tpl.innerHTML = text
   // Keep the prestine template so that plugins can reference it.
   Object.freeze(tpl)
 
@@ -74,16 +74,14 @@ export async function fetchTemplate(resolved: string): Promise<HTMLTemplateEleme
 }
 
 export class ComponentFetchError extends Error {
-  #resolved: string
-  #reason: string
-  get resolved() { return this.#resolved }
-  get reason() { return this.#reason }
+  resolved: string
+  reason: string
 
-  constructor(resolved: string, reason: string = 'Unspecified reason.') {
+  constructor(resolved: string, reason: string = 'Unspecified') {
     super()
 
-    this.#resolved = resolved
-    this.#reason = reason
+    this.resolved = resolved
+    this.reason = reason
   }
 }
 
@@ -117,7 +115,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
 }
 
 async function parseScript(name: string, frags: DocumentFragment): Promise<ParsedScript> {
-  const script: HTMLScriptElement | null = frags.querySelector('script[setup]') ?? frags.querySelector('script')
+  const script: HTMLScriptElement | null = frags.querySelector('script')
   script?.remove()
 
   const blobURL = URL.createObjectURL(
@@ -151,10 +149,9 @@ async function parseScript(name: string, frags: DocumentFragment): Promise<Parse
   ]
 }
 
-export function hashContent(data: HTMLTemplateElement | DocumentFragment): string {
-  const frags = data instanceof DocumentFragment ? data : data.content
+export function hashContent(tpl: HTMLTemplateElement): string {
   const div = document.createElement('div')
-  div.appendChild(frags.cloneNode(true))
+  div.appendChild(tpl.content.cloneNode(true))
   return div.innerHTML
     .split('')
     .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)

@@ -21,6 +21,15 @@ export const CUSTOM_CALLBACKS = [
 export const STATIC_FORM_ASSOCIATED = 'formAssociated'
 export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
+export const coreFunctionsSet = new Set(['constructor', ...CUSTOM_CALLBACKS])
+
+
+export function isSystemKey(k: string) {
+  if (k in coreFunctionsSet) return true
+  if (k.startsWith('$')) return true
+  return false
+}
+
 export const $attr = (elem: HTMLElement | null, name: string, fallback?: any): any => {
   const attr = elem?.getAttribute(name)
   if (fallback !== undefined && !attr) {
