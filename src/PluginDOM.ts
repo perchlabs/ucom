@@ -22,50 +22,55 @@ export default class implements Plugin {
   }
 }
 
-async function processTemplates(man: ComponentManager, tplArr: HTMLTemplateElement[]) {
-  await templateHandler(tplArr, async (tpl) => {
-    const ref = tpl.getAttribute(ATTR_CORE)
+const processTemplates = async (
+  man: ComponentManager,
+  tplArr: HTMLTemplateElement[],
+) => templateHandler(tplArr, async (tpl) => {
+  const ref = tpl.getAttribute(ATTR_CORE)
 
-    if (ref) {
-      tpl.remove()
-      const method = isValidName(ref) ? man.define : man.import
-      await method(ref, tpl)
-    } else {
-      // Annonymous bootstrap app
-      const ident = await man.define(null, tpl)
-      if (ident) {
-        tpl.replaceWith(document.createElement(ident.name))
-      }
+  if (ref) {
+    tpl.remove()
+    const method = isValidName(ref) ? man.define : man.import
+    await method(ref, tpl)
+  } else {
+    // Annonymous bootstrap app
+    const ident = await man.define(null, tpl)
+    if (ident) {
+      tpl.replaceWith(document.createElement(ident.name))
     }
-  })
-}
+  }
+})
 
-function observeMutations(man: ComponentManager, root: QueryableRoot) {
-  new MutationObserver(muts => {
-    processTemplates(man, getMutationTemplates(muts))
-  }).observe(root, {
-    childList: true,
-    subtree: true,
-  })
-}
+const observeMutations = (
+  man: ComponentManager,
+  root: QueryableRoot,
+) => new MutationObserver(muts => {
+  processTemplates(man, getMutationTemplates(muts))
+}).observe(root, {
+  childList: true,
+  subtree: true,
+})
 
-function getMutationTemplates(muts: MutationRecord[]) {
-  return [...muts].map(v => [...v.addedNodes])
+const getMutationTemplates = (muts: MutationRecord[]) => {
+  const elements = [...muts]
+    .map(v => [...v.addedNodes])
     .flat()
-    .filter(el => el.nodeType === 1)
-    .map(el => {
-      if (el instanceof HTMLTemplateElement) {
-        return el.hasAttribute(ATTR_CORE) ? el : null
-      } else if (el instanceof HTMLElement) {
-        return queryForTemplates(el)
-      }
-    })
+    .filter(el => el.nodeType === 1) as Element[]
+
+  return elements
+    .map(el => el.tagName == 'TEMPLATE'
+      ? el.hasAttribute(ATTR_CORE) ? el as HTMLTemplateElement: null
+      : queryForTemplates(el)
+    )
     .filter(v => !!v)
     .flat()
 }
 
-const queryForTemplates = (root: QueryableRoot) => 
-  [...root.querySelectorAll(`template[${ATTR_CORE}]`)] as HTMLTemplateElement[]
+const queryForTemplates = (root: QueryableRoot) => [...(
+  root.querySelectorAll?.(`template[${ATTR_CORE}]`) ?? []
+)] as HTMLTemplateElement[]
 
-const templateHandler = (tplArr: HTMLTemplateElement[], fn: (tpl: HTMLTemplateElement) => Promise<void>) =>
-  Promise.all(tplArr.map(tpl => fn(tpl)))
+const templateHandler = (
+  tplArr: HTMLTemplateElement[],
+  fn: (tpl: HTMLTemplateElement) => Promise<void>,
+) => Promise.all(tplArr.map(tpl => fn(tpl)))
