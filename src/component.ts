@@ -11,11 +11,8 @@ import type {
 
   PluginCallbackBuilderParams,
   AttributeChangedCallback,
-  // ConnectedCallback,
-  // DisconnectedCallback,
   FormAssociatedCallback,
   FormDisabledCallback,
-  // FormResetCallback,
   FormStateRestoreCallback,
 } from './types.ts'
 import {

@@ -3,10 +3,10 @@ import type {
   PluginStartParams,
   PluginConstructParams,
   Plugin,
-} from '../core'
+} from './types.ts'
 import {
   ATTR_CORE,
-} from '../core'
+} from './common.ts'
 
 export default class implements Plugin {
   #sheetsLoader?: Promise<CSSStyleSheet[]>

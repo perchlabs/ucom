@@ -2,10 +2,10 @@ import type {
   Plugin,
   PluginDefineParams,
   PluginConstructParams,
-} from '../core'
+} from './types.ts'
 import {
   isSystemKey,
-} from '../core'
+} from './common.ts'
 
 export default class implements Plugin {
   async define({Raw, exports}: PluginDefineParams): Promise<void> {

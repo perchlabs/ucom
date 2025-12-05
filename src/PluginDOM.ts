@@ -4,10 +4,10 @@ import type {
   PluginParseParams,
   QueryableRoot,
   ComponentManager,
-} from '../core'
+} from './types.ts'
 import {
   ATTR_CORE,
-} from '../core'
+} from './common.ts'
 
 export default class implements Plugin {
   async start({man}: PluginStartParams) {

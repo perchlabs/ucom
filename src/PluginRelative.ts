@@ -1,7 +1,7 @@
 import type {
   PluginParseParams,
   Plugin,
-} from '../core'
+} from './types.ts'
 
 export default class implements Plugin {
   async parse({

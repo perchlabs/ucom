@@ -6,30 +6,36 @@ import type {
   PluginDefineParams,
   PluginCallbackBuilderParams,
   ModuleExports,
-  AttributeChangedCallback,
-  ConnectedCallback,
-  DisconnectedCallback,
-} from '../core'
+  // AttributeChangedCallback,
+  // ConnectedCallback,
+  // DisconnectedCallback,
+} from '../types.ts'
+import type {
+  ValueWrapper,
+  persister,
+  syncer,
+  computer,
+  ComputedFunctionMaker,
+  ProxyRecord,
+} from './types'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
-  CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
-} from '../core'
-import {createApp, ref, reactive, effect, stop, nextTick} from '../petite-shadow-vue'
+  isSystemKey,
+} from '../common.ts'
+import { computed, signal, effect, effectScope, trigger } from './alien-signals'
+import { cleanup, createRootContext } from './context.ts'
+import { walkChildren } from './walk.ts'
+import { createStore } from './store.ts'
 
 // Proto and constructor constants.
-const PropsIndex = '$props'
-const StoreIndex = '$store'
+const PropsIndex = Symbol()
+const StoreIndex = Symbol()
 // Instance constants.
+const CleanupIndex = Symbol()
 const DataIndex = '$data'
-const CleanupIndex = Symbol('clean')
-
-const persistMap: Record<string, any> = {}
-const syncMap: Record<string, any> = {}
-
-const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
 // const PROP_REFLECT_DEFAULT = true
 
@@ -69,27 +75,32 @@ export default class implements Plugin {
     }
 
     proto.$effect = function(f: () => {}) {
-      const e = effect(f, this[DataIndex])
-      this[CleanupIndex].push(e)
+      this[CleanupIndex].push(effect(f))
     }
 
     Object.assign(proto, {
-      $reactive: reactive,
-      $nextTick: nextTick,
+      $computed: computed,
+      $effectScope: effectScope,
+      $signal: signal,
+      $trigger: trigger,
     })
   }
 
-  [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackBuilderParams): AttributeChangedCallback {
+  [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
-    const el = elReal as UpgradeComponent
+    const up = el as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
-      const data = el[DataIndex]
-      const propDef = propDefs[k]
-      if (!data || !propDef) {
+      const data = up[DataIndex]
+      if (!data) {
         return
       }
-  
+
+      const propDef = propDefs[k]
+      if (!propDef) {
+        return
+      }
+
       const val = propDef.cast?.(newValue) ?? newValue
       if (val !== data[k]) {
         data[k] = val
@@ -97,19 +108,16 @@ export default class implements Plugin {
     }
   }
 
-  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
+  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams) {
     const el = elReal as UpgradeComponent
     return async () => {
-      if (!el[CleanupIndex]) {
-        el[CleanupIndex] = []
-        connectData(Com as UpgradeComponentConstructor, Raw, el, shadow)
-      }
+      connectData(Com as UpgradeComponentConstructor, Raw, el as UpgradeComponent, shadow)
     }
   }
 
-  [DISCONNECTED]({el: elReal}: PluginCallbackBuilderParams): DisconnectedCallback {
+  [DISCONNECTED]({el: elReal}: PluginCallbackBuilderParams) {
     const el = elReal as UpgradeComponent
-    return () => el[CleanupIndex].forEach(stop)
+    return () => el[CleanupIndex]?.forEach(f => f())
   }
 }
 
@@ -134,61 +142,72 @@ function connectData(
   el: UpgradeComponent,
   shadow: ShadowRoot,
 ) {
-  const r = makeReactive(Com, Raw, el)
-  Object.assign(el, {
-    get [DataIndex]() { return r },
-  })
+  if (el[CleanupIndex]) {
+    return
+  }
+  el[CleanupIndex] = []
 
-  createApp(shadow, r)
-  el.$nextTick()
+  const store = makeStore(Com, Raw, el)
+  const ctx = createRootContext(shadow, store)
+  Object.assign(el, {
+    get [DataIndex]() { return store.data },
+  })
+  walkChildren(ctx, shadow)
+
+  el[CleanupIndex].push?.(() => cleanup(ctx.el))
 }
 
-function makeReactive(
+function makeStore(
   Com: UpgradeComponentConstructor,
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
-): ReactiveProxy {
+) {
   const {
     def: {name},
     [PropsIndex]: propDefs,
-    [StoreIndex]: storeMaker,
+    [StoreIndex]: userDefinedStore,
   } = Com
+  const store = createStore(el, name)
   const props = makeProps(el, propDefs)
 
-  const d: Record<string, any> = {
-    ...props,
-    get $me() { return el },
-  }
-
-  const store = storeMaker?.({
-    props,
-    persisted: (v: any) => new Persisted(v),
-    synced: (v: any) => new Synced(v),
-  }) ?? {}
+  store.addRaw(props)
   Object.getOwnPropertyNames(rawProto)
-    .filter(k => !storeProhibitedFunctions.has(k))
     .forEach(k => {
+      if (isSystemKey(k)) {
+        return
+      }
       const v = rawProto[k]
       if (typeof v === 'function') {
-        d[k] = v.bind(el)
+        store.add(k, v)
       }
     })
 
-  for (let [k, v] of Object.entries(store)) {
-    if (v instanceof Synced) {
-      d[k] = makeSynced(name, k, v)
+  const raw = userDefinedStore?.({
+    props,
+    persisted: (v: any) => new Persisted(v),
+    synced: (v: any) => new Synced(v),
+    computed: (v: ComputedFunctionMaker) => new Computed(v)
+  }) ?? {}
+
+  for (const [k, v] of Object.entries(raw)) {
+    if (v instanceof Computed) {
+      store.computed(k, v.v)
+    } else if (v instanceof Synced) {
+      store.sync(k, v.v)
     } else if (v instanceof Persisted) {
-      d[k] = makePersisted(name, k, v)
+      store.persist(k, v.v)
     } else {
-      d[k] = v
+      store.add(k, v)
     }
   }
 
-  return reactive(d)
+  return store
 }
 
 function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
-  const d: Record<string, any> = {}
+  const d: Record<string, any> = {
+    // get $el() { return el },
+  }
   for (let [k, v] of Object.entries(propDefs)) {
     const raw = el.getAttribute(k) ?? v.default
     d[k] = v.cast?.(raw) ?? raw
@@ -196,56 +215,24 @@ function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   return d
 }
 
-function makeSynced(name: string, key: string, sync: Synced) {
-  const storeId = `${name}-${key}`
-
-  if (!(storeId in syncMap)) {
-    syncMap[storeId] = ref(sync.v)
-  }
-  return syncMap[storeId]
-}
-
-function makePersisted(name: string, key: string, persist: Persisted) {
-  const storeId = `${name}-${key}`
-
-  if (!(storeId in persistMap)) { 
-    const getItem = () => {
-      const item = localStorage.getItem(storeId)
-      return item ? JSON.parse(item) : undefined
-    }
-
-    const rf = ref(getItem() ?? persist.v)
-    persistMap[storeId] = rf
-
-    const setItem = () => localStorage.setItem(storeId, JSON.stringify(rf.value))
-    effect(() => setItem())
-  }
-
-  return persistMap[storeId]
-}
-
-class StoreValue {
-  v: any
-  constructor(v: any) {
+class StoreValue<T = any> implements ValueWrapper<T> {
+  v: T
+  constructor(v: T) {
     this.v = v
   }
 }
-class Persisted extends StoreValue {}
-class Synced extends StoreValue {}
-
-type persister = (v: string) => InstanceType<typeof Persisted>
-type syncer = (v: string) => InstanceType<typeof Synced>
-
-type ReactiveProxy = ReturnType<typeof reactive>
+export class Synced extends StoreValue {}
+export class Persisted extends StoreValue {}
+export class Computed extends StoreValue<ComputedFunctionMaker>{}
 
 type StoreMaker = (opts: {
   props: Record<string, string>
   persisted: persister
   synced: syncer
+  computed: computer
 }) => Record<string, any>
 
 type PropsMaker = () => PropRawDefs
-
 type PropRawDefs = Record<string, PropRawDef>
 type PropRawDef = string | PropDef
 
@@ -258,16 +245,19 @@ type PropDef = {
 type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
-  [DataIndex]: Record<string, any>
-  [CleanupIndex]: Record<string, any>
-  $reactive: () => {}
-  $nextTick: () => {}
+  [DataIndex]: ProxyRecord
+  [CleanupIndex]: (() => void)[]
+  $computed: () => any
+  $effect: () => any
+  $effectScope: () => any
+  $signal: () => any
+  $trigger: () => any
 }
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {
   new (...args: any[]): UpgradeComponent
-  [PropsIndex]: Record<string, any>
-  [StoreIndex]?: StoreMaker,
+  [PropsIndex]: PropDefs
+  [StoreIndex]?: StoreMaker
 }
 
 type UpgradeExports = ModuleExports & {

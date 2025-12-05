@@ -8,8 +8,8 @@ import type {
   ComponentIdentity,
   ComponentManager,
   ComponentImporter,
-} from '../core'
-import { $attrBool } from '../core'
+} from './types.ts'
+import { $attrBool } from './common.ts'
 
 // const ATTR_SRC = 'u-src'
 

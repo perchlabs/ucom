@@ -34,7 +34,12 @@ export default (pluginClasses: PluginConstructor[]) => {
   const man: ComponentManager = {
     lazy,
     resolve,
-    start: () => plugins.start({man}),
+    start: async () => {
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve))
+      }
+      plugins.start({man})
+    },
     registered(name: string): boolean {
       name = name.toLowerCase()
       return name in idents || customElements.get(name) !== undefined
