@@ -25,7 +25,13 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
   isSystemKey,
 } from '../common.ts'
-import { computed, signal, effect, effectScope, trigger } from './alien-signals'
+import {
+  computed as $computed,
+  signal as $signal,
+  effect as $effect,
+  effectScope as $effectScope,
+  trigger as $trigger,
+} from './alien-signals'
 import { cleanup, createRootContext } from './context.ts'
 import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
@@ -74,30 +80,22 @@ export default class implements Plugin {
       })
     }
 
-    proto.$effect = function(f: () => {}) {
-      this[CleanupIndex].push(effect(f))
-    }
-
     Object.assign(proto, {
-      $computed: computed,
-      $effectScope: effectScope,
-      $signal: signal,
-      $trigger: trigger,
+      $computed,
+      $effect,
+      $effectScope,
+      $signal,
+      $trigger,
     })
   }
 
   [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
-    const up = el as UpgradeComponent
 
     return (k: string, _oldValue: string | null, newValue: string | null) => {
-      const data = up[DataIndex]
-      if (!data) {
-        return
-      }
-
+      const data = (el as UpgradeComponent)[DataIndex]
       const propDef = propDefs[k]
-      if (!propDef) {
+      if (!data || !propDef) {
         return
       }
 
@@ -108,16 +106,12 @@ export default class implements Plugin {
     }
   }
 
-  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams) {
-    const el = elReal as UpgradeComponent
-    return async () => {
-      connectData(Com as UpgradeComponentConstructor, Raw, el as UpgradeComponent, shadow)
-    }
+  [CONNECTED](params: PluginCallbackBuilderParams) {
+    return () => connectData(params as UpgradedPluginCallbackBuilderParams)
   }
 
-  [DISCONNECTED]({el: elReal}: PluginCallbackBuilderParams) {
-    const el = elReal as UpgradeComponent
-    return () => el[CleanupIndex]?.forEach(f => f())
+  [DISCONNECTED]({el}: PluginCallbackBuilderParams) {
+    return () => (el as UpgradeComponent)[CleanupIndex]?.forEach(f => f())
   }
 }
 
@@ -136,12 +130,7 @@ function makePropDefs(propsMaker?: PropsMaker): PropDefs {
   return defs
 }
 
-function connectData(
-  Com: UpgradeComponentConstructor,
-  Raw: RawComponentConstructor,
-  el: UpgradeComponent,
-  shadow: ShadowRoot,
-) {
+function connectData({Com, Raw, el, shadow}: UpgradedPluginCallbackBuilderParams) {
   if (el[CleanupIndex]) {
     return
   }
@@ -261,4 +250,11 @@ interface UpgradeComponentConstructor extends WebComponentConstructor {
 type UpgradeExports = ModuleExports & {
   $props?: PropsMaker
   $store?: StoreMaker
+}
+
+type UpgradedPluginCallbackBuilderParams = {
+  Com: UpgradeComponentConstructor;
+  Raw: RawComponentConstructor;
+  el: UpgradeComponent;
+  shadow: ShadowRoot;
 }
