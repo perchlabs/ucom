@@ -105,7 +105,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
     componentOpts,
   )
 
-  await plugins.define({man, def, Com, Raw, exports})
+  await plugins.define({man, Com, Raw, exports})
   customElements.define(name, Com, customElementOpts)
 
   return def
@@ -179,7 +179,7 @@ function createComponentConstructor(
       this.#shadow.append(frags.cloneNode(true))
       plugins.construct({
         man,
-        def,
+        // def,
         Com,
         Raw,
         el: this,

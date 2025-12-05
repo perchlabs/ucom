@@ -107,24 +107,20 @@ export type ComponentDefiner = (name: string | null, tpl: HTMLTemplateElement) =
 export type ComponentImporter = (url: string, tpl?: HTMLTemplateElement) => Promise<ComponentDef | undefined> 
 export type ComponentResolver = (url: string) => ComponentIdentity
 
-export interface PluginCoreParams {
-  man: ComponentManager,
-  def: ComponentDef
-}
-
 export type PluginStartParams = {
   man: ComponentManager,
 }
-export type PluginParseParams = PluginCoreParams & {
+export type PluginParseParams = PluginStartParams & {
+  def: ComponentDef
   frags: DocumentFragment,
 }
-export type PluginDefineParams = PluginCoreParams & {
+export type PluginDefineParams = PluginStartParams & {
   Com: WebComponentConstructor,
   Raw: RawComponentConstructor,
   exports: ModuleExports,
 }
 
-export type PluginConstructParams = PluginCoreParams & {
+export type PluginConstructParams = PluginStartParams & {
   Com: WebComponentConstructor
   Raw: RawComponentConstructor,
   el: WebComponent,
