@@ -33,6 +33,13 @@ import {
 export default (pluginClasses: PluginConstructor[]): PluginManager  => {
   const plugins = pluginClasses.map(v => new v)
 
+  const provide = <T extends PluginCallbackType>(
+    key: PluginCallbackKey,
+    builderParams: PluginCallbackBuilderParams,
+  ) => plugins
+    .map((p: PluginCallbacks) => (p[key] as PluginCallbackBuilder<T>)?.(builderParams))
+    .filter(v => !!v)
+
   return {
     async start(params: PluginStartParams) {
       const promises = plugins.map(v => v.start?.(params))
@@ -69,14 +76,5 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
     // [FORM_STATE_RESTORE](builder: PluginCallbackBuilderParams, params: Parameters<FormStateRestoreCallback>) {
     //   provide<FormStateRestoreCallback>(FORM_STATE_RESTORE, builder).map(async f => await f(...params))
     // },
-  }
-
-  function provide<T extends PluginCallbackType>(
-    key: PluginCallbackKey,
-    builderParams: PluginCallbackBuilderParams,
-  ) {
-    return plugins
-      .map((p: PluginCallbacks) => (p[key] as PluginCallbackBuilder<T>)?.(builderParams))
-      .filter(v => !!v)
   }
 }
