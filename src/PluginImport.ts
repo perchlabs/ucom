@@ -9,7 +9,10 @@ import type {
   ComponentManager,
   ComponentImporter,
 } from './types.ts'
-import { $attrBool } from './common.ts'
+import {
+  $attrBool,
+  isValidName,
+} from './common.ts'
 
 // const ATTR_SRC = 'u-src'
 
@@ -49,33 +52,31 @@ async function processUndefinedElements(man: ComponentManager, undefArr: Element
   })
 }
 
-function observeMutations(man: ComponentManager, root: QueryableRoot) {
-  new MutationObserver(muts => {
-    processUndefinedElements(man, getMutationUndefined(man, muts))
-  }).observe(root, {
-    childList: true,
-    subtree: true,
-  })
+const observeMutations = (
+  man: ComponentManager,
+  root: QueryableRoot,
+) => new MutationObserver(muts => {
+  processUndefinedElements(man, getMutationUndefined(man, muts))
+}).observe(root, {
+  childList: true,
+  subtree: true,
+})
+
+const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => {
+  const elements = [...muts]
+    .map(v => [...v.addedNodes])
+    .flat()
+    .filter(el => el.nodeType === 1) as Element[]
+
+  return elements
+    .map(el => queryForUndefined(man, el))
+    .flat()
 }
 
-function getMutationUndefined(man: ComponentManager, muts: MutationRecord[]) {
-  return [...muts].map(v => [...v.addedNodes])
-    .flat()
-    .filter(el => el.nodeType === 1)
-    .map(el => el instanceof Element ? queryForUndefined(man, el) : undefined)
-    .filter(v => !!v)
-    .flat()
-}
+const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
+  const arr = Array.from(root.querySelectorAll(':not(:defined)')) as Element[]
 
-function queryForUndefined(man: ComponentManager, root: QueryableRoot) {
-  const arr = [...root.querySelectorAll(':not(:defined)')] as Element[]
-
-  if (!('tagName' in root)) {
-    return arr
-  }
-
-  const {tagName} = root
-  if (tagName.includes('-') && !man.registered(root.tagName)) {
+  if ('tagName' in root && isValidName(root.tagName.toLowerCase()) && !man.registered(root.tagName)) {
     arr.push(root)
   }
 

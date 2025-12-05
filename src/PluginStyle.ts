@@ -44,7 +44,7 @@ export default class implements Plugin {
             return resolve(el.sheet)
           }
           el.addEventListener('load', () => resolve(el.sheet), false)
-          el.addEventListener('error', () => reject(new Error('link failed loading')), false)
+          el.addEventListener('error', () => reject(new Error('theme failed loading')), false)
         })
       })
       .filter(v => Boolean(v))
