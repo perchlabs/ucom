@@ -26,7 +26,7 @@ export default (pluginClasses: PluginConstructor[]) => {
   // Resolves a component URL.
   const resolve = (url: string) => resolveImport(url, FILE_POSTFIX, DIR_POSTFIX)
 
-  const defineActual = async (ident: ComponentDefRaw) => {
+  const defineActual = (ident: ComponentDefRaw) => {
     delete lazy?.[ident.name]
     return defineComponent(man, plugins, ident)
   }
@@ -34,22 +34,26 @@ export default (pluginClasses: PluginConstructor[]) => {
   const man: ComponentManager = {
     lazy,
     resolve,
-    start: async () => {
+
+    async start() {
       if (document.readyState === 'loading') {
         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve))
       }
       plugins.start({man})
     },
+
     registered(name: string): boolean {
       name = name.toLowerCase()
       return name in idents || customElements.get(name) !== undefined
     },
+
     // Define a component by name.  If name is null then create a name based upon the hash of the template contents.
     async define(name: string | null, tpl: HTMLTemplateElement) {
       name = name ? name.toLowerCase() : `${AUTO_NAME_PREFIX}-${hashContent(tpl)}`
       idents[name] ??= defineActual({name, tpl, resolved: ''})
       return idents[name]
     },
+
     // Import a component.  Providing the optional template argument prevents a fetch operation.  This is useful
     // for inlining components on the server (with a plugin providing this functionality).  The URL is useful in
     // this case for allowing relative imports according to the public web path of the component.
