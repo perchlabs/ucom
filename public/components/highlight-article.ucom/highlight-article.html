@@ -14,8 +14,8 @@
   hljs.registerLanguage('javascript', jsLanguage)
 
   export function connectedCallback() {
-    const main = this.$querySelector('main')
-    const slot = this.$querySelector('slot')
+    const main = this.$('main')
+    const slot = this.$('slot')
 
     const change = () => {
       const tpl = [...slot.assignedNodes()].find(e => e instanceof HTMLTemplateElement)

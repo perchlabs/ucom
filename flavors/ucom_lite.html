@@ -41,7 +41,7 @@
 
   <script>
     export function connectedCallback() {
-      const router = this.$qs('rou-ter')
+      const router = this.$('rou-ter')
       router.addEventListener('routes', e => {
         console.log(e.detail)
       })

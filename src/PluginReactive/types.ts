@@ -28,6 +28,13 @@ export type ContextableElement = ShadowRoot | Element
 
 export type RefRecord = Record<string, WeakRef<ContextableElement>>
 
+export interface RootContext {
+  el: ContextableElement
+  data: ProxyRecord
+  refs: RefRecord
+  cleanup: (() => void)[]
+}
+
 export interface Context {
   el: ContextableElement
   data: Record<string, any>

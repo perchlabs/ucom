@@ -136,10 +136,9 @@ function connectData({Com, Raw, el, shadow}: UpgradedPluginCallbackBuilderParams
   }
   el[CleanupIndex] = []
 
-  const store = makeStore(Com, Raw, el)
-  const ctx = createRootContext(shadow, store)
+  const ctx = createRootContext(shadow, makeStore(Com, Raw, el))
   Object.assign(el, {
-    get [DataIndex]() { return store.data },
+    get [DataIndex]() { return ctx.data },
   })
   walkChildren(ctx, shadow)
 

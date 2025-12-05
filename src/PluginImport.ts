@@ -24,10 +24,8 @@ export default class implements Plugin {
     })
   }
 
-  construct({man, el: elReal, shadow}: PluginConstructParams): void {
-    const el = elReal as UpgradeComponent
-
-    el.$importSlot = async function(ref: unknown): Promise<ImportComponentData[]> {
+  construct({man, el, shadow}: PluginConstructParams): void {
+    (el as UpgradeComponent).$importSlot = async (ref: unknown): Promise<ImportComponentData[]> => {
       if (!(ref instanceof HTMLSlotElement)) {
         throw 'Invalid arugment.  Must be an HTML Element.'
       }

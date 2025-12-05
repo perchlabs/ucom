@@ -179,7 +179,6 @@ function createComponentConstructor(
       this.#shadow.append(frags.cloneNode(true))
       plugins.construct({
         man,
-        // def,
         Com,
         Raw,
         el: this,

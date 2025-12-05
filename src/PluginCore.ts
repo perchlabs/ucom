@@ -18,14 +18,9 @@ export default class implements Plugin {
   }
 
   construct({el, shadow}: PluginConstructParams): void {
-    const $querySelector = (v: string) => shadow.querySelector(v)
-    const $querySelectorAll = (v: string) => shadow.querySelectorAll(v)
-
     Object.assign(el, {
-      $querySelector,
-      $querySelectorAll,
-      $qs: $querySelector,
-      $qsa: $querySelectorAll,
+      $: (v: string) => shadow.querySelector(v),
+      $$: (v: string) => shadow.querySelectorAll(v),
     })
   }
 }

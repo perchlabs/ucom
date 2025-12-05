@@ -1,4 +1,5 @@
 import type {
+  RootContext,
   Context,
   ContextableElement,
   Store,
@@ -12,8 +13,8 @@ const contexts = new WeakMap<ContextableElement, Context>()
 // Create the root context object that gets passed to all directives.
 // The data property here is all reactive data because it comes directly from the
 // proxy store.
-export function createRootContext(el: ContextableElement, {data}: Store) {
-  const ctx: Context = {
+export function createRootContext(el: ShadowRoot, {data}: Store) {
+  const ctx: RootContext = {
     el,
     data,
     refs: {},
@@ -41,11 +42,6 @@ export function createSubContext(ctx: Context, el: ContextableElement, data: Rec
 }
 
 export function cleanup(el: ContextableElement) {
-  if (el == null) {
-    console.warn('[cleanup] Called on a null/undefined element.')
-    return
-  }
-
   const ctx = contexts.get(el)
   if (!ctx) return
   
