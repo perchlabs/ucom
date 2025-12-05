@@ -11,9 +11,9 @@ import type {
 
   PluginCallbackBuilderParams,
   AttributeChangedCallback,
-  FormAssociatedCallback,
-  FormDisabledCallback,
-  FormStateRestoreCallback,
+  // FormAssociatedCallback,
+  // FormDisabledCallback,
+  // FormStateRestoreCallback,
 } from './types.ts'
 import {
   $attr,
@@ -22,10 +22,10 @@ import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
-  FORM_ASSOCIATED,
-  FORM_DISABLED,
-  FORM_RESET,
-  FORM_STATE_RESTORE,
+  // FORM_ASSOCIATED,
+  // FORM_DISABLED,
+  // FORM_RESET,
+  // FORM_STATE_RESTORE,
 
   STATIC_FORM_ASSOCIATED,
   STATIC_OBSERVED_ATTRIBUTES,
@@ -205,25 +205,25 @@ function createComponentConstructor(
       await super[DISCONNECTED]?.()
     }
 
-    async [FORM_ASSOCIATED](...params: Parameters<FormAssociatedCallback>) {
-      plugins[FORM_ASSOCIATED](this.#params, params)
-      await super[FORM_ASSOCIATED]?.(...params)
-    }
+    // async [FORM_ASSOCIATED](...params: Parameters<FormAssociatedCallback>) {
+    //   plugins[FORM_ASSOCIATED](this.#params, params)
+    //   await super[FORM_ASSOCIATED]?.(...params)
+    // }
 
-    async [FORM_DISABLED](...params: Parameters<FormDisabledCallback>) {
-      plugins[FORM_DISABLED](this.#params, params)
-      await super[FORM_DISABLED]?.(...params)
-    }
+    // async [FORM_DISABLED](...params: Parameters<FormDisabledCallback>) {
+    //   plugins[FORM_DISABLED](this.#params, params)
+    //   await super[FORM_DISABLED]?.(...params)
+    // }
 
-    async [FORM_RESET]() {
-      plugins[FORM_RESET](this.#params)
-      await super[FORM_RESET]?.()
-    }
+    // async [FORM_RESET]() {
+    //   plugins[FORM_RESET](this.#params)
+    //   await super[FORM_RESET]?.()
+    // }
 
-    async [FORM_STATE_RESTORE](...params: Parameters<FormStateRestoreCallback>) {
-      plugins[FORM_STATE_RESTORE](this.#params, params)
-      await super[FORM_STATE_RESTORE]?.(...params)
-    }
+    // async [FORM_STATE_RESTORE](...params: Parameters<FormStateRestoreCallback>) {
+    //   plugins[FORM_STATE_RESTORE](this.#params, params)
+    //   await super[FORM_STATE_RESTORE]?.(...params)
+    // }
 
     get #params(): PluginCallbackBuilderParams {
       return {

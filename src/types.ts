@@ -39,22 +39,22 @@ export type FormResetCallback = () => CustomElementCallbackReturn
 export type FormStateRestoreCallback = (state: string | File | FormData, reason: 'autocomplete' | 'restore') => CustomElementCallbackReturn
 
 export type PluginCallbackKey =
-  'attributeChangedCallback' |
-  'connectedCallback' |
-  'disconnectedCallback' |
-  'formAssociatedCallback' |
-  'formDisabledCallback' |
-  'formResetCallback' |
-  'formStateRestoreCallback'
+  'attributeChangedCallback'
+  | 'connectedCallback'
+  | 'disconnectedCallback'
+  // | 'formAssociatedCallback'
+  // | 'formDisabledCallback'
+  // | 'formResetCallback'
+  // | 'formStateRestoreCallback'
 
 export type PluginCallbackType =
-  AttributeChangedCallback |
-  ConnectedCallback | 
-  DisconnectedCallback |
-  FormAssociatedCallback |
-  FormDisabledCallback |
-  FormResetCallback |
-  FormStateRestoreCallback
+  AttributeChangedCallback
+  | ConnectedCallback
+  | DisconnectedCallback
+  // | FormAssociatedCallback
+  // | FormDisabledCallback
+  // | FormResetCallback
+  // | FormStateRestoreCallback
 
 export type CallbackRelated = {
   [k in PluginCallbackKey]: (...args: any[]) => any
@@ -64,10 +64,10 @@ export interface PluginCallbacks extends Partial<CallbackRelated> {
   attributeChangedCallback?: PluginCallbackBuilder<AttributeChangedCallback>
   connectedCallback?: PluginCallbackBuilder<ConnectedCallback>
   disconnectedCallback?: PluginCallbackBuilder<DisconnectedCallback>
-  formAssociatedCallback?: PluginCallbackBuilder<FormAssociatedCallback>
-  formDisabledCallback?: PluginCallbackBuilder<FormDisabledCallback>
-  formResetCallback?: PluginCallbackBuilder<FormResetCallback>
-  formStateRestoreCallback?: PluginCallbackBuilder<FormStateRestoreCallback>
+  // formAssociatedCallback?: PluginCallbackBuilder<FormAssociatedCallback>
+  // formDisabledCallback?: PluginCallbackBuilder<FormDisabledCallback>
+  // formResetCallback?: PluginCallbackBuilder<FormResetCallback>
+  // formStateRestoreCallback?: PluginCallbackBuilder<FormStateRestoreCallback>
 }
 
 export interface Plugin extends PluginCallbacks {
@@ -89,12 +89,11 @@ export interface PluginManager extends CallbackRelated {
   attributeChangedCallback: PluginManagerCallbackWithParams<AttributeChangedCallback>
   connectedCallback: PluginManagerCallback
   disconnectedCallback: PluginManagerCallback
-  formAssociatedCallback: PluginManagerCallbackWithParams<FormAssociatedCallback>
-  formDisabledCallback: PluginManagerCallbackWithParams<FormDisabledCallback>
-  formResetCallback: PluginManagerCallback
-  formStateRestoreCallback: PluginManagerCallbackWithParams<FormStateRestoreCallback>
+  // formAssociatedCallback: PluginManagerCallbackWithParams<FormAssociatedCallback>
+  // formDisabledCallback: PluginManagerCallbackWithParams<FormDisabledCallback>
+  // formResetCallback: PluginManagerCallback
+  // formStateRestoreCallback: PluginManagerCallbackWithParams<FormStateRestoreCallback>
 }
-
 
 export interface ComponentManager {
   lazy: {[key: string]: ComponentIdentity},

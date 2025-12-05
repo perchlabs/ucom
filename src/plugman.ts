@@ -15,19 +15,19 @@ import type {
   AttributeChangedCallback,
   ConnectedCallback,
   DisconnectedCallback,
-  FormAssociatedCallback,
-  FormDisabledCallback,
-  FormResetCallback,
-  FormStateRestoreCallback,
+  // FormAssociatedCallback,
+  // FormDisabledCallback,
+  // FormResetCallback,
+  // FormStateRestoreCallback,
 } from './types.ts'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
-  FORM_ASSOCIATED,
-  FORM_DISABLED,
-  FORM_RESET,
-  FORM_STATE_RESTORE,
+  // FORM_ASSOCIATED,
+  // FORM_DISABLED,
+  // FORM_RESET,
+  // FORM_STATE_RESTORE,
 } from './common.ts'
 
 export default (pluginClasses: PluginConstructor[]): PluginManager  => {
@@ -57,18 +57,18 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
     [DISCONNECTED](builder: PluginCallbackBuilderParams) {
       provide<DisconnectedCallback>(DISCONNECTED, builder).map(async f => await f())
     },
-    [FORM_ASSOCIATED](builder: PluginCallbackBuilderParams, params: Parameters<FormAssociatedCallback>) {
-      provide<FormAssociatedCallback>(FORM_ASSOCIATED, builder).map(async f => await f(...params))
-    },
-    [FORM_DISABLED](builder: PluginCallbackBuilderParams, params: Parameters<FormDisabledCallback>) {
-      provide<FormDisabledCallback>(FORM_DISABLED, builder).map(async f => await f(...params))
-    },
-    [FORM_RESET](builder: PluginCallbackBuilderParams) {
-      provide<FormResetCallback>(FORM_RESET, builder).map(async f => await f())
-    },
-    [FORM_STATE_RESTORE](builder: PluginCallbackBuilderParams, params: Parameters<FormStateRestoreCallback>) {
-      provide<FormStateRestoreCallback>(FORM_STATE_RESTORE, builder).map(async f => await f(...params))
-    },
+    // [FORM_ASSOCIATED](builder: PluginCallbackBuilderParams, params: Parameters<FormAssociatedCallback>) {
+    //   provide<FormAssociatedCallback>(FORM_ASSOCIATED, builder).map(async f => await f(...params))
+    // },
+    // [FORM_DISABLED](builder: PluginCallbackBuilderParams, params: Parameters<FormDisabledCallback>) {
+    //   provide<FormDisabledCallback>(FORM_DISABLED, builder).map(async f => await f(...params))
+    // },
+    // [FORM_RESET](builder: PluginCallbackBuilderParams) {
+    //   provide<FormResetCallback>(FORM_RESET, builder).map(async f => await f())
+    // },
+    // [FORM_STATE_RESTORE](builder: PluginCallbackBuilderParams, params: Parameters<FormStateRestoreCallback>) {
+    //   provide<FormStateRestoreCallback>(FORM_STATE_RESTORE, builder).map(async f => await f(...params))
+    // },
   }
 
   function provide<T extends PluginCallbackType>(
