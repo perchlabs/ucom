@@ -18,7 +18,7 @@
       const {$data} = this
       const slot = this.$qs('slot')
 
-      this.#routes = makeRoutes(await this.$importRoot(slot))
+      this.#routes = makeRoutes(await this.$importSlot(slot))
       this.dispatchEvent(new CustomEvent('routes', {
         detail: structuredClone(this.#routes),
       }))
@@ -63,7 +63,8 @@
   }
 
   function makeRoutes(dataArr) {
-    return dataArr.map(({name, attributes}) => {
+    return dataArr.map(({ident, attributes}) => {
+      const {name} = ident
       const {loc} = attributes
       return {
         name,

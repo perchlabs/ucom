@@ -172,10 +172,8 @@ function makeStore(
 
   store.addRaw(props)
   Object.getOwnPropertyNames(rawProto)
+    .filter(k => !isSystemKey(k))
     .forEach(k => {
-      if (isSystemKey(k)) {
-        return
-      }
       const v = rawProto[k]
       if (typeof v === 'function') {
         store.add(k, v)

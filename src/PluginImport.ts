@@ -15,7 +15,7 @@ import { $attrBool } from './common.ts'
 
 export default class implements Plugin {
   async parse({man, frags}: PluginParseParams) {
-    await importRoot(man, frags)
+    await importElements(man, Array.from(frags.children))
   }
 
   async define({man, Com}: PluginDefineParams) {
@@ -27,12 +27,12 @@ export default class implements Plugin {
   construct({man, el: elReal, shadow}: PluginConstructParams): void {
     const el = elReal as UpgradeComponent
 
-    el.$importRoot = async function(ref: unknown): Promise<ImportComponentData[]> {
-      if (!(ref instanceof HTMLElement)) {
+    el.$importSlot = async function(ref: unknown): Promise<ImportComponentData[]> {
+      if (!(ref instanceof HTMLSlotElement)) {
         throw 'Invalid arugment.  Must be an HTML Element.'
       }
 
-      const dataArr = importRoot(man, ref)
+      const dataArr = importElements(man, ref.assignedElements())
       processUndefinedElements(man, queryForUndefined(man, shadow))
       return dataArr
     }
@@ -71,6 +71,7 @@ function getMutationUndefined(man: ComponentManager, muts: MutationRecord[]) {
 
 function queryForUndefined(man: ComponentManager, root: QueryableRoot) {
   const arr = [...root.querySelectorAll(':not(:defined)')] as Element[]
+
   if (!('tagName' in root)) {
     return arr
   }
@@ -83,42 +84,24 @@ function queryForUndefined(man: ComponentManager, root: QueryableRoot) {
   return arr
 }
 
-async function importRoot(man: ComponentManager, root: QueryableRoot): Promise<ImportComponentData[]> {
-  const carry: ImportCarry = {
-    urlPrefix: '',
-    lazy: false,
-  }
+async function importElements(man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> {
+  let base: ImportBase = ['', false]
 
-  const dataArr: ImportComponentData[] = []
-
-  // TODO: Wait for standards to ":scope > " for finding only top-level children of DocumentFragment.
-  // for (const el of [...root.querySelectorAll(':scope > base, :scope > source') as NodeListOf<HTMLElement>]) {
-  // }
-
-  const elArr = root instanceof HTMLSlotElement ? root.assignedElements() : Array.from(root.children)
-  for (const el of elArr) {
+  return elArr.map(el => {
     if (el instanceof HTMLBaseElement) {
-      handleBaseElement(el, carry)
+      el.remove()
+      base = [
+        el.getAttribute('href') ?? '',
+        $attrBool(el, 'lazy'),
+      ]
     } else if (el instanceof HTMLSourceElement) {
-      const data = handleSourceElement(el, carry, man)
-      if (data) {
-        dataArr.push(data)
-      }
+      return handleSourceElement(man, el, base)
     }
-  }
-
-  return dataArr
-}
-
-function handleBaseElement(el: HTMLBaseElement, carry: ImportCarry) {
-  el.remove()
-  Object.assign(carry, {
-    lazy: $attrBool(el, 'lazy'),
-    urlPrefix: el.getAttribute('href') ?? '',
   })
+  .filter(v => !!v)
 }
 
-function handleSourceElement(el: HTMLSourceElement, carry: ImportCarry, man: ComponentManager): ImportComponentData | undefined {
+function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlPrefix, lazy]: ImportBase): ImportComponentData | undefined {
   el.remove()
 
   const src = el.getAttribute('src')
@@ -132,11 +115,11 @@ function handleSourceElement(el: HTMLSourceElement, carry: ImportCarry, man: Com
     attributes[name] = value
   }
 
-  const ident = man.resolve(carry.urlPrefix + src)
+  const ident = man.resolve(urlPrefix + src)
   const {name, resolved} = ident
 
   if (!man.registered(name)) {
-    if (carry.lazy || $attrBool(el, 'lazy')) {
+    if (lazy || $attrBool(el, 'lazy')) {
       man.lazy[name] = ident
     } else {
       man.import(resolved)
@@ -145,20 +128,21 @@ function handleSourceElement(el: HTMLSourceElement, carry: ImportCarry, man: Com
 
   return {
     attributes,
-    ...ident,
+    ident,
   }
 }
 
-type ImportComponentData = ComponentIdentity & {
-  attributes: Record<string, string>
+type ImportComponentData = {
+  attributes: Record<string, string>,
+  ident: ComponentIdentity,
 }
 
-type ImportCarry = {
-  urlPrefix: string
-  lazy: boolean
-}
+type ImportBase = [
+  urlPrefix: string,
+  lazy: boolean,
+]
 
 interface UpgradeComponent extends WebComponent {
   $import: ComponentImporter,
-  $importRoot: (ref: unknown) => Promise<ImportComponentData[]>
+  $importSlot: (ref: unknown) => Promise<ImportComponentData[]>
 }
