@@ -7,6 +7,7 @@ import type {
 } from './types.ts'
 import {
   ATTR_CORE,
+  isValidName,
 } from './common.ts'
 
 export default class implements Plugin {
@@ -27,14 +28,8 @@ async function processTemplates(man: ComponentManager, tplArr: HTMLTemplateEleme
 
     if (ref) {
       tpl.remove()
-      if (/^[a-z]+\-[a-z0-9]+$/.test(ref)) {
-        // Strict component name
-        await man.define(ref, tpl)
-      } else {
-        // Contains path characters
-        // This allows for server side inline definitions that still allows relative component paths.
-        await man.import(ref, tpl)
-      }
+      const method = isValidName(ref) ? man.define : man.import
+      await method(ref, tpl)
     } else {
       // Annonymous bootstrap app
       const ident = await man.define(null, tpl)
@@ -54,11 +49,6 @@ function observeMutations(man: ComponentManager, root: QueryableRoot) {
   })
 }
 
-function queryForTemplates(root: QueryableRoot) {
-  return [...root.querySelectorAll(`template[${ATTR_CORE}]`)]
-    .filter(v => v instanceof HTMLTemplateElement)
-}
-
 function getMutationTemplates(muts: MutationRecord[]) {
   return [...muts].map(v => [...v.addedNodes])
     .flat()
@@ -74,6 +64,8 @@ function getMutationTemplates(muts: MutationRecord[]) {
     .flat()
 }
 
-function templateHandler(tplArr: HTMLTemplateElement[], fn: (tpl: HTMLTemplateElement) => Promise<void>) {
-  return Promise.all(tplArr.map(tpl => fn(tpl)))
-}
+const queryForTemplates = (root: QueryableRoot) => 
+  [...root.querySelectorAll(`template[${ATTR_CORE}]`)] as HTMLTemplateElement[]
+
+const templateHandler = (tplArr: HTMLTemplateElement[], fn: (tpl: HTMLTemplateElement) => Promise<void>) =>
+  Promise.all(tplArr.map(tpl => fn(tpl)))
