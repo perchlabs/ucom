@@ -47,8 +47,7 @@ export const $attrList = (elem: HTMLElement | null, name: string): string[] => {
   return (elem?.getAttribute?.(name) ?? '').split(',').filter(Boolean)
 }
 
-// Taken from petite-vue.
-export const checkAttr = (el: Element, name: string): string | null => {
+export const pullAttr = (el: Element, name: string): string | null => {
   const val = el.getAttribute(name)
   if (val != null) {
     el.removeAttribute(name)

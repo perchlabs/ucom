@@ -47,3 +47,5 @@ export type DirectiveDef = {
   modifier: string
   value: string
 }
+export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef) => void
+

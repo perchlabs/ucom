@@ -4,7 +4,7 @@ import type {
 } from '../types.ts'
 import { effect } from '../alien-signals'
 import { cleanup } from '../context.ts'
-import { getParent } from '../utils.ts'
+import { getParent, makeElementAs } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
@@ -26,7 +26,6 @@ export function dirIs(ctx: Context, el: Element, dir: DirectiveDef) {
   parent.insertBefore(anchor, el)
   parent.removeChild(el)
 
-
   let tagName = ''
   let tag: Element | undefined
 
@@ -43,10 +42,7 @@ export function dirIs(ctx: Context, el: Element, dir: DirectiveDef) {
     }
 
     tagName = v
-    tag = document.createElement(tagName)
-    for (const {name, value} of Array.from(el.attributes).filter(({name}) => name !== 'u-is')) {
-      tag.setAttribute(name, value)
-    }
+    tag = makeElementAs(el, tagName)
 
     parent.insertBefore(tag, anchor)
     parent.removeChild(anchor)

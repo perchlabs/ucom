@@ -1,5 +1,9 @@
-import type {Context, DirectiveDef} from './types.ts'
-import { getDirectives } from './utils.ts'
+import type {
+  Context,
+  DirectiveDef,
+  DirectiveHandler,
+} from './types.ts'
+import { getDirectives, pullDir } from './utils.ts'
 import { dirTextOrHTML } from './directives/textOrHtml.ts'
 import { dirShow } from './directives/show.ts'
 import { dirEvent } from './directives/event.ts'
@@ -15,43 +19,22 @@ export function walk(ctx: Context, node: Node): ChildNode | null | void {
 
   const el = node as Element
 
-  const {control, normal} = getDirectives(el)
-  const getCtrl = (name: string) => control[name]
-
-  let dir: DirectiveDef | null
-  if ((dir = getCtrl('u-show'))) {
-    dirShow(ctx, el as HTMLElement, dir)
+  let def: DirectiveDef | undefined
+  if ((def = pullDir(el, 'u-show'))) {
+    dirShow(ctx, el as HTMLElement, def)
   }
-  if ((dir = getCtrl('u-for'))) {
-    return dirFor(ctx, el, dir)
+  if (def = pullDir(el, 'u-for')) {
+    return dirFor(ctx, el, def)
   }
-  if ((dir = getCtrl('u-is'))) {
-    return dirIs(ctx, el, dir)
+  if (def = pullDir(el, 'u-is')) {
+    return dirIs(ctx, el, def)
   }
 
-  let next: ChildNode | null | void = null
-
-  for (const dir of Object.values(normal)) {
-    switch(dir.key) {
-    case 'u-bind':
-      dirAttribute(ctx, el as HTMLElement, dir)
-      break
-    case 'u-on':
-      dirEvent(ctx, el, dir)
-      break
-    case 'u-text':
-    case 'u-html':
-      dirTextOrHTML(ctx, el as HTMLElement, dir)
-      break
-    case 'u-ref':
-      dirRef(ctx, el, dir)
-      break
-    }
+  for (const def of getDirectives(el)) {
+    dirMap[def.key]?.(ctx, el as HTMLElement, def)
   }
 
   walkChildren(ctx, el)
-
-  return next
 }
 
 export function walkChildren(ctx: Context, node: Element | DocumentFragment) {
@@ -59,4 +42,12 @@ export function walkChildren(ctx: Context, node: Element | DocumentFragment) {
   while (child) {
     child = walk(ctx, child) || child.nextSibling
   }
+}
+
+const dirMap: Record<string, DirectiveHandler> = {
+  'u-bind': dirAttribute,
+  'u-on': dirEvent,
+  'u-text': dirTextOrHTML,
+  'u-html': dirTextOrHTML,
+  'u-ref': dirRef,
 }
