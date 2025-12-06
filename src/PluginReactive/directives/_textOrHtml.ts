@@ -2,7 +2,7 @@ import type { Context, DirectiveDef } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function dirTextOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function _textOrHTML(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const {
     key,
     value: expr,

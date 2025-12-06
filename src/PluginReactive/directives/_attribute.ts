@@ -2,7 +2,7 @@ import type { Context, DirectiveDef } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function dirAttribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const {
     modifier: attrName,
     value: expr,

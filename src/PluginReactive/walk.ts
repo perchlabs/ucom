@@ -3,36 +3,34 @@ import type {
   DirectiveDef,
   DirectiveHandler,
 } from './types.ts'
-import { getDirectives, pullDir } from './utils.ts'
-import { dirTextOrHTML } from './directives/textOrHtml.ts'
-import { dirShow } from './directives/show.ts'
-import { dirEvent } from './directives/event.ts'
-import { dirAttribute } from './directives/attribute.ts'
-import { dirRef } from './directives/ref.ts'
-import { dirFor } from './directives/for.ts'
-import { dirIs } from './directives/is.ts'
+import { pullAttr } from '../common.ts'
+import { _textOrHTML } from './directives/_textOrHtml.ts'
+import { _show } from './directives/_show.ts'
+import { _event } from './directives/_event.ts'
+import { _attribute } from './directives/_attribute.ts'
+import { _ref } from './directives/_ref.ts'
+import { _for } from './directives/_for.ts'
+import { _is } from './directives/_is.ts'
 
 export function walk(ctx: Context, node: Node): ChildNode | null | void {
   // Skip text nodes, comments, etc - only process element nodes
   if (node.nodeType !== 1) return
   if (!ctx) return
 
-  const el = node as Element
+  const el = node as HTMLElement
 
   let def: DirectiveDef | undefined
   if ((def = pullDir(el, 'u-show'))) {
-    dirShow(ctx, el as HTMLElement, def)
+    _show(ctx, el, def)
   }
   if (def = pullDir(el, 'u-for')) {
-    return dirFor(ctx, el, def)
+    return _for(ctx, el, def)
   }
   if (def = pullDir(el, 'u-is')) {
-    return dirIs(ctx, el, def)
+    return _is(ctx, el, def)
   }
 
-  for (const def of getDirectives(el)) {
-    dirMap[def.key]?.(ctx, el as HTMLElement, def)
-  }
+  getDirectives(el).forEach(def => dirMap[def.key]?.(ctx, el, def))
 
   walkChildren(ctx, el)
 }
@@ -44,10 +42,30 @@ export function walkChildren(ctx: Context, node: Element | DocumentFragment) {
   }
 }
 
+// Split directive name to handle modifiers
+// (e.g. "u-on:click" -> ["u-on", "click"])
+function getDirectives(el: Element) {
+  return Array.from(el.attributes)
+    .filter(attr => attr.name.startsWith('u-'))
+    .map(({name, value}) => createDirective(name, value))
+}
+
 const dirMap: Record<string, DirectiveHandler> = {
-  'u-bind': dirAttribute,
-  'u-on': dirEvent,
-  'u-text': dirTextOrHTML,
-  'u-html': dirTextOrHTML,
-  'u-ref': dirRef,
+  'u-bind': _attribute,
+  'u-on': _event,
+  'u-text': _textOrHTML,
+  'u-html': _textOrHTML,
+  'u-ref': _ref,
+}
+
+function createDirective(name: string, value: string): DirectiveDef {
+  const [key, modifier] = name.split(':')
+  return {key, value, modifier}
+}
+
+function pullDir (el: Element, name: string) {
+  const attr = pullAttr(el, name)
+  if (attr) {
+    return createDirective(name, attr)
+  }
 }

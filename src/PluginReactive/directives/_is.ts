@@ -8,7 +8,7 @@ import { getParent, makeElementAs } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
-export function dirIs(ctx: Context, el: Element, dir: DirectiveDef) {
+export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   const {value: expr} = dir
 
   if (!expr.trim()) {

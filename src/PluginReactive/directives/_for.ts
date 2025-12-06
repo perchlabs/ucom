@@ -8,7 +8,7 @@ import { evaluate } from '../expression.ts'
 import { getParent } from '../utils.ts'
 import { walk } from '../walk.ts'
 
-export function dirFor(ctx: Context, el: Element, dir: DirectiveDef) {
+export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   const {value: expr} = dir
 
   // Parse the expression using regex
