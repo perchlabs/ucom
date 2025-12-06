@@ -28,11 +28,8 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   const isTemplate = el.tagName === 'TEMPLATE'
   const templateContent = isTemplate ? (el as HTMLTemplateElement).content : el
 
-  // Clone the template and remove u-for to prevent infinite loop (if not template tag)
+  // Clone the template.
   const template = templateContent.cloneNode(true) as Element
-  if (!isTemplate) {
-    template.removeAttribute('u-for')
-  }
 
   // Replace original element with a comment marker
   // This marker keeps track of where to insert rendered items
@@ -58,7 +55,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
 
       const iter = (item: any, idx: Number) => {
         // Clone the template for this item
-        const clone = template.cloneNode(true) as Element
+        const clone = template.cloneNode(true) as HTMLElement
 
         // Get actual elements to process
         const elements = isTemplate ? Array.from(clone.children) : [clone]
