@@ -220,7 +220,7 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 
 Ucom has Alpine/Vue style templating, with the `u-` prefix.
 
-Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`.
+Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`, `u-is`.
 
 ```html
 <template u-com>
