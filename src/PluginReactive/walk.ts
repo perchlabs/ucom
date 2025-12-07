@@ -49,7 +49,7 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
   }
 }
 
-const reDir = /^u-|&|@|:/
+const reDir = /^u-|\$|@|:/
 function getDirectives(el: Element) {
   return Array.from(el.attributes)
     .filter(attr => reDir.test(attr.name))
@@ -58,7 +58,7 @@ function getDirectives(el: Element) {
 
 const dirMap: Record<string, DirectiveHandler> = {
   'u-text': _text,
-  '&': _text,
+  '$': _text,
   'u-html': _html,
   'u-bind': _attribute,
   ':': _attribute,
@@ -69,7 +69,7 @@ const dirMap: Record<string, DirectiveHandler> = {
 
 function createDirective(keyReal: string, value: string): DirectiveDef {
   let ch1 = keyReal[0]
-  if (['@', '&', ':'].includes(ch1)) {
+  if (['@', '$', ':'].includes(ch1)) {
     return {
       key: ch1,
       value,
