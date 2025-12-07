@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "vite": "^7.2.4"
+    "vite": "^7.2.6"
   },
   "dependencies": {
     "@vue/shared": "file:./local_modules/vue-shared@3.2.27",
