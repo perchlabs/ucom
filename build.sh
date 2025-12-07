@@ -26,7 +26,7 @@ for name in "${@:2}"; do
   case "$UTIL" in
   esbuild)
     esbuild --format=esm --out-extension:.js=.js --minify --bundle \
-      "$ENTRY" --outdir="$OUT_DIR"
+      --outdir="$OUT_DIR" "$ENTRY"
   ;;
   bun)
     bun build --production --outdir="$OUT_DIR" "$ENTRY"

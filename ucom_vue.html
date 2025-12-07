@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Ucom</title>
+  <title>Ucom Vue</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- <link u-com rel="stylesheet" href="/style/chota-0.8.1.min.css"> -->
@@ -19,10 +19,10 @@
 
   <script type="importmap">{
     "imports": {
-      "@com/": "/components/"
+      "@com/": "/components_vue/"
     }
   }</script>
-  <script src="/src/ucom.ts" type="module"></script>
+  <script src="./src/ucom_vue.ts" type="module"></script>
 </head>
 <body>
 
@@ -30,10 +30,10 @@
   <source src="@com/rou-ter.html">
 
   <nav>
-    <a u-for="tab in tabs" :href="tab[0]" &tab[1]></a>
+    <a u-for="([hash, label]) in tabs" :href="hash">{{ label }}</a>
   </nav>
 
-  <rou-ter @routes="routesInit($event)">
+  <rou-ter @routes="routesInit">
     <base href="@com/routes/" lazy>
     <source src="route-unknown.html"  loc="#unknown"  unknown>
     <source src="route-home.html"     loc="#home"     tab="Home" default>
@@ -58,10 +58,8 @@
 
   <style>
     :host {
-      display: block;
       font-family: monospace;
       --link-color: blue;
-      width: 1000px;
     }
 
     nav {
@@ -96,6 +94,7 @@
       margin-bottom: 2rem;
     }
   </style>
+
 </template>
 
 </body>
