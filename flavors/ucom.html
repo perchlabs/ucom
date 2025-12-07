@@ -30,11 +30,10 @@
   <source src="@com/rou-ter.html">
 
   <nav>
-    <a u-for="tab in tabs" u-bind:href="tab[0]" u-text="tab[1]"></a>
-    <!-- <a u-for="([hash, label]) in tabs" u-bind:href="hash" u-text="label"></a> -->
+    <a u-for="tab in tabs" :href="tab[0]" &tab[1]></a>
   </nav>
 
-  <rou-ter u-on:routes="routesInit($event)">
+  <rou-ter @routes="routesInit($event)">
     <base href="@com/routes/" lazy>
     <source src="route-unknown.html"  loc="#unknown"  unknown>
     <source src="route-home.html"     loc="#home"     tab="Home" default>

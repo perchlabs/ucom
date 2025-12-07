@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`18.5k` minified) (`7.3k` gzipped)
+* ucom (`18.8k` minified) (`7.4k` gzipped)
 * ucom_vue (`28.7k` minified) (`11.9k` gzipped)
 * ucom_lite (`7.0k` minified) (`3.1k` gzipped)
 
@@ -218,13 +218,40 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 
 ### Templating
 
-Ucom has Alpine-style templating, with the `u-` prefix.
+Ucom has Alpine/Vue style templating, with the `u-` prefix.
 
 Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`.
 
 ```html
 <template u-com>
-  <div u-for="n in 10" u-text="n"></div>
+  <div u-for="n in 10" u-text="n" u-on:click="alert(n)"></div>
+</template>
+```
+
+Use Vue style shortcuts.  `&` is short for `u-text:`, `@` is short for `u-on:`
+```html
+<template u-com>
+  <div u-for="n in 10" &n @click="alert(n)"></div>
+</template>
+```
+
+While displaying text a `meta` [void element](https://developer.mozilla.org/en-US/docs/Glossary/Void_element) tag is converted to span.  This is fine because the shadow root of the web component separates it from the main HTML document.
+
+This was chosen as a compromise between the ugly verbose Alpine style and the more complicated Vue style.  This way we don't need to parse text nodes with complicated regular expressions.
+
+```html
+<template u-com>
+  <!-- The ugly Alpine style way -->
+  Powers of two:
+  <div u-for="n in 5">
+    <span u-text="n"></span>, <span u-text="n * 2"></span>, <span u-text="n * 4"></span>
+  </div>
+
+  <!-- The pretty Ucom way -->
+  Powers of two:
+  <div u-for="n in 5">
+    <meta &n>, <meta &="n*2">, , <meta &="n*4">
+  </div>
 </template>
 ```
 
@@ -232,45 +259,50 @@ You can use the store to gain access to reactive data.
 
 ```html
 <template u-com>
-  <button u-on:click="count++"><span u-text="count"></span> times</button>
-  <script>
-    export const $store = {count: 0}
+  <button @click="count++"><meta &count> times</button>
+  <div>Double it <meta &double></div>
 
-    export function $store() {
+  <script>
+    export function $store({computed}) {
       return {
         count: 0,
+        double: computed($d => $d.count * 2),
       }
     }
 
     export function connectedCallback() {
-      this.$effect(() => console.log(this.$data.count))
+      this.$effect(() => console.log('count: ', this.$data.count))
+      this.$effect(() => console.log('double: ', this.$data.double))
     }
   </script>
 </template>
 ```
 
-#### Syncronized and Persistent Reactive Data
+#### SyncronizedPersistent Reactive Data
 
 If you wrap a store value with the `synced` and `persisted` function then it will gain some features.
 
 ```html
 <template u-com>
   <!-- Normal store counter -->
-  <button u-on:click="normal++"><span u-text="normal"></span> times</button>
+  <button @click="normal++"><meta &normal> times</button>
 
   <!-- Changes to this counter will be syncronized across all elements of the same name. -->
-  <button u-on:click="sync++"><span u-text="sync"></span> times</button>
+  <button @click="sync++"><meta &sync> times</button>
 
   <!-- This counter will be both syncronized and persisted across all instances of this element -->
   <!-- of the same name (and page refreshes of this self-instantiated custom element) -->
-  <button u-on:click="persist++"><span u-text="persist"></span> times</button>
+  <button @click="persist++"><meta &persist> times</button>
+
+  <div>You have clicked a total of <meta &total> times</div>
 
   <script>
-    export function $store({persisted, synced}) {
+    export function $store({computed, persisted, synced}) {
       return {
         normal: 0,
         persist: persisted(0),
         sync: synced(0),
+        total: computed($d => $d.normal + $d.persist + $d.sync),
       }
     }
   </script>
@@ -283,7 +315,7 @@ It's easy to add js properties and html attributes to your components.
 <my-counter count="5"></my-counter>
 
 <template u-com="my-counter">
-  <button u-on:click="count++"><span u-text="count"></span> times</button>
+  <button @click="count++"><meta &count> times</button>
 
   <script>
     export function $props() {

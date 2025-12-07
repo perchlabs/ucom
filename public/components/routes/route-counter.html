@@ -2,13 +2,13 @@
 <source src="fancy-counter.html">
 
 <div>
-  <button u-on:click="count++">Click: <span u-text="count"></span></button>
+  <button @click="count++">Click: <meta &count></span></button>
 </div>
 
 <fancy-counter
   name="test"
-  u-bind:count="count"
-  u-on:count="count = $event.count">
+  :count
+  @count="count = $event.count">
 </fancy-counter>
 <fancy-counter></fancy-counter>
 

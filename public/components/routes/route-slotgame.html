@@ -3,13 +3,13 @@
 
 <header>
   Game Size:
-  <input u-bind:value="rows" u-on:input="rows = $event.target.value">
+  <input :value="rows" @input="rows = $event.target.value">
   x
-  <input u-bind:value="cols" u-on:input="cols = $event.target.value">
-  <span u-text="rows"></span> x <span u-text="cols"></span>
+  <input :value="cols" @input="cols = $event.target.value">
+  <meta &rows> x <meta &cols>
 </header>
 
-<slot-game u-bind:rows="rows" u-bind:cols="cols">
+<slot-game :rows="rows" :cols="cols">
   <div slot="cell:0:3">
     HERE
   </div>

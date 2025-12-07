@@ -1,8 +1,8 @@
 import type {
-  ContextableElement,
+  ContextableNode,
 } from './types.ts'
 
-export function getParent(el: ContextableElement): ContextableElement {
+export function getParent(el: ContextableNode): ContextableNode {
   return el.parentElement ?? el.getRootNode() as ShadowRoot
 }
 

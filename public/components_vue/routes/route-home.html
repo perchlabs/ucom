@@ -132,7 +132,7 @@
 <template u-com="example-05">
   <div>You can use Vue style template syntax for event handlers.</div>
   <div>Count: {{ count }}</div>
-  <div>Number is: {{ countType }}</div>
+  <div>Number is: {{ oddeven }}</div>
   <nav>
     <button @click="count--">Less</button>
     <button @click="count++">More</button>
@@ -151,14 +151,14 @@
     export function $store({props}) {
       return {
         count: props.count,
-        countType: findType(props.count),
+        oddeven: findType(props.count),
       }
     }
 
     export function connectedCallback() {
       const {$data} = this
       this.$effect(() => {
-        $data.countType = findType($data.count)
+        $data.oddeven = findType($data.count)
       })
     }
 

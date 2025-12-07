@@ -24,19 +24,19 @@ export interface Store {
 }
 export type StoreAdder = (key: string, val: any) => void
 
-export type ContextableElement = ShadowRoot | Element
+export type ContextableNode = DocumentFragment | Element
 
-export type RefRecord = Record<string, WeakRef<ContextableElement>>
+export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export interface RootContext {
-  el: ContextableElement
+  el: ContextableNode
   data: ProxyRecord
   refs: RefRecord
   cleanup: (() => void)[]
 }
 
 export interface Context {
-  el: ContextableElement
+  el: ContextableNode
   data: Record<string, any>
   refs: RefRecord
   cleanup: (() => void)[]
@@ -47,5 +47,6 @@ export type DirectiveDef = {
   modifier: string
   value: string
 }
-export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef) => void
-
+export type DirectiveHandlerReturn = ChildNode | undefined
+export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
+=> DirectiveHandlerReturn

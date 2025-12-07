@@ -32,7 +32,7 @@ import {
   effectScope as $effectScope,
   trigger as $trigger,
 } from './alien-signals'
-import { cleanup, createRootContext } from './context.ts'
+import { cleanup, createContext } from './context.ts'
 import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
 
@@ -136,11 +136,11 @@ function connectData({Com, Raw, el, shadow}: UpgradedPluginCallbackBuilderParams
   }
   el[CleanupIndex] = []
 
-  const ctx = createRootContext(shadow, makeStore(Com, Raw, el))
+  const ctx = createContext(shadow, makeStore(Com, Raw, el))
   Object.assign(el, {
     get [DataIndex]() { return ctx.data },
   })
-  walkChildren(ctx, shadow)
+  walkChildren(shadow, ctx)
 
   el[CleanupIndex].push?.(() => cleanup(ctx.el))
 }

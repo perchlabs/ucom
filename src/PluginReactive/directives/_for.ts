@@ -1,12 +1,13 @@
 import type {
   Context,
+  ContextableNode,
   DirectiveDef,
 } from '../types.ts'
 import { effect } from '../alien-signals'
-import { createSubContext, cleanup } from '../context.ts'
+import { createScopedContext, cleanup } from '../context.ts'
 import { evaluate } from '../expression.ts'
 import { getParent } from '../utils.ts'
-import { walk } from '../walk.ts'
+import { walk, walkChildren } from '../walk.ts'
 
 export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   const {value: expr} = dir
@@ -19,6 +20,8 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
     return
   }
 
+  const next = el.nextSibling
+
   // Extract variable names and array expression
   const itemName = match[3] || match[1] // e.g. "item"
   const indexName = match[2] || 'index' // e.g. "index" or "i"
@@ -26,7 +29,8 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
 
   // Get the template content
   const isTemplate = el.tagName === 'TEMPLATE'
-  const templateContent = isTemplate ? (el as HTMLTemplateElement).content : el
+  const templateContent =  isTemplate ? (el as HTMLTemplateElement).content : el
+  const walkFunc = isTemplate ? walkChildren : walk
 
   // Clone the template.
   const template = templateContent.cloneNode(true) as Element
@@ -34,7 +38,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   // Replace original element with a comment marker
   // This marker keeps track of where to insert rendered items
   const parent = getParent(el)
-  const marker = document.createComment('u-for')
+  const marker = document.createComment(dir.key)
   parent.replaceChild(marker, el)
 
   // Keep track of rendered nodes for cleanup
@@ -55,28 +59,17 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
 
       const iter = (item: any, idx: Number) => {
         // Clone the template for this item
-        const clone = template.cloneNode(true) as HTMLElement
+        const clone = template.cloneNode(true) as ContextableNode
 
-        // Get actual elements to process
-        const elements = isTemplate ? Array.from(clone.children) : [clone]
-
-        elements.forEach(element => {
-          // Create a new scoped context with loop variables
-          // This adds "item" and "index" to the parent context
-          const subctx = createSubContext(ctx, element, {
-            [itemName]: item, // e.g. item = "Apple"
-            [indexName]: idx // e.g. index = 0
-          })
-          
-          // Process directives on the cloned element
-          walk(subctx, element)
-          
-          // Insert before the marker comment
-          parent.insertBefore(element, marker)
-          
-          // Track for cleanup on next render
-          saved.push(element)
+        // Create a new scoped context with loop variables
+        // This adds "item" and "index" to the parent context
+        const subctx = createScopedContext(clone, ctx, {
+          [itemName]: item, // e.g. item = "Apple"
+          [indexName]: idx // e.g. index = 0
         })
+
+        walkFunc(clone, subctx)
+        parent.insertBefore(clone, marker)
       }
 
       // Render each item
@@ -94,4 +87,6 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
 
   // Track effect disposal
   ctx.cleanup.push(dispose)
+
+  return next
 }

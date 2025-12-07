@@ -1,8 +1,8 @@
-import type { Context, DirectiveDef } from '../types.ts'
+import type { Context, DirectiveDef, DirectiveHandlerReturn } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): DirectiveHandlerReturn {
   const {
     modifier: attrName,
     value: expr,
@@ -21,9 +21,10 @@ export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   }
 
   // General attribute binding
+  const exprReal = expr ? expr : attrName
   const dispose = effect(() => {
     try {
-      const value = evaluate(ctx, expr)
+      const value = evaluate(ctx, exprReal)
 
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (typeof value === 'boolean') {
@@ -50,7 +51,7 @@ export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   ctx.cleanup.push(dispose)
 }
 
-export function bindClass(ctx: Context, el: Element, expr: string) {
+export function bindClass(ctx: Context, el: Element, expr: string): undefined {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
     
@@ -84,7 +85,7 @@ export function bindClass(ctx: Context, el: Element, expr: string) {
   ctx.cleanup.push(dispose)
 }
 
-function bindStyle(ctx: Context, el: HTMLElement, expr: string) {
+function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''
     

@@ -6,7 +6,7 @@
   <template u-is="name"></template>
 
   <highlight-article>
-    <raw-printer u-bind:name="name"></raw-printer>
+    <raw-printer :name></raw-printer>
   </highlight-article>
 
   <script>
@@ -129,11 +129,11 @@
 
 <template u-com="example-05">
   <div>You can use Alpine style template syntax for event handlers.</div>
-  <div>Count: <span u-text="count"></span></div>
-  <div>Number is: <span u-text="countType"></span></div>
+  <div>Count: <meta &count></span></div>
+  <div>Number is: <meta &oddeven></span></div>
   <nav>
-    <button u-on:click="count--">Less</button>
-    <button u-on:click="count++">More</button>
+    <button @click="count--">Less</button>
+    <button @click="count++">More</button>
   </nav>
 
   <script>
@@ -148,7 +148,7 @@
 
     export function $store({props, computed}) {
       return {
-        countType: computed($data => findType($data.count)),
+        oddeven: computed($data => findType($data.count)),
       }
     }
 
@@ -170,7 +170,7 @@
   <br>
   Unnamed custom elements such as this will be remembered by a hash of their text definition.
 
-  <div id="count">You've loaded this component <span u-text="count"></span> time(s).</div>
+  <div id="count">You've loaded this component <meta &count></span> time(s).</div>
 
   <script>
     export function $store({persisted}) {

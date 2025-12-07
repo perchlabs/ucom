@@ -22,7 +22,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   const next = el.nextSibling
 
   const parent = getParent(el)
-  const anchor = new Comment('u-is')
+  const anchor = new Comment(dir.key)
   parent.insertBefore(anchor, el)
   parent.removeChild(el)
 
@@ -47,7 +47,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
     parent.insertBefore(tag, anchor)
     parent.removeChild(anchor)
 
-    walk(ctx, tag)
+    walk(tag, ctx)
   })
 
   ctx.cleanup.push(dispose)

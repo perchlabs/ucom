@@ -1,30 +1,30 @@
 
 <main>
-  <h3>Counter: <span u-text="name"></span>
+  <h3>Counter: <meta &name>
   </h3>
 
   <section>
-    <button u-on:click="count--">(-)<sub>1</sub></button>
-    <button u-on:click="count++">(+)<sub>1</sub></button>
-    <button u-on:click="incRef($data)">(+)<sub>2</sub></button>
-    <div>Property: <span u-text="count"></span></div>
+    <button @click="count--">(-)<sub>1</sub></button>
+    <button @click="count++">(+)<sub>1</sub></button>
+    <button @click="incRef($data)">(+)<sub>2</sub></button>
+    <div>Property: <meta &count></div>
   </section>
   <section>
-    <button u-on:click="$me.$data.local--">(-)<sub>1</sub></button>
-    <button u-on:click="local++">(+)<sub>1</sub></button>
-    <button u-on:click="incLocal()">(+)<sub>2</sub></button>
-    <div>Local: <span u-text="local"></span></div>
+    <button @click="$me.$data.local--">(-)<sub>1</sub></button>
+    <button @click="local++">(+)<sub>1</sub></button>
+    <button @click="incLocal()">(+)<sub>2</sub></button>
+    <div>Local: <meta &local></div>
   </section>
   <section>
-    <button u-on:click="sync--">(-)<sub>1</sub></button>
-    <button u-on:click="$data.sync--">(-)<sub>2</sub></button>
-    <button u-on:click="incShare()">(+)<sub>2</sub></button>
-    <div>Syncronized: <span u-text="sync"></span></div>
+    <button @click="sync--">(-)<sub>1</sub></button>
+    <button @click="$data.sync--">(-)<sub>2</sub></button>
+    <button @click="incShare()">(+)<sub>2</sub></button>
+    <div>Syncronized: <meta &sync></div>
   </section>
   <section>
-    <button u-on:click="persist--">-</button>
-    <button u-on:click="persist++">+</button>
-    <div>Persistent: <span u-text="persist"></span></div>
+    <button @click="persist--">-</button>
+    <button @click="persist++">+</button>
+    <div>Persistent: <meta &persist></div>
   </section>
 </main>
 

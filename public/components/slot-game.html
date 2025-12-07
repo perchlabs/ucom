@@ -1,12 +1,12 @@
 <div>
-  <!-- SLOT GAME <span u-text="rows"></span> x <span u-text="cols"></span> -->
-  SLOT GAME <span u-text="`${rows} x ${cols}`"></span>
+  <!-- SLOT GAME <meta &rows> x <meta &cols> -->
+  SLOT GAME <meta &="`${rows} x ${cols}`">
 </div>
 
-<main u-bind:style="{'--rows': rows, '--cols': cols}">
+<main :style="{'--rows': rows, '--cols': cols}">
   <section u-for="cell in cells">
-    <slot u-bind:name="cell">
-      <div u-text="cell"></div>
+    <slot :name="cell">
+      <div &cell></div>
     </slot>
   </section>
 </main>
