@@ -224,14 +224,14 @@ Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-t
 
 ```html
 <template u-com>
-  <div u-for="n in 10" u-text="n" u-on:click="alert(n)"></div>
+  <div u-for="n in 10" u-on:click="alert(n)" u-text="n"></div>
 </template>
 ```
 
-Use Vue style shortcuts.  `&` is short for `u-text:`, `@` is short for `u-on:`
+Use Vue style shortcuts.  `$` is short for `u-text:`, `@` is short for `u-on:`
 ```html
 <template u-com>
-  <div u-for="n in 10" &n @click="alert(n)"></div>
+  <div u-for="n in 10" @click="alert(n)" $n></div>
 </template>
 ```
 
@@ -250,7 +250,7 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
   <!-- The pretty Ucom way -->
   Powers of two:
   <div u-for="n in 5">
-    <meta &n>, <meta &="n*2">, , <meta &="n*4">
+    <meta $n>, <meta $="n*2">, , <meta $="n*4">
   </div>
 </template>
 ```
@@ -259,8 +259,8 @@ You can use the store to gain access to reactive data.
 
 ```html
 <template u-com>
-  <button @click="count++"><meta &count> times</button>
-  <div>Double it <meta &double></div>
+  <button @click="count++"><meta $count> times</button>
+  <div>Double it <meta $double></div>
 
   <script>
     export function $store({computed}) {
@@ -285,16 +285,16 @@ If you wrap a store value with the `synced` and `persisted` function then it wil
 ```html
 <template u-com>
   <!-- Normal store counter -->
-  <button @click="normal++"><meta &normal> times</button>
+  <button @click="normal++"><meta $normal> times</button>
 
   <!-- Changes to this counter will be syncronized across all elements of the same name. -->
-  <button @click="sync++"><meta &sync> times</button>
+  <button @click="sync++"><meta $sync> times</button>
 
   <!-- This counter will be both syncronized and persisted across all instances of this element -->
   <!-- of the same name (and page refreshes of this self-instantiated custom element) -->
-  <button @click="persist++"><meta &persist> times</button>
+  <button @click="persist++"><meta $persist> times</button>
 
-  <div>You have clicked a total of <meta &total> times</div>
+  <div>You have clicked a total of <meta $total> times</div>
 
   <script>
     export function $store({computed, persisted, synced}) {
@@ -315,7 +315,7 @@ It's easy to add js properties and html attributes to your components.
 <my-counter count="5"></my-counter>
 
 <template u-com="my-counter">
-  <button @click="count++"><meta &count> times</button>
+  <button @click="count++"><meta $count> times</button>
 
   <script>
     export function $props() {

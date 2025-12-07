@@ -1,12 +1,12 @@
 <div>
-  <!-- SLOT GAME <meta &rows> x <meta &cols> -->
-  SLOT GAME <meta &="`${rows} x ${cols}`">
+  <!-- SLOT GAME <meta $rows> x <meta $cols> -->
+  SLOT GAME <meta $="`${rows} x ${cols}`">
 </div>
 
 <main :style="{'--rows': rows, '--cols': cols}">
-  <section u-for="cell in cells">
-    <slot :name="cell">
-      <div &cell></div>
+  <section u-for="name in cells">
+    <slot :name>
+      <div $name></div>
     </slot>
   </section>
 </main>

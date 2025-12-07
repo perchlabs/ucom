@@ -6,11 +6,11 @@
   <input :value="rows" @input="rows = $event.target.value">
   x
   <input :value="cols" @input="cols = $event.target.value">
-  <meta &rows> x <meta &cols>
+  <meta $rows> x <meta $cols>
 </header>
 
 <slot-game :rows="rows" :cols="cols">
-  <div slot="cell:0:3">
+  <div slot="0:3">
     HERE
   </div>
 </slot-game>

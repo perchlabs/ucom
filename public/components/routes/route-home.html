@@ -129,8 +129,8 @@
 
 <template u-com="example-05">
   <div>You can use Alpine style template syntax for event handlers.</div>
-  <div>Count: <meta &count></span></div>
-  <div>Number is: <meta &oddeven></span></div>
+  <div>Count: <meta $count></span></div>
+  <div>Number is: <meta $oddeven></span></div>
   <nav>
     <button @click="count--">Less</button>
     <button @click="count++">More</button>
@@ -170,7 +170,7 @@
   <br>
   Unnamed custom elements such as this will be remembered by a hash of their text definition.
 
-  <div id="count">You've loaded this component <meta &count></span> time(s).</div>
+  <div id="count">You've loaded this component <meta $count></span> time(s).</div>
 
   <script>
     export function $store({persisted}) {
