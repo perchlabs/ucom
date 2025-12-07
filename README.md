@@ -278,7 +278,7 @@ You can use the store to gain access to reactive data.
 </template>
 ```
 
-#### SyncronizedPersistent Reactive Data
+#### Syncronized and Persistent Reactive Data
 
 If you wrap a store value with the `synced` and `persisted` function then it will gain some features.
 
