@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "./build.sh ucom ucom_vue ucom_lite",
+    "build": "./build.sh esbuild ucom ucom_vue ucom_lite",
+    "build:bun": "./build.sh bun ucom ucom_vue ucom_lite",
     "tsc": "tsc"
   },
   "devDependencies": {
