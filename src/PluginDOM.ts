@@ -17,8 +17,8 @@ export default class implements Plugin {
     observeMutations(man, root)
   }
 
-  async parse({man, frags}: PluginParseParams) {
-    await processTemplates(man, queryForTemplates(frags))
+  async parse({man, frag}: PluginParseParams) {
+    await processTemplates(man, queryForTemplates(frag))
   }
 }
 

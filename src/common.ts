@@ -54,3 +54,10 @@ export const pullAttr = (el: Element, name: string): string | null => {
   }
   return val
 }
+
+export const getTopLevelChildren = <T extends HTMLElement>(
+  container: DocumentFragment | HTMLElement,
+  ...tagNames: string[]
+) => {
+  return Array.from(container.children).filter(({tagName: k}) =>tagNames.includes(k)) as T[]
+}
