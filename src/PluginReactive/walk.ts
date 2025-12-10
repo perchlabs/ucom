@@ -50,11 +50,9 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
 }
 
 const reDir = /^u-|\$|@|:/
-function getDirectives(el: Element) {
-  return Array.from(el.attributes)
-    .filter(attr => reDir.test(attr.name))
-    .map(({name, value}) => createDirective(name, value))
-}
+const getDirectives = (el: Element) => Array.from(el.attributes)
+  .filter(attr => reDir.test(attr.name))
+  .map(({name, value}) => createDirective(name, value))
 
 const dirMap: Record<string, DirectiveHandler> = {
   'u-text': _text,

@@ -1,5 +1,4 @@
 import type {
-  ComponentDefRaw,
   ComponentManager,
   ComponentIdentity,
   PluginConstructor,
@@ -26,9 +25,9 @@ export default (pluginClasses: PluginConstructor[]) => {
   // Resolves a component URL.
   const resolve = (url: string) => resolveImport(url, FILE_POSTFIX, DIR_POSTFIX)
 
-  const defineActual = (ident: ComponentDefRaw) => {
-    delete lazy?.[ident.name]
-    return defineComponent(man, plugins, ident)
+  const defineActual = (name: string, resolved: string, tpl: HTMLTemplateElement) => {
+    delete lazy?.[name]
+    return defineComponent(man, plugins, {name, resolved, tpl})
   }
 
   const man: ComponentManager = {
@@ -50,7 +49,7 @@ export default (pluginClasses: PluginConstructor[]) => {
     // Define a component by name.  If name is null then create a name based upon the hash of the template contents.
     async define(name: string | null, tpl: HTMLTemplateElement) {
       name = name ? name.toLowerCase() : `${AUTO_NAME_PREFIX}-${hashContent(tpl)}`
-      idents[name] ??= defineActual({name, tpl, resolved: ''})
+      idents[name] ??= defineActual(name, '', tpl )
       return idents[name]
     },
 
@@ -61,7 +60,7 @@ export default (pluginClasses: PluginConstructor[]) => {
       const {name, resolved} = resolve(url)
       try {
         tpl ??= await fetchTemplate(resolved)
-        return idents[name] ??= defineActual({name, tpl, resolved})
+        return idents[name] ??= defineActual(name, resolved, tpl)
       } catch (e) {
         if (e instanceof ComponentFetchError) {
           console.error(`Problem fetching component '${e.resolved}'. Hint: ${e.reason}.`)

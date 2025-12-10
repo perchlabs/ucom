@@ -6,7 +6,6 @@ import type {
   WebComponentConstructor,
   PluginManager,
   ComponentManager,
-  ComponentDefRaw,
   ComponentDef,
 
   PluginCallbackBuilderParams,
@@ -16,9 +15,6 @@ import type {
   // FormStateRestoreCallback,
 } from './types.ts'
 import {
-  $attr,
-  $attrBool,
-
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
@@ -26,9 +22,9 @@ import {
   // FORM_DISABLED,
   // FORM_RESET,
   // FORM_STATE_RESTORE,
-
   STATIC_FORM_ASSOCIATED,
   STATIC_OBSERVED_ATTRIBUTES,
+  getTopLevelChildren,
 } from './common.ts'
 
 export function resolveImport(url: string, postfixFile: string, postfixDir: string): ComponentIdentity {
@@ -82,37 +78,37 @@ export class ComponentFetchError extends Error {
   }
 }
 
-export async function defineComponent(man: ComponentManager, plugins: PluginManager, defMut: ComponentDefRaw) {
-  const def = Object.freeze(defMut)
+export async function defineComponent(man: ComponentManager, plugins: PluginManager, def: ComponentDef) {
   const {name, tpl} = def
 
-  const frags = (tpl.cloneNode(true) as HTMLTemplateElement).content
-  if (frags.querySelector('template[shadowrootmode]')) {
+  // Copy the fragment so that the original version will be available for printing.
+  const frag = tpl.content.cloneNode(true) as DocumentFragment
+  if (frag.querySelector('template[shadowrootmode]')) {
     throw `Component '${name}' used template attribute 'shadowrootmode'. Declarative Shadow Dom (DSD) is not allowed.`
   }
 
-  await plugins.parse({man, def, frags})
+  await plugins.parse({man, def, frag})
 
-  const [Raw, exports, shadowRootOpts, customElementOpts, componentOpts] = await parseScript(name, frags)
+  const [Raw, exports, shadowRootOpts, customElementOpts, webComponentOpts] = await processFragment(frag)
 
   const Com = createComponentConstructor(
     man,
     plugins,
     def,
     Raw,
-    frags,
+    frag,
     shadowRootOpts,
-    componentOpts,
+    webComponentOpts,
   )
 
-  await plugins.define({man, Com, Raw, exports})
+  await plugins.define({man, Com, Raw, frag, exports})
   customElements.define(name, Com, customElementOpts)
 
   return def
 }
 
-async function parseScript(name: string, frags: DocumentFragment): Promise<ParsedScript> {
-  const script: HTMLScriptElement | null = frags.querySelector('script')
+async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
+  const script = frag.querySelector('script')
   script?.remove()
 
   const blobURL = URL.createObjectURL(
@@ -120,7 +116,7 @@ async function parseScript(name: string, frags: DocumentFragment): Promise<Parse
   )
   const module = await import(
     /* @vite-ignore */
-    `${blobURL}#${name}`
+    blobURL
   )
   URL.revokeObjectURL(blobURL)
 
@@ -129,19 +125,32 @@ async function parseScript(name: string, frags: DocumentFragment): Promise<Parse
     ...exports
   } = module as {default: RawComponentConstructor} & ModuleExports
 
+  const reMeta = /^\+([a-z]+)/
+  const metaMap: Record<string, string> = {}
+  const metaArr = getTopLevelChildren<HTMLMetaElement>(frag, 'META')
+  metaArr.forEach(meta => {
+    Array.from(meta.attributes).forEach(({name, value}) => {
+      const match = name.match(reMeta)
+      if (match) {
+        metaMap[match[1]] = value
+        meta.remove()
+      }
+    })
+  })
+
   return [
     Raw,
     exports,
     {
-      mode: $attr(script, 'mode') ?? 'closed',
-      slotAssignment: $attr(script, 'slotAssignment') ?? undefined,
-      delegatesFocus: $attrBool(script, 'delegatesFocus') ?? undefined,
+      mode: metaMap?.mode as ShadowRootMode ?? 'closed',
+      slotAssignment: metaMap?.slotAssignment as SlotAssignmentMode ?? undefined,
+      delegatesFocus: 'delegatesFocus' in metaMap,
     },
     {
-      extends: $attr(script, 'extends') ?? undefined,
+      extends: metaMap?.extends,
     },
     {
-      internals: $attrBool(script, 'internals') ?? undefined,
+      internals: 'internals' in metaMap,
     },
   ]
 }
@@ -160,9 +169,9 @@ function createComponentConstructor(
   plugins: PluginManager,
   def: ComponentDef,
   Raw: RawComponentConstructor,
-  frags: DocumentFragment,
+  frag: DocumentFragment,
   shadowRootOpts: ShadowRootInit,
-  componentOpts: ComponentOpts,
+  webComponentOpts: WebComponentOpts,
 ): WebComponentConstructor {
   const Com = class extends Raw implements WebComponent {
     static [STATIC_FORM_ASSOCIATED] = Raw[STATIC_FORM_ASSOCIATED] ?? false
@@ -171,12 +180,12 @@ function createComponentConstructor(
     static get def() { return def }
 
     #shadow = this.attachShadow(shadowRootOpts)
-    #internals = componentOpts.internals ? this.attachInternals() : undefined
+    #internals = webComponentOpts.internals ? this.attachInternals() : undefined
 
     constructor() {
       super()
 
-      this.#shadow.append(frags.cloneNode(true))
+      this.#shadow.append(frag.cloneNode(true))
       plugins.construct({
         man,
         Com,
@@ -241,9 +250,9 @@ type ParsedScript = [
   exports: ModuleExports,
   shadowRootOpts: ShadowRootInit,
   customElementOpts: ElementDefinitionOptions,
-  componentOpts: ComponentOpts,
+  webComponentOpts: WebComponentOpts,
 ]
 
-type ComponentOpts = {
-  internals: boolean,
+type WebComponentOpts = {
+  internals: boolean | undefined,
 }

@@ -17,8 +17,8 @@ import {
 // const ATTR_SRC = 'u-src'
 
 export default class implements Plugin {
-  async parse({man, frags}: PluginParseParams) {
-    await importElements(man, Array.from(frags.children))
+  async parse({man, frag}: PluginParseParams) {
+    await importElements(man, Array.from(frag.children))
   }
 
   async define({man, Com}: PluginDefineParams) {

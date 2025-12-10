@@ -1,12 +1,13 @@
 
 export interface ComponentIdentity {
-  name: string,
-  resolved: string,
+  readonly name: string,
+  readonly resolved: string,
 }
-export interface ComponentDefRaw extends ComponentIdentity {
-  tpl: HTMLTemplateElement,
+export type ComponentDef = {
+  readonly name: string,
+  readonly resolved: string,
+  readonly tpl: HTMLTemplateElement,
 }
-export type ComponentDef = Readonly<ComponentDefRaw>
 
 export interface PluginConstructor {
   new (...args: any[]): Plugin
@@ -110,17 +111,28 @@ export type ComponentResolver = (url: string) => ComponentIdentity
 export type PluginStartParams = {
   man: ComponentManager,
 }
-export type PluginParseParams = PluginStartParams & {
+export type PluginParseParams = {
+  man: ComponentManager,
   def: ComponentDef
-  frags: DocumentFragment,
+  frag: DocumentFragment,
 }
-export type PluginDefineParams = PluginStartParams & {
-  Com: WebComponentConstructor,
-  Raw: RawComponentConstructor,
+export type PluginPredefineParams = {
+  man: ComponentManager,
+  def: ComponentDef
+  frag: DocumentFragment,
   exports: ModuleExports,
 }
 
-export type PluginConstructParams = PluginStartParams & {
+export type PluginDefineParams = {
+  man: ComponentManager,
+  Com: WebComponentConstructor,
+  Raw: RawComponentConstructor,
+  frag: DocumentFragment,
+  exports: ModuleExports,
+}
+
+export type PluginConstructParams = {
+  man: ComponentManager,
   Com: WebComponentConstructor
   Raw: RawComponentConstructor,
   el: WebComponent,
