@@ -7,7 +7,7 @@ import { effect } from '../alien-signals'
 import { createScopedContext, cleanup } from '../context.ts'
 import { evaluate } from '../expression.ts'
 import { getParent } from '../utils.ts'
-import { walk, walkChildren } from '../walk.ts'
+import { walk } from '../walk.ts'
 
 export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   const {value: expr} = dir
@@ -30,7 +30,6 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   // Get the template content
   const isTemplate = el.tagName === 'TEMPLATE'
   const templateContent =  isTemplate ? (el as HTMLTemplateElement).content : el
-  const walkFunc = isTemplate ? walkChildren : walk
 
   // Clone the template.
   const template = templateContent.cloneNode(true) as Element
@@ -61,15 +60,20 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
         // Clone the template for this item
         const clone = template.cloneNode(true) as ContextableNode
 
-        // Create a new scoped context with loop variables
-        // This adds "item" and "index" to the parent context
-        const subctx = createScopedContext(clone, ctx, {
-          [itemName]: item, // e.g. item = "Apple"
-          [indexName]: idx // e.g. index = 0
-        })
+        const children = isTemplate ? Array.from(clone.children) : [clone as Element]
 
-        walkFunc(clone, subctx)
-        parent.insertBefore(clone, marker)
+        children.forEach(child => {
+          // Create a new scoped context with loop variables
+          // This adds "item" and "index" to the parent context
+          const scoped = createScopedContext(child, ctx, {
+            [itemName]: item, // e.g. item = "Apple"
+            [indexName]: idx // e.g. index = 0
+          })
+
+          walk(child, scoped)
+          parent.insertBefore(child, marker)
+          saved.push(child)
+        })
       }
 
       // Render each item
