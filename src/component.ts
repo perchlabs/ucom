@@ -129,17 +129,13 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
   const metaMap: Record<string, string> = {}
   const metaArr = getTopLevelChildren<HTMLMetaElement>(frag, 'META')
   metaArr.forEach(meta => {
-    let count = 0
     Array.from(meta.attributes).forEach(({name, value}) => {
       const match = name.match(reMeta)
       if (match) {
         metaMap[match[1]] = value
-        count++
+        meta.remove()
       }
     })
-    if (count > 0) {
-      meta.remove()
-    }
   })
 
   return [
