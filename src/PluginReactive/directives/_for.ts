@@ -9,23 +9,43 @@ import { evaluate } from '../expression.ts'
 import { getParent } from '../utils.ts'
 import { walk } from '../walk.ts'
 
+const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
+const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+const stripParensRE = /^\(|\)$/g
+const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
+
 export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   const {value: expr} = dir
 
-  // Parse the expression using regex
-  // Matches: "item in items" or "(item, index) in items"
-  const match = expr.match(/^\s*(?:\(([^,]+),\s*([^)]+)\)|([^)\s]+))\s+in\s+(.+)$/)
-  if (!match) {
-    console.error('[u-for] Invalid syntax: ', expr)
-    return
-  }
-
   const next = el.nextSibling
 
-  // Extract variable names and array expression
-  const itemName = match[3] || match[1] // e.g. "item"
-  const indexName = match[2] || 'index' // e.g. "index" or "i"
-  const itemsExpr = match[4] // e.g. "items" or "todos"
+  const inMatch = expr.match(forAliasRE)
+  if (!inMatch) {
+    console.warn(`invalid u-for expression: ${expr}`)
+    return next
+  }
+
+  const itemsExp = inMatch[2].trim()
+  let valueExp = inMatch[1].trim().replace(stripParensRE, '').trim()
+  let destructureBindings: string[] | undefined
+  let isArrayDestructure = false
+  let indexName = 'index'
+  // let objIndexExp: string | undefined
+
+  let match
+  if ((match = valueExp.match(forIteratorRE))) {
+    valueExp = valueExp.replace(forIteratorRE, '').trim()
+    indexName = match[1].trim()
+    // if (match[2]) {
+    //   objIndexExp = match[2].trim()
+    // }
+  }
+
+  if ((match = valueExp.match(destructureRE))) {
+    destructureBindings = match[1].split(',').map((s) => s.trim())
+    isArrayDestructure = valueExp[0] === '['
+  }
+  const itemName = valueExp
 
   // Get the template content
   const isTemplate = el.tagName === 'TEMPLATE'
@@ -47,7 +67,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   const dispose = effect(() => {
     try {
       // Evaluate the array expression
-      const items = evaluate(ctx, itemsExpr)
+      const items = evaluate(ctx, itemsExp)
 
       // Clean up previous render
       saved.forEach(n => {
@@ -57,6 +77,18 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
       saved = []
 
       const iter = (item: any, idx: Number) => {
+        const data: Record<string, any> = {
+          [indexName]: idx,
+        }
+
+        if (destructureBindings) {
+          destructureBindings.forEach((b, i) => {
+            data[b] = item[isArrayDestructure ? i : b]
+          })
+        } else {
+          data[itemName] = item
+        }
+
         // Clone the template for this item
         const clone = template.cloneNode(true) as ContextableNode
 
@@ -64,11 +96,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
 
         children.forEach(child => {
           // Create a new scoped context with loop variables
-          // This adds "item" and "index" to the parent context
-          const scoped = createScopedContext(child, ctx, {
-            [itemName]: item, // e.g. item = "Apple"
-            [indexName]: idx // e.g. index = 0
-          })
+          const scoped = createScopedContext(child, ctx, {...data})
 
           walk(child, scoped)
           parent.insertBefore(child, marker)
