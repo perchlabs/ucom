@@ -66,9 +66,6 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   // Create effect that re-renders whenever array changes
   const dispose = effect(() => {
     try {
-      // Evaluate the array expression
-      const items = evaluate(ctx, itemsExp)
-
       // Clean up previous render
       saved.forEach(n => {
         cleanup(n)
@@ -76,7 +73,16 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
       })
       saved = []
 
-      const iter = (item: any, idx: Number) => {
+      // Evaluate the array expression
+      let items = evaluate(ctx, itemsExp)
+      if (Number.isInteger(items)) {
+        items = [...Array(items).keys()]
+      }
+      if (!Array.isArray(items)) {
+        return
+      }
+
+      items.forEach((item: any, idx: Number) => {
         const data: Record<string, any> = {
           [indexName]: idx,
         }
@@ -102,16 +108,8 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
           parent.insertBefore(child, marker)
           saved.push(child)
         })
-      }
+      })
 
-      // Render each item
-      if (Number.isInteger(items)) {
-        for (let i = 0; i < items as unknown as number; i++) {
-          iter(i, i)
-        }
-      } else if (Array.isArray(items)) {
-        items.forEach(iter)
-      }
     } catch (e) {
       console.error('[u-for] Error: ', e)
     }
