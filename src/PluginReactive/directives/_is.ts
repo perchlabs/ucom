@@ -2,6 +2,7 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
+import { isValidComponentPath } from '../../common.ts'
 import { effect } from '../alien-signals'
 import { cleanup } from '../context.ts'
 import { getParent, makeElementAs } from '../utils.ts'
@@ -9,6 +10,7 @@ import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
 export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
+  const {man} = ctx
   const {value: expr} = dir
 
   if (!expr.trim()) {
@@ -30,18 +32,33 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   let tag: Element | undefined
 
   const dispose = effect(() => {
-    const v = evaluate(ctx, expr)
-    if (!v || v === tagName) {
-      return
-    }
-
     if (tag) {
       parent.insertBefore(anchor, tag)
       cleanup(tag)
       tag.remove()
     }
 
-    tagName = v
+    let tagNameNew = ''
+    const ref = evaluate(ctx, expr)
+    if (isValidComponentPath(ref)) {
+      try {
+        const {name, resolved} = man.resolve(ref)
+        tagNameNew = name
+        if (!man.registered(tagNameNew)) {
+          man.import(resolved)
+        }
+      } catch (e) {
+        return
+      }
+    } else {
+      tagNameNew = evaluate(ctx, expr)
+    }
+
+    if (!tagNameNew || tagNameNew === tagName) {
+      return
+    }
+
+    tagName = tagNameNew
     tag = makeElementAs(el, tagName)
 
     parent.insertBefore(tag, anchor)

@@ -1,4 +1,5 @@
 import type {
+  ComponentManager,
   RawComponentConstructor,
   WebComponent,
   WebComponentConstructor,
@@ -130,13 +131,13 @@ function makePropDefs(propsMaker?: PropsMaker): PropDefs {
   return defs
 }
 
-function connectData({Com, Raw, el, shadow}: UpgradedPluginCallbackBuilderParams) {
+function connectData({Com, Raw, el, shadow, man}: UpgradedPluginCallbackBuilderParams) {
   if (el[CleanupIndex]) {
     return
   }
   el[CleanupIndex] = []
 
-  const ctx = createContext(shadow, makeStore(Com, Raw, el))
+  const ctx = createContext(shadow, man, makeProxyStore(Com, Raw, el))
   Object.assign(el, {
     get [DataIndex]() { return ctx.data },
   })
@@ -145,7 +146,7 @@ function connectData({Com, Raw, el, shadow}: UpgradedPluginCallbackBuilderParams
   el[CleanupIndex].push?.(() => cleanup(ctx.el))
 }
 
-function makeStore(
+function makeProxyStore(
   Com: UpgradeComponentConstructor,
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
@@ -187,7 +188,7 @@ function makeStore(
     }
   }
 
-  return store
+  return store.data
 }
 
 function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
@@ -256,4 +257,5 @@ type UpgradedPluginCallbackBuilderParams = {
   Raw: RawComponentConstructor;
   el: UpgradeComponent;
   shadow: ShadowRoot;
+  man: ComponentManager,
 }

@@ -1,3 +1,4 @@
+import type { ComponentManager } from '../types'
 import type { signal} from './alien-signals'
 
 export type Signal = typeof signal
@@ -30,12 +31,14 @@ export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export interface RootContext {
   el: ContextableNode
+  man: ComponentManager
   data: ProxyRecord
   refs: RefRecord
   cleanup: (() => void)[]
 }
 
 export interface Context {
+  man: ComponentManager
   el: ContextableNode
   data: Record<string, any>
   refs: RefRecord
@@ -49,4 +52,4 @@ export type DirectiveDef = {
 }
 export type DirectiveHandlerReturn = ChildNode | undefined
 export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
-=> DirectiveHandlerReturn
+  => DirectiveHandlerReturn

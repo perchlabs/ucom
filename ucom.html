@@ -27,22 +27,22 @@
 <body>
 
 <template u-com>
-  <source src="@com/rou-ter.html">
-
   <nav>
-    <a u-for="tab in tabs" :href="tab[0]" $tab[1]></a>
+    <a u-for="([href, text]) in tabs" :href $text></a>
   </nav>
 
-  <rou-ter @routes="routesInit($event)">
+  <template u-is="`@com/rou-ter.html`" @routes="routesInit($event)">
     <base href="@com/routes/" lazy>
     <source src="route-unknown.html"  loc="#unknown"  unknown>
     <source src="route-home.html"     loc="#home"     tab="Home" default>
     <source src="route-counter.html"  loc="#counter"  tab="Counter">
     <source src="route-slotgame.html" loc="#slotgame" tab="Slot Game">
     <source src="route-mutation.html" loc="#mutation" tab="Mutation">
-  </rou-ter>
+  </template>
 
   <script>
+    // export const $store = {tabs: []}
+
     export function $store() {
       return {
         tabs: [],

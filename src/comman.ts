@@ -4,7 +4,11 @@ import type {
   PluginConstructor,
 } from './types.ts'
 import {
-  resolveImport,
+  isValidComponentName as isName,
+  isValidComponentPath as isPath,
+} from './common.ts'
+import {
+  resolveImport as resolve,
   fetchTemplate,
   ComponentFetchError,
   defineComponent,
@@ -13,17 +17,12 @@ import {
 import plugMan from './plugman.ts'
 
 const AUTO_NAME_PREFIX = 'ucom'
-const FILE_POSTFIX = '.html'
-const DIR_POSTFIX = '.ucom'
 
 export default (pluginClasses: PluginConstructor[]) => {
   const plugins = plugMan(pluginClasses)
 
   const idents: Record<string, ReturnType<typeof defineComponent>> = {}
   const lazy: Record<string, ComponentIdentity> = {}
-
-  // Resolves a component URL.
-  const resolve = (url: string) => resolveImport(url, FILE_POSTFIX, DIR_POSTFIX)
 
   const defineActual = (name: string, resolved: string, tpl: HTMLTemplateElement) => {
     delete lazy?.[name]
@@ -33,6 +32,8 @@ export default (pluginClasses: PluginConstructor[]) => {
   const man: ComponentManager = {
     lazy,
     resolve,
+    isName,
+    isPath,
 
     async start() {
       if (document.readyState === 'loading') {

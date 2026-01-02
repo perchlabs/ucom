@@ -24,19 +24,21 @@ import {
   // FORM_STATE_RESTORE,
   STATIC_FORM_ASSOCIATED,
   STATIC_OBSERVED_ATTRIBUTES,
+  FILE_POSTFIX,
+  DIR_POSTFIX,
   getTopLevelChildren,
+  reComponentPath,
 } from './common.ts'
 
-export function resolveImport(url: string, postfixFile: string, postfixDir: string): ComponentIdentity {
-  const re = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${postfixFile}|${postfixDir})$`)
-  const matches = re.exec(url)
+export function resolveImport(url: string): ComponentIdentity {
+  const matches = reComponentPath.exec(url)
   if (!matches) {
     throw Error(`Problem resolving '${url}'`)
   }
 
   const [,name, postfix] = matches
-  if (postfix === postfixDir) {
-    url += `/${name}${postfixFile}`
+  if (postfix === DIR_POSTFIX) {
+    url += `/${name}${FILE_POSTFIX}`
   }
 
   return {
@@ -237,6 +239,7 @@ function createComponentConstructor(
       return {
         Com,
         Raw,
+        man,
         el: this,
         shadow: this.#shadow,
       }

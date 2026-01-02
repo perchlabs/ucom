@@ -28,6 +28,7 @@ export type PluginCallbackBuilderParams = {
   Raw: RawComponentConstructor,
   el: WebComponent,
   shadow: ShadowRoot,
+  man: ComponentManager,
 }
 
 type CustomElementCallbackReturn = void | Promise<void>
@@ -103,6 +104,8 @@ export interface ComponentManager {
   import: ComponentImporter,
   resolve: ComponentResolver,
   registered: (name: string) => boolean
+  isName: (name: string, toLowerCase?: boolean) => boolean
+  isPath: (path: string) => boolean
 }
 export type ComponentDefiner = (name: string | null, tpl: HTMLTemplateElement) => Promise<ComponentDef | undefined>
 export type ComponentImporter = (url: string, tpl?: HTMLTemplateElement) => Promise<ComponentDef | undefined> 

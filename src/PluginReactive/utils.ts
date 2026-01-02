@@ -11,5 +11,12 @@ export function makeElementAs(el: Element, tagName: string) {
   for (const {name, value} of Array.from(el.attributes)) {
     tag.setAttribute(name, value)
   }
+
+  if (el instanceof HTMLTemplateElement) {
+    tag.append(el.content)
+  } else {
+    tag.innerHTML = el.innerHTML
+  }
+
   return tag
 }

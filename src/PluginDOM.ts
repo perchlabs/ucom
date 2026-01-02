@@ -7,7 +7,7 @@ import type {
 } from './types.ts'
 import {
   ATTR_CORE,
-  isValidName,
+  isValidComponentName,
 } from './common.ts'
 
 export default class implements Plugin {
@@ -30,7 +30,7 @@ const processTemplates = async (
 
   if (ref) {
     tpl.remove()
-    const method = isValidName(ref) ? man.define : man.import
+    const method = isValidComponentName(ref) ? man.define : man.import
     await method(ref, tpl)
   } else {
     // Annonymous bootstrap app

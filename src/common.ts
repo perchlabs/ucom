@@ -18,12 +18,22 @@ export const CUSTOM_CALLBACKS = [
   FORM_STATE_RESTORE,
 ]
 
+export const FILE_POSTFIX = '.html'
+export const DIR_POSTFIX = '.ucom'
+
 export const STATIC_FORM_ASSOCIATED = 'formAssociated'
 export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
 export const coreFunctionsSet = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
-export const isValidName = (v: string) => /^[a-z]+\-[a-z0-9]+$/.test(v)
+export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
+export const isValidComponentPath = (path: string) => reComponentPath.test(path)
+export const isValidComponentName = (v: string, toLowerCase = false) => {
+  if (toLowerCase) {
+    v = v.toLowerCase()
+  }
+  return /^[a-z]+\-[a-z0-9]+$/.test(v)
+}
 
 export function isSystemKey(k: string) {
   if (k in coreFunctionsSet) return true

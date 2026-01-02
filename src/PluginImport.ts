@@ -11,7 +11,7 @@ import type {
 } from './types.ts'
 import {
   $attrBool,
-  isValidName,
+  isValidComponentName,
 } from './common.ts'
 
 // const ATTR_SRC = 'u-src'
@@ -76,7 +76,7 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = Array.from(root.querySelectorAll(':not(:defined)')) as Element[]
 
-  if ('tagName' in root && isValidName(root.tagName.toLowerCase()) && !man.registered(root.tagName)) {
+  if ('tagName' in root && man.isName(root.tagName, true) && !man.registered(root.tagName)) {
     arr.push(root)
   }
 
