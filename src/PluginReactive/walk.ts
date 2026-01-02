@@ -13,6 +13,7 @@ import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 import { _for } from './directives/_for.ts'
 import { _is } from './directives/_is.ts'
+import { _data } from './directives/_data.ts'
 
 export function walk(node: Node, ctx: Context): ChildNode | null | void {
   // Skip text nodes, comments, etc - only process element nodes
@@ -55,6 +56,7 @@ const getDirectives = (el: Element) => Array.from(el.attributes)
   .map(({name, value}) => createDirective(name, value))
 
 const dirMap: Record<string, DirectiveHandler> = {
+  'u-data': _data,
   'u-text': _text,
   '$': _text,
   'u-html': _html,

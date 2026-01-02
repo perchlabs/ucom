@@ -220,7 +220,7 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 
 Ucom has Alpine/Vue style templating, with the `u-` prefix.
 
-Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`, `u-is`.
+Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`, `u-is`, `u-data`.
 
 ```html
 <template u-com>
@@ -250,7 +250,13 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
   <!-- The pretty Ucom way -->
   Powers of two:
   <div u-for="n in 5">
-    <meta $n>, <meta $="n*2">, , <meta $="n*4">
+    <meta $n>, <meta $="n*2">, <meta $="n*4">
+  </div>
+
+  <!-- Precalculate using meta u-data -->
+  <div u-for="n in 5">
+    <meta u-data="n1: n, n2: n*2, n3: n*3">
+    <meta $n1>, <meta $n2>, <meta $n3>
   </div>
 </template>
 ```
@@ -275,6 +281,15 @@ You can use the store to gain access to reactive data.
       this.$effect(() => console.log('double: ', this.$data.double))
     }
   </script>
+</template>
+```
+
+You can also declare reactive data at its current context / block level by using a `meta` tag with the `u-data` directive.  This style can be mixed with the `$store` export from the script.
+
+```html
+<template u-com>
+  <meta u-data="count: 5">
+  <button @click="count++"><meta $count> times</button>
 </template>
 ```
 
