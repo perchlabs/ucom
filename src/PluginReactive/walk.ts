@@ -6,6 +6,8 @@ import type {
   DirectiveHandlerReturn,
 } from './types.ts'
 import { pullAttr } from '../common.ts'
+import { void_meta } from './voids/void_meta.ts'
+import { void_param } from './voids/void_param.ts'
 import { _text } from './directives/_text.ts'
 import { _html } from './directives/_html.ts'
 import { _show } from './directives/_show.ts'
@@ -14,7 +16,6 @@ import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 import { _for } from './directives/_for.ts'
 import { _is } from './directives/_is.ts'
-import { _data } from './directives/_data.ts'
 
 export function walk(node: Node, ctx: Context): ChildNode | null | void {
   // Skip text nodes, comments, etc - only process element nodes
@@ -22,6 +23,13 @@ export function walk(node: Node, ctx: Context): ChildNode | null | void {
   if (!ctx) return
 
   const el = node as HTMLElement
+
+  switch (el.tagName) {
+    case 'META':
+      return void_meta(ctx, el as HTMLMetaElement)
+    case 'PARAM':
+      return void_param(ctx, el as HTMLParamElement)
+  }
 
   let def: DirectiveDef | undefined 
   if ((def = pullDir(el, 'u-show'))) {
@@ -57,7 +65,6 @@ const getDirectives = (el: Element) => Array.from(el.attributes)
   .map(({name, value}) => createDirective(name, value))
 
 const dirMap: Record<string, DirectiveHandler> = {
-  'u-data': _data,
   'u-text': _text,
   '$': _text,
   'u-html': _html,
@@ -73,13 +80,13 @@ function createDirective(keyReal: string, value: string): DirectiveDef {
   if (['@', '$', ':'].includes(ch1)) {
     return {
       key: ch1,
-      value,
       modifier: keyReal.substring(1),
+      value,
     }
   }
 
   const [key, modifier] = keyReal.split(':')
-  return {key, value, modifier}
+  return {key, modifier, value}
 }
 
 function pullDir (el: Element, key: string) {

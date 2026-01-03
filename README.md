@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`19.9k` minified) (`7.8k` gzipped)
+* ucom (`20.0k` minified) (`7.8k` gzipped)
 * ucom_vue (`28.8k` minified) (`11.9k` gzipped)
 * ucom_lite (`7.1k` minified) (`3.1k` gzipped)
 
@@ -242,20 +242,23 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
 ```html
 <template u-com>
   <!-- The ugly Alpine style way -->
-  Powers of two:
+  Exponential:
   <div u-for="n in 5">
-    <span u-text="n"></span>, <span u-text="n * 2"></span>, <span u-text="n * 4"></span>
+    <span u-text="n ** 1"></span>, <span u-text="n ** 2"></span>, <span u-text="n ** 3"></span>
   </div>
 
   <!-- The pretty Ucom way -->
-  Powers of two:
+  Exponential:
   <div u-for="n in 5">
-    <meta $n>, <meta $="n*2">, <meta $="n*4">
+    <meta $n=>, <meta $="n**2">, <meta $="n**3">
   </div>
 
-  <!-- Precalculate using meta u-data -->
+  <!-- Precalculate using param -->
+  Exponential:
   <div u-for="n in 5">
-    <meta u-data="n1: n, n2: n*2, n3: n*3">
+    <param $n1="n**1">
+    <param $n2="n**2">
+    <param $n3="n**3">
     <meta $n1>, <meta $n2>, <meta $n3>
   </div>
 </template>
@@ -284,11 +287,11 @@ You can use the store to gain access to reactive data.
 </template>
 ```
 
-You can also declare reactive data at its current context / block level by using a `meta` tag with the `u-data` directive.  This style can be mixed with the `$store` export from the script.
+You can also declare reactive data at its current context / block level by using a `param` tag.  This style can be mixed with the `$store` export from the script.
 
 ```html
 <template u-com>
-  <meta u-data="count: 5">
+  <param $count="5">
   <button @click="count++"><meta $count> times</button>
 </template>
 ```
