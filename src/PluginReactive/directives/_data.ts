@@ -1,5 +1,5 @@
 import type { Context, DirectiveDef } from '../types.ts'
-import { effect, signal as createSignal } from '../alien-signals'
+import { effect, signal as createSignal, computed } from '../alien-signals'
 import { defineSignalProperty } from '../store.ts'
 import { evaluate } from '../expression.ts'
 
@@ -27,7 +27,9 @@ export function _data(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {
     try {
-      const dataNew = evaluate(ctx, expr) ?? {}
+      const dataNew = evaluate(expr, ctx, {
+        computed,
+      }) ?? {}
       for (const k in dataNew) {
         if (k in data) {
           data[k] = dataNew[k]

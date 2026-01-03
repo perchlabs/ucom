@@ -24,7 +24,7 @@ export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): Di
   const exprReal = expr ? expr : attrName
   const dispose = effect(() => {
     try {
-      const value = evaluate(ctx, exprReal)
+      const value = evaluate(exprReal, ctx)
 
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (typeof value === 'boolean') {
@@ -57,7 +57,7 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
     
   const dispose = effect(() => {
     try {
-      const value = evaluate(ctx, expr)
+      const value = evaluate(expr, ctx)
       
       // Start with original classes
       const classes = new Set(originalClasses)
@@ -91,7 +91,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
     
   const dispose = effect(() => {
     try {
-      const value = evaluate(ctx, expr)
+      const value = evaluate(expr, ctx)
       
       // Restore original styles first
       el.setAttribute('style', originalStyle)

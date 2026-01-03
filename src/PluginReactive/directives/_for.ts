@@ -74,7 +74,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
       saved = []
 
       // Evaluate the array expression
-      let items = evaluate(ctx, itemsExp)
+      let items = evaluate(itemsExp, ctx)
       if (Number.isInteger(items)) {
         items = [...Array(items).keys()]
       }

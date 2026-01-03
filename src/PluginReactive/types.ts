@@ -3,7 +3,7 @@ import type { signal} from './alien-signals'
 
 export type Signal = ReturnType<typeof signal>
 export type SignalRecord = Record<string, Signal>
-export type ProxyRecord = Record<string, Signal>
+export type ProxyRecord = Record<string, any>
 
 export interface ValueWrapper<T = any> {
   v: T
@@ -40,7 +40,7 @@ export interface RootContext {
 export interface Context {
   man: ComponentManager
   el: ContextableNode
-  data: Record<string, any>
+  data: ProxyRecord
   refs: RefRecord
   cleanup: (() => void)[]
 }

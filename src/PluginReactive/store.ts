@@ -1,5 +1,4 @@
 import type {
-  ContextableNode,
   ComputedFunctionMaker,
   ProxyRecord,
   SignalRecord,
@@ -17,7 +16,7 @@ type ItemRecord = Record<string, Item>
 const persistMap: ItemRecord = {}
 const syncMap: ItemRecord = {}
 
-export function createStore(el: ContextableNode, name: string) {
+export function createStore(el: HTMLElement, name: string) {
   const data: ProxyRecord = {}
   const signals: SignalRecord = {}
 

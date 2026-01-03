@@ -11,11 +11,10 @@ export function _event(ctx: Context, el: Element, dir: DirectiveDef): DirectiveH
 
   // Create event handler function with access to:
   // - $event: the native event object
-  // - $el: the element itself
   // - $data: the reactive data (via 'with' statement)
   const handler = (e: Event) => {
     try {
-      execute(ctx, stmt, e)
+      execute(stmt, ctx, {$event: e})
     } catch (err) {
       console.error(`[u-on:${eventName}] Error: `, err)
     }

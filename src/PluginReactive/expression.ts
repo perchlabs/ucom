@@ -1,33 +1,48 @@
-import type { Context } from './types.ts'
+import type {
+  Context,
+  ProxyRecord,
+} from './types.ts'
 
-export function evaluate({data}: Context, expr: string) {
+export function evaluate(expr: string, {data}: Context, other: ProxyRecord = {}) {
+  const params: ProxyRecord = {
+    $data: data,
+    ...other,
+  }
+
   try {
     // Create a function that evaluates the expression
     // The 'with' statement allows: "count" instead of "$data.count"
-    const fn = new Function('$data',
-      `with($data) { return ${expr}; }`)
-    
+    const fn = new Function(
+      ...Object.keys(params),
+      `with($data) { return ${expr}; }`
+    )
+
     // Execute and return result
-    return fn(data)
+    return fn(...Object.values(params))
   } catch (e) {
     console.error('[evaluate] Error: ', expr, e)
     return null
   }
 }
 
-export function execute({data}: Context, code: string, event: Event | null = null) {
+export function execute(code: string, {data}: Context, other: ProxyRecord = {}) {
+  const params: ProxyRecord = {
+    $data: data,
+    ...other,
+  }
+
   try {
     // Create an async function to support await
     // Include $event for u-on compatibility
-    const fn = new Function('$event', '$data',
+    const fn = new Function(
+      ...Object.keys(params),
       `return (async () => {
-        with($data) {
-          ${code}
-        }
-      })();`)
+        with($data) { ${code} }
+      })();`,
+    )
 
     // Execute and return promise for error handling
-    return fn.call(data, event, data) as Promise<void>
+    return fn.call(data, ...Object.values(params)) as Promise<void>
   } catch (err) {
     console.error('[execute] Error: ', err)
     return Promise.reject(err)

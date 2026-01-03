@@ -24,7 +24,7 @@ export function _show(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const dispose = effect(() => {
     try {
       // Evaluate expression as boolean
-      const show = evaluate(ctx, expr)
+      const show = evaluate(expr, ctx)
 
       // Showing
       if (show) {
