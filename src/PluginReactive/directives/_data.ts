@@ -1,21 +1,25 @@
 import type { Context, DirectiveDef } from '../types.ts'
 import { effect, signal as createSignal } from '../alien-signals'
+import { defineSignalProperty } from '../store.ts'
 import { evaluate } from '../expression.ts'
 
 export function _data(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
-  let {
-    value: expr
-  } = dir
+  const {data} = ctx
+  let {value: expr} = dir
+
+  expr = expr.trim()
+  if (!expr) {
+    return console.warn(`[u-data] expression cannot be empty.`)
+  }
 
   if (el.tagName !== 'META') {
-    console.warn('u-data only works on meta elements')
+    console.error('[u-data] directive only allowed on meta elements')
     return
   }
   
   const next = el.nextSibling
   el.remove()
 
-  expr = expr.trim()
   if (!expr.startsWith('{')) {
     expr = `{${expr}}`
   }
@@ -23,21 +27,16 @@ export function _data(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {
     try {
-      const data = evaluate(ctx, expr) ?? {}
-      for (const k in data) {
-        if (k in ctx.data) {
-          ctx.data[k] = data[k]
+      const dataNew = evaluate(ctx, expr) ?? {}
+      for (const k in dataNew) {
+        if (k in data) {
+          data[k] = dataNew[k]
         } else {
-          const value = createSignal(data[k])
-          Object.defineProperty(ctx.data, k, {
-            get() { return value() },
-            set(val) { value(val) },
-            enumerable: true
-          })
+          defineSignalProperty(data, k, createSignal(dataNew[k]))
         }
       }
     } catch (e) {
-      console.error('[u-text] Error: ', e)
+      console.error('[u-data] Error: ', e)
     }
   })
 

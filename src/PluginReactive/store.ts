@@ -3,6 +3,7 @@ import type {
   ComputedFunctionMaker,
   ProxyRecord,
   SignalRecord,
+  Signal,
 } from './types.ts'
 import { computed, effect, signal as createSignal } from './alien-signals'
 
@@ -28,11 +29,7 @@ export function createStore(el: ContextableNode, name: string) {
     if (isFunc) {
       data[key] = value.bind(el)
     } else {
-      Object.defineProperty(data, key, {
-        get() { return value() },
-        set(val) { value(val) },
-        enumerable: true
-      })
+      defineSignalProperty(data, key, value)
       signals[key] = value
     }
   }
@@ -93,3 +90,10 @@ export function createStore(el: ContextableNode, name: string) {
   }
 }
 
+export function defineSignalProperty(data: ProxyRecord, key: string, signal: Signal) {
+  Object.defineProperty(data, key, {
+    get() { return signal() },
+    set(val) { signal(val) },
+    enumerable: true
+  })
+}

@@ -1,7 +1,7 @@
 import type { ComponentManager } from '../types'
 import type { signal} from './alien-signals'
 
-export type Signal = typeof signal
+export type Signal = ReturnType<typeof signal>
 export type SignalRecord = Record<string, Signal>
 export type ProxyRecord = Record<string, Signal>
 
@@ -50,6 +50,6 @@ export type DirectiveDef = {
   modifier: string
   value: string
 }
-export type DirectiveHandlerReturn = ChildNode | undefined | null
+export type DirectiveHandlerReturn = ChildNode | undefined | null | void
 export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
   => DirectiveHandlerReturn
