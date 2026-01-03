@@ -11,7 +11,6 @@ import type {
 } from './types.ts'
 import {
   $attrBool,
-  isValidComponentName,
 } from './common.ts'
 
 // const ATTR_SRC = 'u-src'

@@ -3,6 +3,7 @@ import type {
   ContextableNode,
   DirectiveDef,
   DirectiveHandler,
+  DirectiveHandlerReturn,
 } from './types.ts'
 import { pullAttr } from '../common.ts'
 import { _text } from './directives/_text.ts'
@@ -33,7 +34,7 @@ export function walk(node: Node, ctx: Context): ChildNode | null | void {
     return _is(ctx, el, def)
   }
 
-  let next: ChildNode | undefined
+  let next: DirectiveHandlerReturn
   for (const def of getDirectives(el)) {
     if (next = dirMap[def.key]?.(ctx, el, def)) {
       return next

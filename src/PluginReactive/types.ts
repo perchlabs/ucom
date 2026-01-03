@@ -50,6 +50,6 @@ export type DirectiveDef = {
   modifier: string
   value: string
 }
-export type DirectiveHandlerReturn = ChildNode | undefined
+export type DirectiveHandlerReturn = ChildNode | undefined | null
 export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
   => DirectiveHandlerReturn
