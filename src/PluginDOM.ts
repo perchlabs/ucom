@@ -7,6 +7,8 @@ import type {
 } from './types.ts'
 import {
   ATTR_CORE,
+} from './constants.ts'
+import {
   isValidComponentName,
 } from './common.ts'
 

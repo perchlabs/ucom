@@ -28,7 +28,7 @@ import {
   // FORM_DISABLED,
   // FORM_RESET,
   // FORM_STATE_RESTORE,
-} from './common.ts'
+} from './constants.ts'
 
 export default (pluginClasses: PluginConstructor[]): PluginManager  => {
   const plugins = pluginClasses.map(v => new v)

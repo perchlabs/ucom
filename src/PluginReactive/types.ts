@@ -1,4 +1,4 @@
-import type { ComponentManager } from '../types'
+import type { ComponentManager, ParamModKey } from '../types.ts'
 import type { signal} from './alien-signals'
 
 export type Signal = ReturnType<typeof signal>
@@ -30,7 +30,7 @@ export type ContextableNode = DocumentFragment | Element
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export interface RootContext {
-  el: ContextableNode
+  el: ShadowRoot
   man: ComponentManager
   data: ProxyRecord
   refs: RefRecord
@@ -53,3 +53,22 @@ export type DirectiveDef = {
 export type DirectiveHandlerReturn = ChildNode | undefined | null | void
 export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
   => DirectiveHandlerReturn
+
+export type ParsedParamElement = {
+  k: string,
+  expr: string,
+  top: boolean,
+  property: boolean,
+  computed: boolean,
+  synced: boolean,
+  persisted: boolean,
+  cast?: null | ((value:string) => any)
+}
+
+export type ParamVarDef = {
+  k: string,
+  expr: string,
+  mod: ParamModKey,
+  top: boolean,
+  cast: ((value: string) => any) | null | undefined
+}

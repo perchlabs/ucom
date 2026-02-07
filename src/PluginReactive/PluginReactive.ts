@@ -6,25 +6,35 @@ import type {
   Plugin,
   PluginDefineParams,
   PluginCallbackBuilderParams,
-  ModuleExports,
+  // ModuleExports,
   // AttributeChangedCallback,
   // ConnectedCallback,
   // DisconnectedCallback,
+
 } from '../types.ts'
 import type {
   ValueWrapper,
-  persister,
-  syncer,
-  computer,
+  // persister,
+  // syncer,
+  // computer,
   ComputedFunctionMaker,
   ProxyRecord,
+  ParamVarDef,
 } from './types'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
   STATIC_OBSERVED_ATTRIBUTES,
+
+  PARAM_MOD_PROP,
+  PARAM_MOD_COMP,
+  PARAM_MOD_SYNC,
+  PARAM_MOD_SAVE,
+} from '../constants.ts'
+import {
   isSystemKey,
+  getTopLevelChildren,
 } from '../common.ts'
 import {
   computed as $computed,
@@ -33,7 +43,11 @@ import {
   effectScope as $effectScope,
   trigger as $trigger,
 } from './alien-signals'
+import {
+  parseParam,
+} from './utils.ts'
 import { cleanup, createContext } from './context.ts'
+import { evaluate } from './expression.ts'
 import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
 
@@ -46,16 +60,37 @@ const DataIndex = '$data'
 
 // const PROP_REFLECT_DEFAULT = true
 
+function parseParams(frag: DocumentFragment) {
+  const paramVarDefs: ReturnType<typeof parseParam> = {}
+
+  const params = getTopLevelChildren<HTMLParamElement>(frag, 'PARAM')
+  for (const el of params) {
+    Object.assign(paramVarDefs, parseParam(el, frag))
+    el.remove()
+  }
+
+  const entries = Object.values(paramVarDefs)
+  const {props = [], store = []} = Object.groupBy(entries, ({mod}) => mod === PARAM_MOD_PROP ? 'props' : 'store')
+  const propDefs: PropDefs = {}
+  for (const {k, expr, cast} of props) {
+    propDefs[k] = {
+      cast,
+      default: evaluate(expr, {}),
+    }
+  }
+
+  return {propDefs, store}
+}
+
 export default class implements Plugin {
-  async define({Com, exports}: PluginDefineParams) {
+  async define({Com, frag}: PluginDefineParams) {
     const Upgrade = Com as UpgradeComponentConstructor
     const proto = Upgrade.prototype
-    const {$props, $store} = exports as UpgradeExports
+    const {propDefs, store} = parseParams(frag)
 
-    const propDefs = makePropDefs($props)
     Object.assign(Upgrade, {
       [PropsIndex]: propDefs,
-      [StoreIndex]: $store,
+      [StoreIndex]: store,
     })
 
     const propKeys = Object.keys(propDefs)
@@ -116,21 +151,6 @@ export default class implements Plugin {
   }
 }
 
-function makePropDefs(propsMaker?: PropsMaker): PropDefs {
-  const defs: PropDefs = {}
-  Object
-    .entries(propsMaker?.() ?? {})
-    .map(([k, v]) => {
-      if (typeof v === 'object') {
-        v.default ??= ''
-      } else {
-        v = {default: v}
-      }
-      defs[k] = v
-  })
-  return defs
-}
-
 function connectData({Com, Raw, el, shadow, man}: UpgradedPluginCallbackBuilderParams) {
   if (el[CleanupIndex]) {
     return
@@ -154,7 +174,7 @@ function makeProxyStore(
   const {
     def: {name},
     [PropsIndex]: propDefs,
-    [StoreIndex]: userDefinedStore,
+    [StoreIndex]: storeDef,
   } = Com
   const store = createStore(el, name)
   const props = makeProps(el, propDefs)
@@ -169,22 +189,32 @@ function makeProxyStore(
       }
     })
 
-  const raw = userDefinedStore?.({
-    props,
-    persisted: (v: any) => new Persisted(v),
-    synced: (v: any) => new Synced(v),
-    computed: (v: ComputedFunctionMaker) => new Computed(v)
-  }) ?? {}
+  for (let {k, mod, expr} of storeDef) {
+    switch (mod) {
+      case PARAM_MOD_COMP: {
+        // expr = `() => ${expr}`
+        let val = evaluate(expr, store.data)
+        // if (typeof val === 'function') {
+        //   val = evaluate(val(), store.data)
+        // }
 
-  for (const [k, v] of Object.entries(raw)) {
-    if (v instanceof Computed) {
-      store.computed(k, v.v)
-    } else if (v instanceof Synced) {
-      store.sync(k, v.v)
-    } else if (v instanceof Persisted) {
-      store.persist(k, v.v)
-    } else {
-      store.add(k, v)
+        store.computed(k, val)
+        break
+      }
+      case PARAM_MOD_SYNC: {
+        const val = evaluate(expr, {})
+        store.sync(k, val)
+        break
+      }
+      case PARAM_MOD_SAVE: {
+        const val = evaluate(expr, {})
+        store.persist(k, val)
+        break
+      }
+      default: {
+        const val = evaluate(expr, {})
+        store.add(k, val)
+      }
     }
   }
 
@@ -212,22 +242,11 @@ export class Synced extends StoreValue {}
 export class Persisted extends StoreValue {}
 export class Computed extends StoreValue<ComputedFunctionMaker>{}
 
-type StoreMaker = (opts: {
-  props: Record<string, string>
-  persisted: persister
-  synced: syncer
-  computed: computer
-}) => Record<string, any>
-
-type PropsMaker = () => PropRawDefs
-type PropRawDefs = Record<string, PropRawDef>
-type PropRawDef = string | PropDef
-
 type PropDef = {
   default: any
   // TODO: Investigate ways to control reflective attributes/properties
   // reflect: boolean,
-  cast?: (value: any) => any
+  cast?: null | ((value: any) => any)
 }
 type PropDefs = Record<string, PropDef>
 
@@ -244,12 +263,7 @@ interface UpgradeComponent extends WebComponent {
 interface UpgradeComponentConstructor extends WebComponentConstructor {
   new (...args: any[]): UpgradeComponent
   [PropsIndex]: PropDefs
-  [StoreIndex]?: StoreMaker
-}
-
-type UpgradeExports = ModuleExports & {
-  $props?: PropsMaker
-  $store?: StoreMaker
+  [StoreIndex]: ParamVarDef[]
 }
 
 type UpgradedPluginCallbackBuilderParams = {

@@ -1,11 +1,7 @@
+<param $name.prop="''">
+
 
 <script>
-  export function $props() {
-    return {
-      name: '',
-    }
-  }
-
   export default class extends HTMLElement {
     async connectedCallback() {
       this.$effect(() => {

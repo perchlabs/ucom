@@ -26,6 +26,9 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
   FILE_POSTFIX,
   DIR_POSTFIX,
+} from './constants.ts'
+
+import {
   getTopLevelChildren,
   reComponentPath,
 } from './common.ts'

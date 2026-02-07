@@ -1,11 +1,11 @@
 import type {
-  Context,
+  // Context,
   ProxyRecord,
 } from './types.ts'
 
-export function evaluate(expr: string, {data}: Context, other: ProxyRecord = {}) {
+export function evaluate(expr: string, dataThis: ProxyRecord = {}, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
-    $data: data,
+    $data: dataThis,
     ...other,
   }
 
@@ -25,15 +25,14 @@ export function evaluate(expr: string, {data}: Context, other: ProxyRecord = {})
   }
 }
 
-export function execute(code: string, {data}: Context, other: ProxyRecord = {}) {
+export function execute(code: string, dataThis: ProxyRecord = {}, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
-    $data: data,
+    $data: dataThis,
     ...other,
   }
 
   try {
     // Create an async function to support await
-    // Include $event for u-on compatibility
     const fn = new Function(
       ...Object.keys(params),
       `return (async () => {
@@ -42,7 +41,7 @@ export function execute(code: string, {data}: Context, other: ProxyRecord = {}) 
     )
 
     // Execute and return promise for error handling
-    return fn.call(data, ...Object.values(params)) as Promise<void>
+    return fn.call(dataThis, ...Object.values(params)) as Promise<void>
   } catch (err) {
     console.error('[execute] Error: ', err)
     return Promise.reject(err)

@@ -1,6 +1,43 @@
+<param
+  $rows.prop=2
+  $cols.prop=2
+  cast="parseInt"
+>
+
+<param $cells.comp="() => {
+  const cells = []
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      cells.push(`${i}:${j}`)
+    }
+  }
+  return cells
+}">
+
+<!-- <param $cells.comp="(() => {
+  const cells = []
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      cells.push(`${i}:${j}`)
+    }
+  }
+  return cells
+})()"> -->
+
+<!-- <param $cells.comp="() => {
+  const cells = []
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      cells.push(`${i}:${j}`)
+    }
+  }
+  return cells
+}"> -->
+
+
 <div>
-  <!-- SLOT GAME <meta $rows> x <meta $cols> -->
-  SLOT GAME <meta $="`${rows} x ${cols}`">
+  <!-- SLOT GAME <meta %rows> x <meta %cols> -->
+  SLOT GAME <meta %="`${rows} x ${cols}`">
 </div>
 
 <main :style="{'--rows': rows, '--cols': cols}">
@@ -9,36 +46,8 @@
       <div $name></div>
     </slot>
   </section>
+
 </main>
-
-<script>
-  export function $props() {
-    return {
-      rows: {
-        default: 2,
-        cast: parseInt,
-      },
-      cols: {
-        default: 2,
-        cast: parseInt,
-      }
-    }
-  }
-
-  export function $store({computed}) {
-    return {
-      cells: computed($data => {
-        const cells = []
-        for (let i = 0; i < $data.rows; i++) {
-          for (let j = 0; j < $data.cols; j++) {
-            cells.push(`${i}:${j}`)
-          }
-        }
-        return cells
-      }),
-    }
-  }
-</script>
 
 <style>
   :host {
@@ -51,7 +60,6 @@
     text-align: center;
     width: 50px;
     height: 50px;
-
   }
 
   main {

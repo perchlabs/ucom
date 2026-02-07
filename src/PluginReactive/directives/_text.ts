@@ -4,12 +4,13 @@ import { evaluate } from '../expression.ts'
 
 export function _text(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const expr = dir.modifier ? dir.modifier : dir.value
+  // let expr = dir.modifier ? dir.modifier : dir.value
 
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {
     try {
       // Evaluate the expression (e.g., "count" or "firstName + ' ' + lastName")
-      el.textContent = evaluate(expr, ctx) ?? ''
+      el.textContent = evaluate(expr, ctx.data) ?? ''
     } catch (e) {
       console.error('[u-text] Error: ', e)
     }

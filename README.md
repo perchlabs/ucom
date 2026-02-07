@@ -228,7 +228,7 @@ Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-t
 </template>
 ```
 
-Use Vue style shortcuts.  `$` is short for `u-text:`, `@` is short for `u-on:`
+Use Vue style shortcuts.  `%` is short for `u-text:`, `@` is short for `u-on:`
 ```html
 <template u-com>
   <div u-for="n in 10" @click="alert(n)" $n></div>
@@ -250,7 +250,7 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
   <!-- The pretty Ucom way -->
   Exponential:
   <div u-for="n in 5">
-    <meta $n=>, <meta $="n**2">, <meta $="n**3">
+    <meta %n=>, <meta %n="n**2">, <meta %="n**3">
   </div>
 
   <!-- Precalculate using param -->
@@ -259,7 +259,7 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
     <param $n1="n**1">
     <param $n2="n**2">
     <param $n3="n**3">
-    <meta $n1>, <meta $n2>, <meta $n3>
+    <meta %n1>, <meta %n2>, <meta %n3>
   </div>
 </template>
 ```
@@ -268,17 +268,15 @@ You can use the store to gain access to reactive data.
 
 ```html
 <template u-com>
-  <button @click="count++"><meta $count> times</button>
-  <div>Double it <meta $double></div>
+  <param
+    $count=0,
+    $double="() => count * 2"
+  >
+
+  <button @click="count++"><meta %count> times</button>
+  <div>Double it <meta %double></div>
 
   <script>
-    export function $store({computed}) {
-      return {
-        count: 0,
-        double: computed($d => $d.count * 2),
-      }
-    }
-
     export function connectedCallback() {
       this.$effect(() => console.log('count: ', this.$data.count))
       this.$effect(() => console.log('double: ', this.$data.double))
@@ -287,43 +285,37 @@ You can use the store to gain access to reactive data.
 </template>
 ```
 
-You can also declare reactive data at its current context / block level by using a `param` tag.  This style can be mixed with the `$store` export from the script.
+You can also declare reactive data at its current context / block level by using a `param` tag.
 
 ```html
 <template u-com>
   <param $count="5">
-  <button @click="count++"><meta $count> times</button>
+  <button @click="count++"><meta %count> times</button>
 </template>
 ```
 
 #### Syncronized and Persistent Reactive Data
 
-If you wrap a store value with the `synced` and `persisted` function then it will gain some features.
-
 ```html
 <template u-com>
+  <param
+    $normal=0
+    $persist.save=0
+    $sync.share=0
+    $total.comp="() => normal + persist + sync"
+  >
+
   <!-- Normal store counter -->
-  <button @click="normal++"><meta $normal> times</button>
+  <button @click="normal++"><meta %normal> times</button>
 
   <!-- Changes to this counter will be syncronized across all elements of the same name. -->
-  <button @click="sync++"><meta $sync> times</button>
+  <button @click="sync++"><meta %sync> times</button>
 
   <!-- This counter will be both syncronized and persisted across all instances of this element -->
   <!-- of the same name (and page refreshes of this self-instantiated custom element) -->
-  <button @click="persist++"><meta $persist> times</button>
+  <button @click="persist++"><meta %persist> times</button>
 
-  <div>You have clicked a total of <meta $total> times</div>
-
-  <script>
-    export function $store({computed, persisted, synced}) {
-      return {
-        normal: 0,
-        persist: persisted(0),
-        sync: synced(0),
-        total: computed($d => $d.normal + $d.persist + $d.sync),
-      }
-    }
-  </script>
+  <div>You have clicked a total of <meta %total> times</div>
 </template>
 ```
 
@@ -333,18 +325,9 @@ It's easy to add js properties and html attributes to your components.
 <my-counter count="5"></my-counter>
 
 <template u-com="my-counter">
-  <button @click="count++"><meta $count> times</button>
+  <param $count.prop=0 cast="parseInt">
 
-  <script>
-    export function $props() {
-      return {
-        count: {
-          default: 0,
-          cast: parseInt,
-        },
-      }
-    }
-  </script>
+  <button @click="count++"><meta %count> times</button>
 </template>
 ```
 
@@ -356,14 +339,8 @@ It's easy to add js properties and html attributes to your components.
 <dyn-amic name="my-other-component"></dyn-amic>
 
 <template u-com="dyn-amic">
-  <template u-is="name"></template>
+  <param $name.prop="''">
 
-  <script>
-    export function $props() {
-      return {
-        name: '',
-      }
-    }
-  </script>
+  <template u-is="name"></template>
 </template>
 ```

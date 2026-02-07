@@ -5,7 +5,7 @@ import type {
   DirectiveHandler,
   DirectiveHandlerReturn,
 } from './types.ts'
-import { pullAttr } from '../common.ts'
+import { getAttributes, pullAttr } from '../common.ts'
 import { void_meta } from './voids/void_meta.ts'
 import { void_param } from './voids/void_param.ts'
 import { _text } from './directives/_text.ts'
@@ -59,14 +59,14 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
   }
 }
 
-const reDir = /^u-|\$|@|:/
-const getDirectives = (el: Element) => Array.from(el.attributes)
-  .filter(attr => reDir.test(attr.name))
-  .map(({name, value}) => createDirective(name, value))
+const reDir = /^u-|%|@|:/
+const getDirectives = (el: Element) => getAttributes(el)
+  .filter(([k]) => reDir.test(k))
+  .map(item => createDirective(...item))
 
 const dirMap: Record<string, DirectiveHandler> = {
   'u-text': _text,
-  '$': _text,
+  '%': _text,
   'u-html': _html,
   'u-bind': _attribute,
   ':': _attribute,
@@ -77,7 +77,7 @@ const dirMap: Record<string, DirectiveHandler> = {
 
 function createDirective(keyReal: string, value: string): DirectiveDef {
   let ch1 = keyReal[0]
-  if (['@', '$', ':'].includes(ch1)) {
+  if (['@', '%', ':'].includes(ch1)) {
     return {
       key: ch1,
       modifier: keyReal.substring(1),

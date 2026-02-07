@@ -1,5 +1,12 @@
 
+<example-run
+  u-for="i in 6"
+  :name="`example-0${i+1}`"
+></example-run>
+
 <template u-com="example-run">
+  <param $name.prop="''">
+
   <source src="@com/highlight-article.ucom">
   <source src="@com/raw-printer.html">
 
@@ -8,14 +15,6 @@
   <highlight-article>
     <raw-printer :name></raw-printer>
   </highlight-article>
-
-  <script>
-    export function $props() {
-      return {
-        name: '',
-      }
-    }
-  </script>
 
   <style>
     :host {
@@ -26,10 +25,12 @@
 </template>
 
 
+
 <template u-com="example-01">
   This is a component
 </template>
-<example-run name="example-01"></example-run>
+
+
 
 <template u-com="example-02">
   <header id="myheader">My Component</header>
@@ -50,7 +51,6 @@
     }
   </style>
 </template>
-<example-run name="example-02"></example-run>
 
 
 
@@ -84,7 +84,6 @@
     }
   </style>
 </template>
-<example-run name="example-03"></example-run>
 
 
 
@@ -123,45 +122,27 @@
     }
   </style>
 </template>
-<example-run name="example-04"></example-run>
 
 
 
 <template u-com="example-05">
+  <param $count=0>
+  <param $oddeven.comp="() => count % 2 === 0 ? 'even' : 'odd'">
+
   <div>You can use Alpine style template syntax for event handlers.</div>
-  <div>Count: <meta $count></span></div>
-  <div>Number is: <meta $oddeven></span></div>
+  <div>Count: <meta %count></div>
+  <div>Number is: <meta %oddeven></div>
   <nav>
     <button @click="count--">Less</button>
     <button @click="count++">More</button>
   </nav>
-
-  <script>
-    export function $props() {
-      return {
-        count: {
-          default: 0,
-          cast: parseInt,
-        },
-      }
-    }
-
-    export function $store({props, computed}) {
-      return {
-        oddeven: computed($data => findType($data.count)),
-      }
-    }
-
-    function findType(num) {
-      return num % 2 === 0 ? 'even' : 'odd'
-    }
-  </script>
 </template>
-<example-run name="example-05"></example-run>
 
 
 
 <template u-com="example-06">
+  <param $count.save=0>
+
   Use <code>&lt;template u-com&gt;&lt;/template></code> to gain access to Unicom.
   <br>
   Use this to gain access to the Unicom functionality in your layouts, routers, and tests.
@@ -170,17 +151,13 @@
   <br>
   Unnamed custom elements such as this will be remembered by a hash of their text definition.
 
-  <div id="count">You've loaded this component <meta $count></span> time(s).</div>
+  <div id="count">You've loaded this component <meta %count></span> time(s).</div>
 
   <script>
-    export function $store({persisted}) {
-      return {
-        count: persisted(0),
-      }
-    }
-
     export function connectedCallback() {
-      this.$effect(() => this.$data.count++)
+      this.$effect(() => {
+        this.$data.count++
+      })
     }
   </script>
 
@@ -198,4 +175,3 @@
     }
   </style>
 </template>
-<example-run name="example-06"></example-run>

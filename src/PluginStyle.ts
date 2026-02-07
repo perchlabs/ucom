@@ -6,7 +6,7 @@ import type {
 } from './types.ts'
 import {
   ATTR_CORE,
-} from './common.ts'
+} from './constants.ts'
 
 export default class implements Plugin {
   #sheetsLoader?: Promise<CSSStyleSheet[]>

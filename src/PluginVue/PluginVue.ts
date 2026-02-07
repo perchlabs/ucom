@@ -16,7 +16,7 @@ import {
   DISCONNECTED,
   CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
-} from '../common.ts'
+} from '../constants.ts'
 import {createApp, ref, reactive, effect, stop, nextTick} from './petite-shadow-vue'
 
 // Proto and constructor constants.

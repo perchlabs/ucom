@@ -1,8 +1,10 @@
 <base href="@com/">
 <source src="fancy-counter.html">
 
+<param $count=5>
+
 <div>
-  <button @click="count++">Click: <meta $count></span></button>
+  <button @click="count++">Click: <meta %count></span></button>
 </div>
 
 <fancy-counter
@@ -11,11 +13,3 @@
   @count="count = $event.count">
 </fancy-counter>
 <fancy-counter></fancy-counter>
-
-<script>
-  export function $store() {
-    return {
-      count: 5,
-    }
-  }
-</script>

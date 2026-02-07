@@ -1,14 +1,10 @@
+<param $name="''">
+
 <slot></slot>
 
-<template u-is="routeName"></template>
+<template u-is="name"></template>
 
 <script>
-  export function $store() {
-    return {
-      routeName: '',
-    }
-  }
-
   export default class extends HTMLElement {
     #routes
     #routeDefault
@@ -31,11 +27,11 @@
 
       const route = this.getRoute(window.location.href)
       Object.assign($data, {
-        routeName: route.name,
+        name: route.name,
       })
 
       window.addEventListener('hashchange', this.hashchangeEvent)
-    }
+}
 
     disconnectedCallback() {
       window.removeEventListener('hashchange', this.hashchangeEvent)
@@ -45,7 +41,7 @@
     hashchangeEvent = e => {
       const route = this.getRoute(e.newURL)
       Object.assign(this.$data, {
-        routeName: route.name,
+        name: route.name,
       })
     }
 

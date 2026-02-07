@@ -1,3 +1,4 @@
+import { PARAM_TOP_MODS } from './constants.ts'
 
 export interface ComponentIdentity {
   readonly name: string,
@@ -169,4 +170,10 @@ export interface WebComponentConstructor extends RawComponentConstructor {
   observedAttributes: string[]
 }
 
-export type QueryableRoot = Document | ShadowRoot | Element | DocumentFragment
+export type QueryableRoot = Document | DocumentFragment | Element 
+
+export type ArrayElement<ArrayType extends readonly unknown[]> = 
+  ArrayType extends readonly (infer ElementType)[] ? ElementType : never
+
+// export type ParamModKey = ArrayElement<typeof PARAM_MODS>
+export type ParamModKey = keyof typeof PARAM_TOP_MODS

@@ -1,12 +1,18 @@
 <base href="@com/">
 <source src="slot-game.html">
 
+<param
+  $maxlen="8"
+  $rows.save="4"
+  $cols.save="4"
+>
+
 <header>
   Game Size:
   <input :value="rows" @input="rows = $event.target.value">
   x
   <input :value="cols" @input="cols = $event.target.value">
-  <meta $rows> x <meta $cols>
+  <meta %rows> x <meta %cols>
 </header>
 
 <slot-game :rows="rows" :cols="cols">
@@ -16,16 +22,6 @@
 </slot-game>
 
 <script>
-  export function $store({persisted}) {
-    return {
-      MAX_LENGTH: 8,
-      rows: persisted(4),
-      cols: persisted(4),
-      // rows: 4,
-      // cols: 4,
-    }
-  }
-
   export function connectedCallback() {
     this.$game = this.$('slot-game')
   }
