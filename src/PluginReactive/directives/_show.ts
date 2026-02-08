@@ -5,7 +5,7 @@ import { evaluate } from '../expression.ts'
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
 
 export function _show(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
-  const {value: expr} = dir
+  const {val: expr} = dir
   // expr: string
 
   // Store original display value to restore when showing (i.e. flex/grid, etc)
@@ -24,7 +24,7 @@ export function _show(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const dispose = effect(() => {
     try {
       // Evaluate expression as boolean
-      const show = evaluate(expr, ctx.data)
+      const show = evaluate(expr, ctx.store.data)
 
       // Showing
       if (show) {

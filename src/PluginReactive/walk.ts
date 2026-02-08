@@ -5,9 +5,9 @@ import type {
   DirectiveHandler,
   DirectiveHandlerReturn,
 } from './types.ts'
-import { getAttributes, pullAttr } from '../common.ts'
+import { getDirectives, pullDir } from './directive.ts'
 import { void_meta } from './voids/void_meta.ts'
-import { void_param } from './voids/void_param.ts'
+import { _var } from './directives/_var.ts'
 import { _text } from './directives/_text.ts'
 import { _html } from './directives/_html.ts'
 import { _show } from './directives/_show.ts'
@@ -27,8 +27,6 @@ export function walk(node: Node, ctx: Context): ChildNode | null | void {
   switch (el.tagName) {
     case 'META':
       return void_meta(ctx, el as HTMLMetaElement)
-    case 'PARAM':
-      return void_param(ctx, el as HTMLParamElement)
   }
 
   let def: DirectiveDef | undefined 
@@ -43,7 +41,7 @@ export function walk(node: Node, ctx: Context): ChildNode | null | void {
   }
 
   let next: DirectiveHandlerReturn
-  for (const def of getDirectives(el)) {
+  for (const def of getDirectives(el, reDir)) {
     if (next = dirMap[def.key]?.(ctx, el, def)) {
       return next
     }
@@ -59,12 +57,10 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
   }
 }
 
-const reDir = /^u-|%|@|:/
-const getDirectives = (el: Element) => getAttributes(el)
-  .filter(([k]) => reDir.test(k))
-  .map(item => createDirective(...item))
-
+const reDir = /^u-|\$|%|@|:/
 const dirMap: Record<string, DirectiveHandler> = {
+  'u-var': _var,
+  '$': _var,
   'u-text': _text,
   '%': _text,
   'u-html': _html,
@@ -73,25 +69,4 @@ const dirMap: Record<string, DirectiveHandler> = {
   'u-on': _event,
   '@': _event,
   'u-ref': _ref,
-}
-
-function createDirective(keyReal: string, value: string): DirectiveDef {
-  let ch1 = keyReal[0]
-  if (['@', '%', ':'].includes(ch1)) {
-    return {
-      key: ch1,
-      modifier: keyReal.substring(1),
-      value,
-    }
-  }
-
-  const [key, modifier] = keyReal.split(':')
-  return {key, modifier, value}
-}
-
-function pullDir (el: Element, key: string) {
-  const attr = pullAttr(el, key)
-  if (attr) {
-    return createDirective(key, attr)
-  }
 }

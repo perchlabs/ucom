@@ -3,8 +3,8 @@ import { execute } from '../expression.ts'
 
 export function _event(ctx: Context, el: Element, dir: DirectiveDef): DirectiveHandlerReturn {
   const {
-    modifier: eventName,
-    value: stmt,
+    ref: eventName,
+    val: stmt,
   } = dir
 
   if (!eventName) return
@@ -14,7 +14,7 @@ export function _event(ctx: Context, el: Element, dir: DirectiveDef): DirectiveH
   // - $data: the reactive data (via 'with' statement)
   const handler = (e: Event) => {
     try {
-      execute(stmt, ctx.data, {$event: e})
+      execute(stmt, ctx.store.data, {$event: e})
     } catch (err) {
       console.error(`[u-on:${eventName}] Error: `, err)
     }

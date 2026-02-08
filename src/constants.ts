@@ -26,26 +26,7 @@ export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
 export const CORE_FUNCTIONS_SET = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
-export const PARAM_MOD_VAR = 'var'
-export const PARAM_MOD_PROP = 'prop'
-export const PARAM_MOD_COMP = 'comp'
-export const PARAM_MOD_SYNC = 'share'
-export const PARAM_MOD_SAVE = 'save'
-// export const PARAM_MODS = [
-//   PARAM_MOD_VARIABLE,
-//   PARAM_MOD_PROP,
-//   PARAM_MOD_COMP,
-//   PARAM_MOD_SYNCED,
-//   PARAM_MOD_PERSISTED,
-// ] as const
-export const PARAM_TOP_MODS = {
-  [PARAM_MOD_VAR]: true,
-  [PARAM_MOD_PROP]: true,
-  [PARAM_MOD_COMP]: true,
-  [PARAM_MOD_SYNC]: true,
-  [PARAM_MOD_SAVE]: true,
-}  as const
-export const PARAM_BODY_MODS = {
-  [PARAM_MOD_VAR]: true,
-  [PARAM_MOD_COMP]: true,
-}  as const
+export const STORE_MOD_VAR = 'var'
+export const STORE_MOD_CALC = 'calc'
+export const STORE_MOD_SYNC = 'sync'
+export const STORE_MOD_SAVE = 'save'

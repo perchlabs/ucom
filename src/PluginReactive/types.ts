@@ -1,4 +1,4 @@
-import type { ComponentManager, ParamModKey } from '../types.ts'
+import type { ComponentManager } from '../types.ts'
 import type { signal} from './alien-signals'
 
 export type Signal = ReturnType<typeof signal>
@@ -16,8 +16,11 @@ export type ComputedFunction = () => any
 export type computer = (v: ComputedFunctionMaker) => ValueWrapper<ComputedFunctionMaker>
 
 export interface Store {
-  signals: SignalRecord
+  // signals: SignalRecord
   data: ProxyRecord
+  addRaw: (raw: Record<string, any>) => void
+  copy: (dataNew?: ProxyRecord) => Store
+
   add: StoreAdder
   computed: StoreAdder
   sync: StoreAdder
@@ -32,7 +35,7 @@ export type RefRecord = Record<string, WeakRef<ContextableNode>>
 export interface RootContext {
   el: ShadowRoot
   man: ComponentManager
-  data: ProxyRecord
+  store: Store,
   refs: RefRecord
   cleanup: (() => void)[]
 }
@@ -40,35 +43,17 @@ export interface RootContext {
 export interface Context {
   man: ComponentManager
   el: ContextableNode
-  data: ProxyRecord
+  store: Store,
   refs: RefRecord
   cleanup: (() => void)[]
 }
 
 export type DirectiveDef = {
   key: string
-  modifier: string
-  value: string
+  ref?: string
+  mod?: string
+  val: string
 }
 export type DirectiveHandlerReturn = ChildNode | undefined | null | void
 export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
   => DirectiveHandlerReturn
-
-export type ParsedParamElement = {
-  k: string,
-  expr: string,
-  top: boolean,
-  property: boolean,
-  computed: boolean,
-  synced: boolean,
-  persisted: boolean,
-  cast?: null | ((value:string) => any)
-}
-
-export type ParamVarDef = {
-  k: string,
-  expr: string,
-  mod: ParamModKey,
-  top: boolean,
-  cast: ((value: string) => any) | null | undefined
-}

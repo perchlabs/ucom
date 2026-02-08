@@ -1,8 +1,9 @@
 import type {
   ComputedFunctionMaker,
   ProxyRecord,
-  SignalRecord,
+  // SignalRecord,
   Signal,
+  Store,
 } from './types.ts'
 import { computed, effect, signal as createSignal } from './alien-signals'
 
@@ -16,20 +17,18 @@ type ItemRecord = Record<string, Item>
 const persistMap: ItemRecord = {}
 const syncMap: ItemRecord = {}
 
-export function createStore(el: HTMLElement, name: string) {
+export function createStore(el: HTMLElement, name: string): Store {
   const data: ProxyRecord = {}
-  const signals: SignalRecord = {}
 
   const addItem = ([key, value, isFunc = false]: Item) => {
-    if (key in data) {
-      return console.error(`Element store already has a key '${key}'.`, el)
-    }
+    // if (key in data) {
+    //   return console.error(`Element store already has a key '${key}'.`, el)
+    // }
 
     if (isFunc) {
       data[key] = value.bind(el)
     } else {
       defineSignalProperty(data, key, value)
-      signals[key] = value
     }
   }
 
@@ -45,7 +44,6 @@ export function createStore(el: HTMLElement, name: string) {
   }
 
   return {
-    signals,
     data,
     add,
     addRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
@@ -86,6 +84,14 @@ export function createStore(el: HTMLElement, name: string) {
 
       addItem(persistMap[storeId])
     },
+
+    copy(dataNew: ProxyRecord = {}) {
+      const store = createStore(el, name)
+      Object.assign(store.data, Object.create(data))
+      // store.addRaw(data)
+      store.addRaw(dataNew)
+      return store
+    },
   }
 }
 
@@ -93,6 +99,7 @@ export function defineSignalProperty(data: ProxyRecord, key: string, signal: Sig
   Object.defineProperty(data, key, {
     get() { return signal() },
     set(val) { signal(val) },
-    enumerable: true
+    configurable: true,
+    enumerable: true,
   })
 }

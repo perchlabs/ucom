@@ -11,7 +11,7 @@ import { walk } from '../walk.ts'
 
 export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   const {man} = ctx
-  let {value: expr} = dir
+  let {val: expr} = dir
 
   expr = expr.trim()
   if (!expr) {
@@ -40,7 +40,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
     }
 
     let tagNameNew = ''
-    const ref = evaluate(expr, ctx.data)
+    const ref = evaluate(expr, ctx.store.data)
     if (isValidComponentPath(ref)) {
       try {
         const {name, resolved} = man.resolve(ref)
@@ -52,7 +52,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
         return
       }
     } else {
-      tagNameNew = evaluate(expr, ctx.data)
+      tagNameNew = evaluate(expr, ctx.store.data)
     }
 
     if (!tagNameNew || tagNameNew === tagName) {

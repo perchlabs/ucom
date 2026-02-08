@@ -4,8 +4,8 @@ import { evaluate } from '../expression.ts'
 
 export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): DirectiveHandlerReturn {
   const {
-    modifier: attrName,
-    value: expr,
+    ref: attrName,
+    val: expr,
   } = dir
 
   if (!attrName) return
@@ -24,7 +24,7 @@ export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): Di
   const exprReal = expr ? expr : attrName
   const dispose = effect(() => {
     try {
-      const value = evaluate(exprReal, ctx.data)
+      const value = evaluate(exprReal, ctx.store.data)
 
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (typeof value === 'boolean') {
@@ -57,7 +57,7 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
     
   const dispose = effect(() => {
     try {
-      const value = evaluate(expr, ctx.data)
+      const value = evaluate(expr, ctx.store.data)
       
       // Start with original classes
       const classes = new Set(originalClasses)
@@ -91,7 +91,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
     
   const dispose = effect(() => {
     try {
-      const value = evaluate(expr, ctx.data)
+      const value = evaluate(expr, ctx.store.data)
       
       // Restore original styles first
       el.setAttribute('style', originalStyle)

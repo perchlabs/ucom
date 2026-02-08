@@ -1,10 +1,10 @@
 <param
-  $rows.prop=2
-  $cols.prop=2
+  $rows=2
+  $cols=2
   cast="parseInt"
 >
 
-<param $cells.comp="() => {
+<meta $cells.calc="() => {
   const cells = []
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
@@ -14,27 +14,6 @@
   return cells
 }">
 
-<!-- <param $cells.comp="(() => {
-  const cells = []
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      cells.push(`${i}:${j}`)
-    }
-  }
-  return cells
-})()"> -->
-
-<!-- <param $cells.comp="() => {
-  const cells = []
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      cells.push(`${i}:${j}`)
-    }
-  }
-  return cells
-}"> -->
-
-
 <div>
   <!-- SLOT GAME <meta %rows> x <meta %cols> -->
   SLOT GAME <meta %="`${rows} x ${cols}`">
@@ -43,10 +22,9 @@
 <main :style="{'--rows': rows, '--cols': cols}">
   <section u-for="name in cells">
     <slot :name>
-      <div $name></div>
+      <div %name></div>
     </slot>
   </section>
-
 </main>
 
 <style>

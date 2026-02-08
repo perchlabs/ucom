@@ -15,7 +15,7 @@ const stripParensRE = /^\(|\)$/g
 const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
 export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
-  const {value: expr} = dir
+  const {val: expr} = dir
 
   const next = el.nextSibling
 
@@ -74,7 +74,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
       saved = []
 
       // Evaluate the array expression
-      let items = evaluate(itemsExp, ctx.data)
+      let items = evaluate(itemsExp, ctx.store.data)
       if (Number.isInteger(items)) {
         items = [...Array(items).keys()]
       }

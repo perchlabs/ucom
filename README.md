@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`20.7k` minified) (`8.2k` gzipped)
+* ucom (`20.3k` minified) (`8.0k` gzipped)
 * ucom_vue (`28.8k` minified) (`11.9k` gzipped)
 * ucom_lite (`7.1k` minified) (`3.1k` gzipped)
 
@@ -52,7 +52,7 @@ Create an immediately executed component app with an empty `u-com` attribute.
 
 ```html
 <template u-com>
-  <source src="/components/my-component.ucom/">
+  <source src="/components/my-component.ucom">
 
   This is an inline, self-instantiated app.
   You can use this to bootstrap, to create layouts, or to write quick one-offs.
@@ -253,44 +253,44 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
     <meta %n=>, <meta %n="n**2">, <meta %="n**3">
   </div>
 
-  <!-- Precalculate using param -->
+  <!-- Precalculate (saved to the current sub-scope -->
   Exponential:
   <div u-for="n in 5">
-    <param $n1="n**1">
-    <param $n2="n**2">
-    <param $n3="n**3">
+    <meta
+      $n1="n**1"
+      $n2="n**2"
+      $n3="n**3"
+    >
     <meta %n1>, <meta %n2>, <meta %n3>
   </div>
 </template>
 ```
 
-You can use the store to gain access to reactive data.
+You can use the store to gain access to reactive data by declaring it in a `meta` void tag (no closing tag required).
+
+Use `u-var` or `$` shortcut syntax.
+
+Use modifiers `.sync`, `.save` or `.calc`.
 
 ```html
 <template u-com>
-  <param
-    $count=0,
-    $double="() => count * 2"
+  <meta
+    u-var:count=0,
+    u-var:double.calc="() => count * 2"
+    $quadruple.calc="() => count * 4"
   >
 
   <button @click="count++"><meta %count> times</button>
   <div>Double it <meta %double></div>
+  <div>Quadruple it <meta %quadruple></div>
 
   <script>
     export function connectedCallback() {
       this.$effect(() => console.log('count: ', this.$data.count))
       this.$effect(() => console.log('double: ', this.$data.double))
+      this.$effect(() => console.log('quadruple: ', this.$data.quadruple))
     }
   </script>
-</template>
-```
-
-You can also declare reactive data at its current context / block level by using a `param` tag.
-
-```html
-<template u-com>
-  <param $count="5">
-  <button @click="count++"><meta %count> times</button>
 </template>
 ```
 
@@ -298,11 +298,11 @@ You can also declare reactive data at its current context / block level by using
 
 ```html
 <template u-com>
-  <param
+  <meta
     $normal=0
     $persist.save=0
-    $sync.share=0
-    $total.comp="() => normal + persist + sync"
+    $sync.sync=0
+    $total.calc="() => normal + persist + sync"
   >
 
   <!-- Normal store counter -->
@@ -319,13 +319,13 @@ You can also declare reactive data at its current context / block level by using
 </template>
 ```
 
-It's easy to add js properties and html attributes to your components.
+It's easy to add js properties and html attributes to your components using the `param` void element (no closing tag needed).
 
 ```html
 <my-counter count="5"></my-counter>
 
 <template u-com="my-counter">
-  <param $count.prop=0 cast="parseInt">
+  <param $count=0 cast="parseInt">
 
   <button @click="count++"><meta %count> times</button>
 </template>
@@ -339,7 +339,7 @@ It's easy to add js properties and html attributes to your components.
 <dyn-amic name="my-other-component"></dyn-amic>
 
 <template u-com="dyn-amic">
-  <param $name.prop="''">
+  <param $name>
 
   <template u-is="name"></template>
 </template>

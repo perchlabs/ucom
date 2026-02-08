@@ -8,10 +8,10 @@ import {
 
 export function _ref(ctx: Context, el: Element, dir: DirectiveDef): undefined {
   const {
-    value: refName,
-    modifier,
+    mod,
+    val: name,
   } = dir
 
-  const refs = modifier === 'global' ? globalRefs : ctx.refs
-  refs[refName] = new WeakRef(el)
+  const refs = mod === 'global' ? globalRefs : ctx.refs
+  refs[name] = new WeakRef(el)
 }
