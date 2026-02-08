@@ -16,9 +16,7 @@ import { effect } from '../alien-signals'
 
 import { evaluate } from '../expression.ts'
 
-export function _var(ctx: Context, _el: Element, dir: DirectiveDef) {
-  // console.log('_var: ', dir)
-
+export function _data(ctx: Context, _el: Element, dir: DirectiveDef) {
   const {store} = ctx
 
   const {
@@ -30,7 +28,6 @@ export function _var(ctx: Context, _el: Element, dir: DirectiveDef) {
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {
     try {
-// console.log('var expr: ', expr)
       const v = evaluate(expr, store.data) ?? {}
 
       if (ref) {

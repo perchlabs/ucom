@@ -7,7 +7,7 @@ import type {
 } from './types.ts'
 import { getDirectives, pullDir } from './directive.ts'
 import { void_meta } from './voids/void_meta.ts'
-import { _var } from './directives/_var.ts'
+import { _data } from './directives/_data.ts'
 import { _text } from './directives/_text.ts'
 import { _html } from './directives/_html.ts'
 import { _show } from './directives/_show.ts'
@@ -59,8 +59,8 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
 
 const reDir = /^u-|\$|%|@|:/
 const dirMap: Record<string, DirectiveHandler> = {
-  'u-var': _var,
-  '$': _var,
+  'u-data': _data,
+  '$': _data,
   'u-text': _text,
   '%': _text,
   'u-html': _html,

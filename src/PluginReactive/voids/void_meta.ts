@@ -6,7 +6,7 @@ import { getDirectives } from '../directive.ts'
 
 import { makeElementAs } from '../utils.ts'
 import { _text } from '../directives/_text.ts'
-import { _var } from '../directives/_var.ts'
+import { _data } from '../directives/_data.ts'
 
 export function void_meta(ctx: Context, el: HTMLMetaElement) {
   for (const def of getDirectives(el, reDir)) {
@@ -25,8 +25,8 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
 
 const reDir = /^u-|\$|%/
 const dirMap: Record<string, DirectiveHandler> = {
-  'u-var': _var,
-  '$': _var,
+  'u-data': _data,
+  '$': _data,
   'u-text': _text,
   '%': _text,
 }

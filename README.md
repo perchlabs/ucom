@@ -268,15 +268,15 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
 
 You can use the store to gain access to reactive data by declaring it in a `meta` void tag (no closing tag required).
 
-Use `u-var` or `$` shortcut syntax.
+Use `u-data` or `$` shortcut syntax.
 
 Use modifiers `.sync`, `.save` or `.calc`.
 
 ```html
 <template u-com>
   <meta
-    u-var:count=0,
-    u-var:double.calc="() => count * 2"
+    u-data:count=0,
+    u-data:double.calc="() => count * 2"
     $quadruple.calc="() => count * 4"
   >
 
