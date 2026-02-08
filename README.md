@@ -272,27 +272,31 @@ Use `u-data` or `$` shortcut syntax.
 
 Use modifiers `.sync`, `.save` or `.calc`.
 
-```html
 <template u-com>
+  <!-- u-data is very flexible -->
   <meta
-    u-data:count=0,
+    u-data:count=1
     u-data:double.calc="() => count * 2"
-    $quadruple.calc="() => count * 4"
+    $triple.calc="() => count * 3"
+    $.calc="{quadruple: () => count * 4}"
   >
 
-  <button @click="count++"><meta %count> times</button>
+  <button @click="count++">Once: <meta %count></button>
+
   <div>Double it <meta %double></div>
+
+  <div>Triple it <meta %triple></div>
+
   <div>Quadruple it <meta %quadruple></div>
 
   <script>
     export function connectedCallback() {
-      this.$effect(() => console.log('count: ', this.$data.count))
-      this.$effect(() => console.log('double: ', this.$data.double))
-      this.$effect(() => console.log('quadruple: ', this.$data.quadruple))
+      const {$data} = this
+      this.$effect(() => console.log('count: ', $data.count))
+      this.$effect(() => console.log('double: ', $data.double))
     }
   </script>
 </template>
-```
 
 #### Syncronized and Persistent Reactive Data
 
