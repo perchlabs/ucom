@@ -253,7 +253,7 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
     <meta %n=>, <meta %n="n**2">, <meta %="n**3">
   </div>
 
-  <!-- Precalculate (saved to the current sub-scope -->
+  <!-- Precalculate (saved to the current sub-scope) -->
   Exponential:
   <div u-for="n in 5">
     <meta
@@ -301,15 +301,15 @@ Use modifiers `.sync`, `.save` or `.calc`.
   <meta
     $normal=0
     $persist.save=0
-    $sync.sync=0
-    $total.calc="() => normal + persist + sync"
+    $share.sync=0
+    $total.calc="() => normal + persist + share"
   >
 
   <!-- Normal store counter -->
   <button @click="normal++"><meta %normal> times</button>
 
   <!-- Changes to this counter will be syncronized across all elements of the same name. -->
-  <button @click="sync++"><meta %sync> times</button>
+  <button @click="share++"><meta %share> times</button>
 
   <!-- This counter will be both syncronized and persisted across all instances of this element -->
   <!-- of the same name (and page refreshes of this self-instantiated custom element) -->
