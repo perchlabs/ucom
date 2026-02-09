@@ -3,11 +3,10 @@ import type {
 } from '../types.ts'
 import type {
   Store,
-  RootContext,
+  // RootContext,
   Context,
   ContextableNode,
   RefRecord,
-  ProxyRecord,
 } from './types.ts'
 
 export const globalRefs: RefRecord = {}
@@ -15,29 +14,27 @@ export const globalRefs: RefRecord = {}
 const contexts = new WeakMap<ContextableNode, Context>()
 
 // Create the root context object that gets passed to all directives.
-// The data property here is all reactive data because it comes directly
-// from the proxy store.
-export function createContext(el: ShadowRoot, man: ComponentManager, store: Store) {
-  const ctx: RootContext = {
+export function createRootContext(shadow: ShadowRoot, man: ComponentManager, store: Store) {
+  const ctx: Context = {
+    shadow,
     man,
-    el,
     store,
     refs: {},
     cleanup: [],
   }
-  contexts.set(el, ctx)
+  contexts.set(shadow, ctx)
   return ctx
 }
 
 // Create a sub context for sub blocks.
 // The data parameter here is not reactive.  It is mixed in with reactive data from
 // the root context.
-export function createScopedContext(el: ContextableNode, ctx: Context, dataNew: ProxyRecord): Context {
-  const {man, refs} = ctx
-  const subctx = {
+export function createScopedContext(ctx: Context, el: Element, store: Store) {
+  const {shadow, man, refs} = ctx
+  const subctx: Context = {
+    shadow,
     man,
-    el,
-    store: ctx.store.copy(dataNew),
+    store,
     refs: {...refs},
     cleanup: [],
   }

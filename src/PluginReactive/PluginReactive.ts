@@ -12,10 +12,8 @@ import type {
   // DisconnectedCallback,
 } from '../types.ts'
 import type {
-  ValueWrapper,
-  ComputedFunctionMaker,
   ProxyRecord,
-  RootContext,
+  Context,
 } from './types.ts'
 import {
   ATTRIBUTE_CHANGED,
@@ -38,7 +36,7 @@ import {
   getAttributes,
   $attr,
 } from '../common.ts'
-import { cleanup, createContext } from './context.ts'
+import { cleanup, createRootContext } from './context.ts'
 import { evaluate } from './expression.ts'
 import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
@@ -74,7 +72,7 @@ function parseParams(frag: DocumentFragment) {
 
         propDefs[k] = {
           cast,
-          default: evaluate(expr, {}),
+          default: evaluate(expr),
         }
       })
   }
@@ -144,7 +142,7 @@ export default class implements Plugin {
   [CONNECTED](params: PluginCallbackBuilderParams) {
     const {Com, Raw, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
-      const ctx = createContext(shadow, man, makeProxyStore(Com, Raw, el))
+      const ctx = createRootContext(shadow, man, makeProxyStore(Com, Raw, el))
       el[ContextIndex] = ctx
 
       const {data} = ctx.store
@@ -196,26 +194,16 @@ function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   return d
 }
 
-class StoreValue<T = any> implements ValueWrapper<T> {
-  v: T
-  constructor(v: T) {
-    this.v = v
-  }
-}
-export class Synced extends StoreValue {}
-export class Persisted extends StoreValue {}
-export class Computed extends StoreValue<ComputedFunctionMaker>{}
-
 type PropDef = {
   default: any
   // TODO: Investigate ways to control reflective attributes/properties
   // reflect: boolean,
-  cast?: null | ((value: any) => any)
+  cast?: ((value: any) => any)
 }
 type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
-  [ContextIndex]: RootContext
+  [ContextIndex]: Context
   [DataIndex]: ProxyRecord
   $computed: () => any
   $effect: () => any

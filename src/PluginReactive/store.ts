@@ -1,7 +1,6 @@
 import type {
-  ComputedFunctionMaker,
+  ComputedFunction,
   ProxyRecord,
-  // SignalRecord,
   Signal,
   Store,
 } from './types.ts'
@@ -48,10 +47,10 @@ export function createStore(el: HTMLElement, name: string): Store {
     add,
     addRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
 
-    computed(key: string, value: ComputedFunctionMaker) {
+    computed(key: string, value: ComputedFunction) {
       addItem([
         key,
-        computed(() => value(data)),
+        computed(value),
       ])
     },
 

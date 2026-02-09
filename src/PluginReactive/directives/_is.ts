@@ -40,7 +40,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
     }
 
     let tagNameNew = ''
-    const ref = evaluate(expr, ctx.store.data)
+    const ref = evaluate(expr, ctx)
     if (isValidComponentPath(ref)) {
       try {
         const {name, resolved} = man.resolve(ref)
@@ -52,7 +52,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
         return
       }
     } else {
-      tagNameNew = evaluate(expr, ctx.store.data)
+      tagNameNew = evaluate(expr, ctx)
     }
 
     if (!tagNameNew || tagNameNew === tagName) {

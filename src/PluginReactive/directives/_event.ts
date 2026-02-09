@@ -14,7 +14,7 @@ export function _event(ctx: Context, el: Element, dir: DirectiveDef): DirectiveH
   // - $data: the reactive data (via 'with' statement)
   const handler = (e: Event) => {
     try {
-      execute(stmt, ctx.store.data, {$event: e})
+      execute(stmt, ctx, {$event: e})
     } catch (err) {
       console.error(`[u-on:${eventName}] Error: `, err)
     }

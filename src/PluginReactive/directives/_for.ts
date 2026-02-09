@@ -74,7 +74,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
       saved = []
 
       // Evaluate the array expression
-      let items = evaluate(itemsExp, ctx.store.data)
+      let items = evaluate(itemsExp, ctx)
       if (Number.isInteger(items)) {
         items = [...Array(items).keys()]
       }
@@ -98,18 +98,20 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
         // Clone the template for this item
         const clone = template.cloneNode(true) as ContextableNode
 
-        const children = isTemplate ? Array.from(clone.children) : [clone as Element]
+        const elSubArr = isTemplate ? Array.from(clone.children) : [clone as Element]
 
-        children.forEach(child => {
+        // Create a shared store for all contexts in this iteration of loop.
+        const store = ctx.store.copy(data)
+
+        elSubArr.forEach(elSub => {
           // Create a new scoped context with loop variables
-          const scoped = createScopedContext(child, ctx, {...data})
+          const scoped = createScopedContext(ctx, elSub, store)
 
-          walk(child, scoped)
-          parent.insertBefore(child, marker)
-          saved.push(child)
+          walk(elSub, scoped)
+          parent.insertBefore(elSub, marker)
+          saved.push(elSub)
         })
       })
-
     } catch (e) {
       console.error('[u-for] Error: ', e)
     }

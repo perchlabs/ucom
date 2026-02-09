@@ -28,7 +28,7 @@ export function _data(ctx: Context, _el: Element, dir: DirectiveDef) {
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {
     try {
-      const v = evaluate(expr, store.data) ?? {}
+      const v = evaluate(expr, ctx) ?? {}
 
       if (ref) {
         addItem(store, mod, ref, v)

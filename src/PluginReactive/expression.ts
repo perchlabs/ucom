@@ -1,11 +1,11 @@
 import type {
-  // Context,
   ProxyRecord,
+  Context,
 } from './types.ts'
 
-export function evaluate(expr: string, dataThis: ProxyRecord = {}, other: ProxyRecord = {}) {
+export function evaluate(expr: string, ctxThis?: Context, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
-    $data: dataThis,
+    $data: ctxThis ? ctxThis.store.data : {},
     ...other,
   }
 
@@ -25,9 +25,10 @@ export function evaluate(expr: string, dataThis: ProxyRecord = {}, other: ProxyR
   }
 }
 
-export function execute(code: string, dataThis: ProxyRecord = {}, other: ProxyRecord = {}) {
+export function execute(code: string, ctxThis?: Context, other: ProxyRecord = {}) {
+  const $data = ctxThis ? ctxThis.store.data : {}
   const params: ProxyRecord = {
-    $data: dataThis,
+    $data,
     ...other,
   }
 
@@ -41,7 +42,7 @@ export function execute(code: string, dataThis: ProxyRecord = {}, other: ProxyRe
     )
 
     // Execute and return promise for error handling
-    return fn.call(dataThis, ...Object.values(params)) as Promise<void>
+    return fn.call($data, ...Object.values(params)) as Promise<void>
   } catch (err) {
     console.error('[execute] Error: ', err)
     return Promise.reject(err)

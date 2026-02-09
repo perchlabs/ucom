@@ -9,7 +9,7 @@ export function _text(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const dispose = effect(() => {
     try {
       // Evaluate the expression (e.g., "count" or "firstName + ' ' + lastName")
-      el.textContent = evaluate(expr, ctx.store.data) ?? ''
+      el.textContent = evaluate(expr, ctx) ?? ''
     } catch (e) {
       console.error('[u-text] Error: ', e)
     }
