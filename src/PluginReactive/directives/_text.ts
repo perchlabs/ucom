@@ -3,8 +3,7 @@ import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function _text(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
-  const expr = dir.ref ? dir.ref : dir.val
-  // let expr = dir.ref ? dir.ref : dir.val
+  const expr = dir.ref ?? dir.val
 
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {

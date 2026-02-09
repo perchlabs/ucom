@@ -6,7 +6,6 @@ const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.
 
 export function _show(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
   const {val: expr} = dir
-  // expr: string
 
   // Store original display value to restore when showing (i.e. flex/grid, etc)
   let originalDisplay = getComputedStyle(el).display
