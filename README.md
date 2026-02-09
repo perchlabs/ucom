@@ -272,6 +272,7 @@ Use `u-data` or `$` shortcut syntax.
 
 Use modifiers `.sync`, `.save` or `.calc`.
 
+```html
 <template u-com>
   <!-- u-data is very flexible -->
   <meta
