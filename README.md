@@ -231,7 +231,7 @@ Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-t
 Use Vue style shortcuts.  `%` is short for `u-text:`, `@` is short for `u-on:`
 ```html
 <template u-com>
-  <div u-for="n in 10" @click="alert(n)" $n></div>
+  <div u-for="n in 10" @click="alert(n)" %n></div>
 </template>
 ```
 
