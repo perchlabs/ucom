@@ -15,6 +15,7 @@ import type {
   ValueWrapper,
   ComputedFunctionMaker,
   ProxyRecord,
+  RootContext,
 } from './types.ts'
 import {
   ATTRIBUTE_CHANGED,
@@ -45,7 +46,7 @@ import { createStore } from './store.ts'
 // Proto and constructor constants.
 const PropsIndex = Symbol()
 // Instance constants.
-const CleanupIndex = Symbol()
+const ContextIndex = Symbol()
 const DataIndex = '$data'
 
 // const PROP_REFLECT_DEFAULT = true
@@ -141,28 +142,22 @@ export default class implements Plugin {
   }
 
   [CONNECTED](params: PluginCallbackBuilderParams) {
-    return () => connectData(params as UpgradedPluginCallbackBuilderParams)
+    const {Com, Raw, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
+    return () => {
+      const ctx = createContext(shadow, man, makeProxyStore(Com, Raw, el))
+      el[ContextIndex] = ctx
+
+      const {data} = ctx.store
+      Object.assign(el, {
+        get [DataIndex]() { return data },
+      })
+      walkChildren(shadow, ctx)
+    }
   }
 
   [DISCONNECTED]({el}: PluginCallbackBuilderParams) {
-    return () => (el as UpgradeComponent)[CleanupIndex]?.forEach(f => f())
+    return () => cleanup(el)
   }
-}
-
-function connectData({Com, Raw, el, shadow, man}: UpgradedPluginCallbackBuilderParams) {
-  if (el[CleanupIndex]) {
-    return
-  }
-  el[CleanupIndex] = []
-
-  const ctx = createContext(shadow, man, makeProxyStore(Com, Raw, el))
-  const {data} = ctx.store
-  Object.assign(el, {
-    get [DataIndex]() { return data },
-  })
-  walkChildren(shadow, ctx)
-
-  el[CleanupIndex].push?.(() => cleanup(ctx.el))
 }
 
 function makeProxyStore(
@@ -220,8 +215,8 @@ type PropDef = {
 type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
+  [ContextIndex]: RootContext
   [DataIndex]: ProxyRecord
-  [CleanupIndex]: (() => void)[]
   $computed: () => any
   $effect: () => any
   $effectScope: () => any

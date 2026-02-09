@@ -33,7 +33,7 @@ export function createContext(el: ShadowRoot, man: ComponentManager, store: Stor
 // The data parameter here is not reactive.  It is mixed in with reactive data from
 // the root context.
 export function createScopedContext(el: ContextableNode, ctx: Context, dataNew: ProxyRecord): Context {
-  const { man, refs } = ctx
+  const {man, refs} = ctx
   const subctx = {
     man,
     el,
@@ -48,10 +48,10 @@ export function createScopedContext(el: ContextableNode, ctx: Context, dataNew: 
 export function cleanup(el: ContextableNode) {
   const ctx = contexts.get(el)
   if (!ctx) return
-  
+
   // Run all cleanup functions
-  ctx.cleanup?.forEach(fn => fn())
-  
+  ctx.cleanup.forEach(fn => fn())
+
   // Remove context (and cleanup array) from WeakMap
   contexts.delete(el)
 }
