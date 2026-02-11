@@ -298,6 +298,7 @@ Use modifiers `.sync`, `.save` or `.calc`.
     }
   </script>
 </template>
+```
 
 #### Syncronized and Persistent Reactive Data
 

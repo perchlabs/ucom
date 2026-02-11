@@ -7,22 +7,23 @@ export const getDirectives = (el: Element, reDir: RegExp) => getAttributes(el)
   .filter(([k]) => reDir.test(k))
   .map(item => createDirective(...item))
 
-export function createDirective(keyFull: string, val: string): DirectiveDef {
-  const ch1 = keyFull[0]
-  if (['@', '$', '%', ':'].includes(ch1)) {
-    const [ref, mod] = keyFull.substring(1).split('.')
+export function createDirective(full: string, val: string): DirectiveDef {
+  const key = shortMap[full[0]]
+  if (key) {
+    const [ref, mod] = full.substring(1).split('.')
 
     return {
-      key: ch1,
+      full,
+      key,
       ref,
       val,
       mod,
     }
+  } else {
+    const [key, keyRight] = full.split(':')
+    const [ref, mod] = keyRight?.split('.') ?? []
+    return {full, key, ref, val, mod}
   }
-
-  const [key, keyRight] = keyFull.split(':')
-  const [ref, mod] = keyRight?.split('.') ?? []
-  return {key, ref, val, mod}
 }
 
 export function pullDir(el: Element, key: string) {
@@ -30,4 +31,11 @@ export function pullDir(el: Element, key: string) {
   if (attr) {
     return createDirective(key, attr)
   }
+}
+
+const shortMap: Record<string, string> = {
+  '$': 'u-data',
+  '@': 'u-on',
+  '%': 'u-text',
+  ':': 'u-bind',
 }

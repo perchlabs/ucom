@@ -159,18 +159,12 @@ export default class implements Plugin {
 }
 
 function makeProxyStore(
-  Com: UpgradeComponentConstructor,
+  {[PropsIndex]: propDefs}: UpgradeComponentConstructor,
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
 ) {
-  const {
-    def: {name},
-    [PropsIndex]: propDefs,
-  } = Com
-  const store = createStore(el, name)
-  const props = makeProps(el, propDefs)
-
-  store.addRaw(props)
+  const store = createStore(el)
+  store.addRaw(makeProps(el, propDefs))
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !isSystemKey(k))
     .forEach(k => {
@@ -187,9 +181,9 @@ function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   const d: Record<string, any> = {
     // get $el() { return el },
   }
-  for (let [k, v] of Object.entries(propDefs)) {
-    const raw = el.getAttribute(k) ?? v.default
-    d[k] = v.cast?.(raw) ?? raw
+  for (let [k, def] of Object.entries(propDefs)) {
+    const raw = el.getAttribute(k) ?? def.default
+    d[k] = def.cast?.(raw) ?? raw
   }
   return d
 }

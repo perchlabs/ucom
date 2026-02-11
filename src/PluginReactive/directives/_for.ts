@@ -63,15 +63,19 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   // Keep track of rendered nodes for cleanup
   let saved: Element[] = []
 
+  const cleanSaved = () => {
+    // Clean up previous render
+    saved.forEach(n => {
+      cleanup(n)
+      n.remove()
+    })
+    saved = []
+  }
+
   // Create effect that re-renders whenever array changes
   const dispose = effect(() => {
     try {
-      // Clean up previous render
-      saved.forEach(n => {
-        cleanup(n)
-        n.remove()
-      })
-      saved = []
+      cleanSaved()
 
       // Evaluate the array expression
       let items = evaluate(itemsExp, ctx)
@@ -118,7 +122,7 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
   })
 
   // Track effect disposal
-  ctx.cleanup.push(dispose)
+  ctx.cleanup.push(dispose, cleanSaved)
 
   return next
 }

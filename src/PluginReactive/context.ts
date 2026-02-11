@@ -3,7 +3,6 @@ import type {
 } from '../types.ts'
 import type {
   Store,
-  // RootContext,
   Context,
   ContextableNode,
   RefRecord,
@@ -14,25 +13,25 @@ export const globalRefs: RefRecord = {}
 const contexts = new WeakMap<ContextableNode, Context>()
 
 // Create the root context object that gets passed to all directives.
-export function createRootContext(shadow: ShadowRoot, man: ComponentManager, store: Store) {
+export function createRootContext(root: ShadowRoot, man: ComponentManager, store: Store) {
   const ctx: Context = {
-    shadow,
     man,
     store,
     refs: {},
     cleanup: [],
   }
-  contexts.set(shadow, ctx)
+  contexts.set(root, ctx)
   return ctx
 }
 
 // Create a sub context for sub blocks.
 // The data parameter here is not reactive.  It is mixed in with reactive data from
 // the root context.
-export function createScopedContext(ctx: Context, el: Element, store: Store) {
-  const {shadow, man, refs} = ctx
+export function createScopedContext(ctx: Context, el: Element, store?: Store) {
+  const {man, refs} = ctx
+  store ??= ctx.store
+
   const subctx: Context = {
-    shadow,
     man,
     store,
     refs: {...refs},
@@ -49,6 +48,6 @@ export function cleanup(el: ContextableNode) {
   // Run all cleanup functions
   ctx.cleanup.forEach(fn => fn())
 
-  // Remove context (and cleanup array) from WeakMap
+  // Remove context from WeakMap
   contexts.delete(el)
 }

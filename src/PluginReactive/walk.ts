@@ -5,6 +5,7 @@ import type {
   DirectiveHandler,
   DirectiveHandlerReturn,
 } from './types.ts'
+import { createScopedContext } from './context.ts'
 import { getDirectives, pullDir } from './directive.ts'
 import { void_meta } from './voids/void_meta.ts'
 import { _data } from './directives/_data.ts'
@@ -16,6 +17,15 @@ import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 import { _for } from './directives/_for.ts'
 import { _is } from './directives/_is.ts'
+
+const reDir = /^u-|\$|%|@|:/
+const dirMap: Record<string, DirectiveHandler> = {
+  'u-text': _text,
+  'u-html': _html,
+  'u-bind': _attribute,
+  'u-on': _event,
+  'u-ref': _ref,
+}
 
 export function walk(node: Node, ctx: Context): ChildNode | null | void {
   // Skip text nodes, comments, etc - only process element nodes
@@ -40,8 +50,20 @@ export function walk(node: Node, ctx: Context): ChildNode | null | void {
     return _is(ctx, el, def)
   }
 
+  const {d1, d2 = []} = Object.groupBy(
+    getDirectives(el, reDir),
+    def => def.key == 'u-data' ? 'd1' : 'd2',
+  )
+
+  if (d1) {
+    ctx = createScopedContext(ctx, el)
+    for (const def of d1) {
+      _data(ctx, el, def)
+    }
+  }
+
   let next: DirectiveHandlerReturn
-  for (const def of getDirectives(el, reDir)) {
+  for (const def of d2) {
     if (next = dirMap[def.key]?.(ctx, el, def)) {
       return next
     }
@@ -55,18 +77,4 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
   while (child) {
     child = walk(child, ctx) || child.nextSibling
   }
-}
-
-const reDir = /^u-|\$|%|@|:/
-const dirMap: Record<string, DirectiveHandler> = {
-  'u-data': _data,
-  '$': _data,
-  'u-text': _text,
-  '%': _text,
-  'u-html': _html,
-  'u-bind': _attribute,
-  ':': _attribute,
-  'u-on': _event,
-  '@': _event,
-  'u-ref': _ref,
 }

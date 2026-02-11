@@ -1,7 +1,6 @@
 import type {
   ComputedFunction,
   ProxyRecord,
-  Signal,
   Store,
 } from './types.ts'
 import { computed, effect, signal as createSignal } from './alien-signals'
@@ -16,7 +15,8 @@ type ItemRecord = Record<string, Item>
 const persistMap: ItemRecord = {}
 const syncMap: ItemRecord = {}
 
-export function createStore(el: HTMLElement, name: string): Store {
+export function createStore(el: HTMLElement): Store {
+  const name = el.tagName
   const data: ProxyRecord = {}
 
   const addItem = ([key, value, isFunc = false]: Item) => {
@@ -27,7 +27,13 @@ export function createStore(el: HTMLElement, name: string): Store {
     if (isFunc) {
       data[key] = value.bind(el)
     } else {
-      defineSignalProperty(data, key, value)
+      // defineSignalProperty(data, key, value)
+      Object.defineProperty(data, key, {
+        get() { return value() },
+        set(val) { value(val) },
+        configurable: true,
+        enumerable: true,
+      })
     }
   }
 
@@ -85,20 +91,11 @@ export function createStore(el: HTMLElement, name: string): Store {
     },
 
     copy(dataNew: ProxyRecord = {}) {
-      const store = createStore(el, name)
+      const store = createStore(el)
       Object.assign(store.data, Object.create(data))
       // store.addRaw(data)
       store.addRaw(dataNew)
       return store
     },
   }
-}
-
-export function defineSignalProperty(data: ProxyRecord, key: string, signal: Signal) {
-  Object.defineProperty(data, key, {
-    get() { return signal() },
-    set(val) { signal(val) },
-    configurable: true,
-    enumerable: true,
-  })
 }
