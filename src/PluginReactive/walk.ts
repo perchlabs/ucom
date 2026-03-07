@@ -18,15 +18,6 @@ import { _ref } from './directives/_ref.ts'
 import { _for } from './directives/_for.ts'
 import { _is } from './directives/_is.ts'
 
-const reDir = /^u-|\$|%|@|:/
-const dirMap: Record<string, DirectiveHandler> = {
-  'u-ref': _ref,
-  'u-html': _html,
-  '%': _text,
-  ':': _attribute,
-  '@': _event,
-}
-
 export function walk(node: Node, ctx: Context): ChildNode | null | void {
   // Skip text nodes, comments, etc - only process element nodes
   if (node.nodeType !== 1) return
@@ -77,4 +68,13 @@ export function walkChildren(node: ContextableNode, ctx: Context) {
   while (child) {
     child = walk(child, ctx) || child.nextSibling
   }
+}
+
+const reDir = /^u-|\$|%|@|:/
+const dirMap: Record<string, DirectiveHandler> = {
+  'u-ref': _ref,
+  'u-html': _html,
+  '%': _text,
+  ':': _attribute,
+  '@': _event,
 }

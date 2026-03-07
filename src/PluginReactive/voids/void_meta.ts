@@ -6,10 +6,8 @@ import { makeElementAs } from '../utils.ts'
 import { _data } from '../directives/_data.ts'
 import { _text } from '../directives/_text.ts'
 
-const reDir = /^u-|\$|%/
-
 export function void_meta(ctx: Context, el: HTMLMetaElement) {
-  for (const def of getDirectives(el, reDir)) {
+  for (const def of getDirectives(el, /^u-|\$|%/)) {
 
     switch (def.key) {
       case '$': {
