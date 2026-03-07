@@ -20,11 +20,11 @@ import { _is } from './directives/_is.ts'
 
 const reDir = /^u-|\$|%|@|:/
 const dirMap: Record<string, DirectiveHandler> = {
-  'u-text': _text,
-  'u-html': _html,
-  'u-bind': _attribute,
-  'u-on': _event,
   'u-ref': _ref,
+  'u-html': _html,
+  '%': _text,
+  ':': _attribute,
+  '@': _event,
 }
 
 export function walk(node: Node, ctx: Context): ChildNode | null | void {
@@ -52,7 +52,7 @@ export function walk(node: Node, ctx: Context): ChildNode | null | void {
 
   const {d1, d2 = []} = Object.groupBy(
     getDirectives(el, reDir),
-    def => def.key == 'u-data' ? 'd1' : 'd2',
+    def => def.key == '$' ? 'd1' : 'd2',
   )
 
   if (d1) {

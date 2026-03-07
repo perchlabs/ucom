@@ -43,7 +43,7 @@ export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): Di
         el.setAttribute(attrName, value)
       }
     } catch (e) {
-      console.error(`[u-bind:${attrName}] Error: `, e)
+      console.error(`[bind:${attrName}] Error: `, e)
     }
   })
 
@@ -77,7 +77,7 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
       // Apply the final class list
       el.className = Array.from(classes).join(' ')
     } catch (e) {
-      console.error('[u-bind:class] Error: ', e)
+      console.error('[bind:class] Error: ', e)
     }
   })
 
@@ -111,7 +111,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
         }
       }
     } catch (e) {
-      console.error('[u-bind:style] Error: ', e)
+      console.error('[bind:style] Error: ', e)
     }
   })
 

@@ -220,15 +220,18 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 
 Ucom has Alpine/Vue style templating, with the `u-` prefix.
 
-Directives include; `u-show`, `u-for`, `u-bind`, `u-html`, `u-on`, `u-ref`, `u-text`, `u-is`, `u-data`.
+Directives include;
 
-```html
-<template u-com>
-  <div u-for="n in 10" u-on:click="alert(n)" u-text="n"></div>
-</template>
-```
+- `u-show`
+- `u-for`
+- `u-html`
+- `u-ref`
+- `u-is`
+- `@` (handler)
+- `%` (text)
+- `$` (data)
+- `:` (bind)
 
-Use Vue style shortcuts.  `%` is short for `u-text:`, `@` is short for `u-on:`
 ```html
 <template u-com>
   <div u-for="n in 10" @click="alert(n)" %n></div>
@@ -241,13 +244,7 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
 
 ```html
 <template u-com>
-  <!-- The ugly Alpine style way -->
-  Exponential:
-  <div u-for="n in 5">
-    <span u-text="n ** 1"></span>, <span u-text="n ** 2"></span>, <span u-text="n ** 3"></span>
-  </div>
-
-  <!-- The pretty Ucom way -->
+  <!-- Inline calculation -->
   Exponential:
   <div u-for="n in 5">
     <meta %n=>, <meta %n="n**2">, <meta %="n**3">
@@ -268,18 +265,15 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
 
 You can use the store to gain access to reactive data by declaring it in a `meta` void tag (no closing tag required).
 
-Use `u-data` or `$` shortcut syntax.
-
 Use modifiers `.sync`, `.save` or `.calc`.
 
 ```html
 <template u-com>
-  <!-- u-data is very flexible -->
+  <!-- data is very flexible -->
   <meta
-    u-data:count=1
-    u-data:double.calc="() => count * 2"
-    $triple.calc="() => count * 3"
-    $.calc="{quadruple: () => count * 4}"
+    $count=1
+    $double.calc="() => count * 2"
+    $.calc="{triple: () => count * 3}"
   >
 
   <button @click="count++">Once: <meta %count></button>
@@ -287,8 +281,6 @@ Use modifiers `.sync`, `.save` or `.calc`.
   <div>Double it <meta %double></div>
 
   <div>Triple it <meta %triple></div>
-
-  <div>Quadruple it <meta %quadruple></div>
 
   <script>
     export function connectedCallback() {

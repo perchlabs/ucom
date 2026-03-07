@@ -16,7 +16,7 @@ export function _event(ctx: Context, el: Element, dir: DirectiveDef): DirectiveH
     try {
       execute(stmt, ctx, {$event: e})
     } catch (err) {
-      console.error(`[u-on:${eventName}] Error: `, err)
+      console.error(`[handle:${eventName}] Error: `, err)
     }
   }
 

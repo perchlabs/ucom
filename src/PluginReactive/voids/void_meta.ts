@@ -12,11 +12,11 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
   for (const def of getDirectives(el, reDir)) {
 
     switch (def.key) {
-      case 'u-data': {
+      case '$': {
         _data(ctx, el, def)
         break
       }
-      case 'u-text': {
+      case '%': {
         const span = makeElementAs(el, 'span')
         _text(ctx, span, def)
         el.replaceWith(span)
