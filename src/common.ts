@@ -14,7 +14,7 @@ export const isValidComponentName = (v: string, toLowerCase = false) => {
 }
 
 export function isSystemKey(k: string) {
-  if (k in CORE_FUNCTIONS_SET) return true
+  if (CORE_FUNCTIONS_SET.has(k)) return true
   if (k.startsWith('$')) return true
   return false
 }
