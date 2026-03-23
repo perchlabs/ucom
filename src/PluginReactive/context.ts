@@ -3,7 +3,7 @@ import type {
 } from '../types.ts'
 import type {
   Store,
-  Context as iContext,
+  Context,
   ContextableNode,
   RefRecord,
   ProxyRecord,
@@ -17,13 +17,13 @@ export function createContext(
   man: ComponentManager,
   store: Store,
   refs: RefRecord = {},
-): iContext {
+): Context {
   let isFrag: boolean
   let start: Text | undefined
   let end: Text | undefined
-  let children = new Set<iContext>()
+  let children = new Set<Context>()
 
-  const ctx: iContext = {
+  const ctx: Context = {
     ptr,
     man,
     store,

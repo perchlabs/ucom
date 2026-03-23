@@ -1,11 +1,9 @@
 import type {
-  // Block,
   Context,
   DirectiveDef,
 } from '../types.ts'
 import { isValidComponentPath } from '../../common.ts'
 import { effect } from '../alien-signals'
-// import { cleanupContext } from '../context.ts'
 import { getParent, makeElementAs } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
@@ -36,7 +34,6 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   const dispose = effect(() => {
     if (tag) {
       parent.insertBefore(anchor, tag)
-      // cleanup(tag)
       tag.remove()
     }
 
