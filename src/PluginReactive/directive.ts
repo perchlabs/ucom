@@ -11,7 +11,7 @@ export function createDirective(full: string, val: string): DirectiveDef {
   if (full.startsWith('u-')) {
     const [key, keyRight] = full.split(':')
     const [ref, mod] = keyRight?.split('.') ?? []
-    return {full, key, ref, val, mod}
+    return {full, key, ref, expr: val, mod}
   } else {
     const [key] = full
     const [ref, mod] = full.substring(1).split('.')
@@ -20,7 +20,7 @@ export function createDirective(full: string, val: string): DirectiveDef {
       full,
       key,
       ref,
-      val,
+      expr: val,
       mod,
     }
   }

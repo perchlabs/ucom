@@ -5,7 +5,7 @@ import { evaluate } from '../expression.ts'
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
 
 export function _show(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
-  const {val: expr} = dir
+  const {expr} = dir
 
   // Store original display value to restore when showing (i.e. flex/grid, etc)
   let originalDisplay = getComputedStyle(el).display

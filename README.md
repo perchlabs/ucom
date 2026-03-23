@@ -218,7 +218,7 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 
 ### Templating
 
-Ucom has Alpine/Vue style templating, with the `u-` prefix.
+Ucom has Alpine/Vue style templating.
 
 Directives include;
 
@@ -229,8 +229,12 @@ Directives include;
 - `u-is`
 - `@` (handler)
 - `%` (text)
-- `$` (data)
 - `:` (bind)
+
+`meta` void element specific options.
+
+- `$` (data)
+- `%` (text)
 
 ```html
 <template u-com>

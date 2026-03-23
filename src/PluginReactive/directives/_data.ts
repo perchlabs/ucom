@@ -1,7 +1,6 @@
 import type {
   Context,
   DirectiveDef,
-  Store,
 } from '../types.ts'
 import {
   STORE_MOD_VAR,
@@ -9,20 +8,15 @@ import {
   STORE_MOD_SYNC,
   STORE_MOD_SAVE,
 } from '../../constants.ts'
-import {
-  isObject,
-} from '../../common.ts'
+import { isRecord } from '../../common.ts'
 import { effect } from '../alien-signals'
-
 import { evaluate } from '../expression.ts'
 
-export function _data(ctx: Context, _el: Element, dir: DirectiveDef) {
-  const {store} = ctx
-
+export function _data(ctx: Context, _el: HTMLElement, dir: DirectiveDef) {
   const {
     ref,
+    expr,
     mod = STORE_MOD_VAR,
-    val: expr
   } = dir
 
   // Create an effect that automatically re-runs when signals change
@@ -31,38 +25,29 @@ export function _data(ctx: Context, _el: Element, dir: DirectiveDef) {
       const v = evaluate(expr, ctx) ?? {}
 
       if (ref) {
-        addItem(store, mod, ref, v)
-      } else if (isObject(v)) {
+        addItem(ctx, ref, v)
+      } else if (isRecord(v)) {
         for (const k in v) {
-          addItem(store, mod, k, v[k])
+          addItem(ctx, k, v[k])
         }
       } else {
-        console.warn('TODO: Error, not basic type or object.')
+        console.error('$data invalid format')
       }
     } catch (e) {
-      console.error('[var] Error: ', e)
+      console.error('$data: ', e)
     }
   })
 
   // Track effect disposal
   ctx.cleanup.push(dispose)
-}
 
-function addItem(store: Store, mod: string, ref: string, v: any) {
-  switch (mod) {
-    case STORE_MOD_VAR:
-      store.add(ref, v)
-      break
-    case STORE_MOD_CALC:
-      store.computed(ref, v)
-      break
-    case STORE_MOD_SYNC:
-      store.sync(ref, v)
-      break
-    case STORE_MOD_SAVE:
-      store.persist(ref, v)
-      break
-    default:
-      console.warn(`Unsupported variable type '${mod}'`)
+  function addItem({store}: Context, ref: string, v: any) {
+    switch (mod) {
+      case STORE_MOD_VAR:
+      case STORE_MOD_CALC:
+      case STORE_MOD_SYNC:
+      case STORE_MOD_SAVE:
+        store[mod](ref, v)
+    }
   }
 }

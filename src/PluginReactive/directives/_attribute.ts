@@ -5,7 +5,7 @@ import { evaluate } from '../expression.ts'
 export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): DirectiveHandlerReturn {
   const {
     ref: attrName,
-    val: expr,
+    expr,
   } = dir
 
   if (!attrName) return
@@ -92,7 +92,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
   const dispose = effect(() => {
     try {
       const value = evaluate(expr, ctx)
-      
+
       // Restore original styles first
       el.setAttribute('style', originalStyle)
       

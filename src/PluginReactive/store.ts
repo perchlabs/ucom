@@ -20,14 +20,9 @@ export function createStore(el: HTMLElement): Store {
   const data: ProxyRecord = {}
 
   const addItem = ([key, value, isFunc = false]: Item) => {
-    // if (key in data) {
-    //   return console.error(`Element store already has a key '${key}'.`, el)
-    // }
-
     if (isFunc) {
       data[key] = value.bind(el)
     } else {
-      // defineSignalProperty(data, key, value)
       Object.defineProperty(data, key, {
         get() { return value() },
         set(val) { value(val) },
@@ -50,10 +45,10 @@ export function createStore(el: HTMLElement): Store {
 
   return {
     data,
-    add,
-    addRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
+    varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
+    var: add,
 
-    computed(key: string, value: ComputedFunction) {
+    calc(key: string, value: ComputedFunction) {
       addItem([
         key,
         computed(value),
@@ -68,7 +63,7 @@ export function createStore(el: HTMLElement): Store {
       addItem(syncMap[storeId])
     },
 
-    persist(key: string, value: any) {
+    save(key: string, value: any) {
       const storeId = `${name}-${key}`
       if (!(storeId in persistMap)) {
         if (typeof value === 'function') {
@@ -93,8 +88,7 @@ export function createStore(el: HTMLElement): Store {
     copy(dataNew: ProxyRecord = {}) {
       const store = createStore(el)
       Object.assign(store.data, Object.create(data))
-      // store.addRaw(data)
-      store.addRaw(dataNew)
+      store.varRaw(dataNew)
       return store
     },
   }

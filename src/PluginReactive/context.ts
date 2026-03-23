@@ -3,51 +3,111 @@ import type {
 } from '../types.ts'
 import type {
   Store,
-  Context,
+  Context as iContext,
   ContextableNode,
   RefRecord,
+  ProxyRecord,
 } from './types.ts'
+import { walk } from './walk.ts'
 
 export const globalRefs: RefRecord = {}
 
-const contexts = new WeakMap<ContextableNode, Context>()
+export function createContext(
+  ptr: ContextableNode,
+  man: ComponentManager,
+  store: Store,
+  refs: RefRecord = {},
+): iContext {
+  let isFrag: boolean
+  let start: Text | undefined
+  let end: Text | undefined
+  let children = new Set<iContext>()
 
-// Create the root context object that gets passed to all directives.
-export function createRootContext(root: ShadowRoot, man: ComponentManager, store: Store) {
-  const ctx: Context = {
+  const ctx: iContext = {
+    ptr,
     man,
     store,
-    refs: {},
+    refs,
     cleanup: [],
+
+    scope(el: HTMLElement, data: ProxyRecord = {}) {
+      const scoped = createContext(
+        el,
+        man,
+        store.copy(data),
+        {...refs},
+      )
+      children.add(scoped)
+
+      return scoped
+    },
+
+    mount(parent: ContextableNode, anchor: Node) {
+      isFrag = ptr instanceof HTMLTemplateElement
+      ctx.dup = isFrag
+        ? (ptr as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment
+        : ptr.cloneNode(true) as HTMLElement
+
+      ctx.insert(parent, anchor)
+      ctx.walk()
+      return ctx
+    },
+
+    insert(parent: ContextableNode, anchor: Node) {
+      if (isFrag) {
+        if (start) {
+          // already inserted, moving
+          let node: Node | null = start
+          let next: Node | null
+          while (node) {
+            next = node.nextSibling
+            parent.insertBefore(node, anchor)
+            if (node === end) {
+              break
+            }
+            node = next
+          }
+        } else {
+          start = new Text('')
+          end = new Text('')
+          parent.insertBefore(end, anchor)
+          parent.insertBefore(start, end)
+          parent.insertBefore(ctx.dup!, end)
+        }
+      } else {
+        parent.insertBefore(ctx.dup!, anchor)
+      }
+    },
+
+    remove() {
+      if (start) {
+        const parent = start.parentNode!
+        let node: Node | null = start
+        let next: Node | null
+        while (node) {
+          next = node.nextSibling
+          parent.removeChild(node)
+          if (node === end) {
+            break
+          }
+          node = next
+        }
+      } else {
+        ptr.parentNode?.removeChild(ptr)
+      }
+
+      ctx.teardown()
+    },
+
+    teardown() {
+      ctx.cleanup.forEach(fn => fn())
+      children.forEach(child => child.teardown())
+    },
+
+    walk() {
+      walk(ctx.dup ?? ptr, ctx)
+    },
   }
-  contexts.set(root, ctx)
+
   return ctx
-}
-
-// Create a sub context for sub blocks.
-// The data parameter here is not reactive.  It is mixed in with reactive data from
-// the root context.
-export function createScopedContext(ctx: Context, el: Element, store?: Store) {
-  const {man, refs} = ctx
-  store ??= ctx.store
-
-  const subctx: Context = {
-    man,
-    store,
-    refs: {...refs},
-    cleanup: [],
-  }
-  contexts.set(el, subctx)
-  return subctx
-}
-
-export function cleanup(el: ContextableNode) {
-  const ctx = contexts.get(el)
-  if (!ctx) return
-
-  // Run all cleanup functions
-  ctx.cleanup.forEach(fn => fn())
-
-  // Remove context from WeakMap
-  contexts.delete(el)
 }

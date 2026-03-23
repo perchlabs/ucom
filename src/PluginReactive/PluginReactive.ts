@@ -12,8 +12,8 @@ import type {
   // DisconnectedCallback,
 } from '../types.ts'
 import type {
-  ProxyRecord,
   Context,
+  ProxyRecord,
 } from './types.ts'
 import {
   ATTRIBUTE_CHANGED,
@@ -36,10 +36,10 @@ import {
   getAttributes,
   $attr,
 } from '../common.ts'
-import { cleanup, createRootContext } from './context.ts'
+import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'
-import { walkChildren } from './walk.ts'
 import { createStore } from './store.ts'
+import { walkChildren } from './walk.ts'
 
 // Proto and constructor constants.
 const PropsIndex = Symbol()
@@ -142,19 +142,19 @@ export default class implements Plugin {
   [CONNECTED](params: PluginCallbackBuilderParams) {
     const {Com, Raw, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
-      const ctx = createRootContext(shadow, man, makeProxyStore(Com, Raw, el))
-      el[ContextIndex] = ctx
-
+      const ctx = createContext(shadow, man, makeProxyStore(Com, Raw, el))
       const {data} = ctx.store
       Object.assign(el, {
         get [DataIndex]() { return data },
+        [ContextIndex]: ctx,
       })
+
       walkChildren(shadow, ctx)
     }
   }
 
   [DISCONNECTED]({el}: PluginCallbackBuilderParams) {
-    return () => cleanup(el)
+    return () => (el as UpgradeComponent)[ContextIndex].teardown()
   }
 }
 
@@ -164,13 +164,13 @@ function makeProxyStore(
   el: UpgradeComponent,
 ) {
   const store = createStore(el)
-  store.addRaw(makeProps(el, propDefs))
+  store.varRaw(makeProps(el, propDefs))
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !isSystemKey(k))
     .forEach(k => {
       const v = rawProto[k]
       if (typeof v === 'function') {
-        store.add(k, v)
+        store.var(k, v)
       }
     })
 

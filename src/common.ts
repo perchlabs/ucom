@@ -54,8 +54,14 @@ export function getAttributes(el: Element): [k: string, v: string][] {
   return Array.from(el.attributes).map(({name, value}) => [name, value])
 }
 
-export function isObject(value: any) {
-  return typeof value === 'object'
-    && value !== null
-    && !Array.isArray(value)
+export function isRecord(value: unknown): value is Record<string | number | symbol, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  )
+}
+
+export function isNumber(value: unknown) {
+  return typeof value === 'number'
 }

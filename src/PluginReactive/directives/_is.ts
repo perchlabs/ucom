@@ -1,17 +1,18 @@
 import type {
+  // Block,
   Context,
   DirectiveDef,
 } from '../types.ts'
 import { isValidComponentPath } from '../../common.ts'
 import { effect } from '../alien-signals'
-import { cleanup } from '../context.ts'
+// import { cleanupContext } from '../context.ts'
 import { getParent, makeElementAs } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
 export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   const {man} = ctx
-  let {val: expr} = dir
+  let {expr} = dir
 
   expr = expr.trim()
   if (!expr) {
@@ -22,7 +23,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
     return console.warn(`u-is may only be placed on a template.`)
   }
 
-  const next = el.nextSibling
+  const next = el.nextElementSibling
 
   const parent = getParent(el)
   const anchor = new Comment(dir.key)
@@ -35,7 +36,7 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
   const dispose = effect(() => {
     if (tag) {
       parent.insertBefore(anchor, tag)
-      cleanup(tag)
+      // cleanup(tag)
       tag.remove()
     }
 

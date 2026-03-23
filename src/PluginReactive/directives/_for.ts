@@ -1,23 +1,20 @@
-import type {
-  Context,
-  ContextableNode,
-  DirectiveDef,
-} from '../types.ts'
-import { effect } from '../alien-signals'
-import { createScopedContext, cleanup } from '../context.ts'
+import type { Context, DirectiveDef } from '../types.ts'
 import { evaluate } from '../expression.ts'
+import { effect } from '../alien-signals'
 import { getParent } from '../utils.ts'
-import { walk } from '../walk.ts'
+import { pullAttr, isNumber, isRecord } from '../../common.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
-export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
-  const {val: expr} = dir
+type KeyToIndexMap = Map<any, number>
 
-  const next = el.nextSibling
+export const _for = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
+  const {expr} = dir
+
+  const next = el.nextElementSibling
 
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
@@ -25,104 +22,146 @@ export function _for(ctx: Context, el: Element, dir: DirectiveDef) {
     return next
   }
 
-  const itemsExp = inMatch[2].trim()
+  const parent = getParent(el)
+
+  const anchor = new Text('')
+  parent.insertBefore(anchor, el)
+  parent.removeChild(el)
+
+  const sourceExp = inMatch[2].trim()
   let valueExp = inMatch[1].trim().replace(stripParensRE, '').trim()
   let destructureBindings: string[] | undefined
   let isArrayDestructure = false
-  let indexName = 'index'
-  // let objIndexExp: string | undefined
+  let indexExp: string | undefined
+  let objIndexExp: string | undefined
 
-  let match
+  let keyExp = pullAttr(el, ':key')
+  // if (keyExp) {
+  //   keyExp = JSON.stringify(keyExp)
+  // }
+
+  let match: RegExpMatchArray | null
   if ((match = valueExp.match(forIteratorRE))) {
     valueExp = valueExp.replace(forIteratorRE, '').trim()
-    indexName = match[1].trim()
-    // if (match[2]) {
-    //   objIndexExp = match[2].trim()
-    // }
+    indexExp = match[1].trim()
+    if (match[2]) {
+      objIndexExp = match[2].trim()
+    }
   }
 
   if ((match = valueExp.match(destructureRE))) {
     destructureBindings = match[1].split(',').map((s) => s.trim())
     isArrayDestructure = valueExp[0] === '['
   }
-  const itemName = valueExp
 
-  // Get the template content
-  const isTemplate = el.tagName === 'TEMPLATE'
-  const templateContent =  isTemplate ? (el as HTMLTemplateElement).content : el
+  const createChildContexts = (source: unknown): [Context[], KeyToIndexMap] => {
+    const map: KeyToIndexMap = new Map
+    const ctxs: Context[] = []
 
-  // Clone the template.
-  const template = templateContent.cloneNode(true) as Element
+    if (Array.isArray(source)) {
+      for (let i = 0; i < source.length; i++) {
+        ctxs.push(createChildContext(map, source[i], i))
+      }
+    } else if (isNumber(source)) {
+      for (let i = 0; i < source; i++) {
+        ctxs.push(createChildContext(map, i + 1, i))
+      }
+    } else if (isRecord(source)) {
+      let i = 0
+      for (const k in source) {
+        ctxs.push(createChildContext(map, source[k], i++, k))
+      }
+    }
 
-  // Replace original element with a comment marker
-  // This marker keeps track of where to insert rendered items
-  const parent = getParent(el)
-  const marker = document.createComment(dir.key)
-  parent.replaceChild(marker, el)
-
-  // Keep track of rendered nodes for cleanup
-  let saved: Element[] = []
-
-  const cleanSaved = () => {
-    // Clean up previous render
-    saved.forEach(n => {
-      cleanup(n)
-      n.remove()
-    })
-    saved = []
+    return [ctxs, map]
   }
 
-  // Create effect that re-renders whenever array changes
+  const createChildContext = (
+    map: KeyToIndexMap,
+    value: any,
+    index: number,
+    objKey?: string
+  ): Context => {
+    const data: any = {}
+    if (destructureBindings) {
+      destructureBindings.forEach(
+        (b, i) => (data[b] = value[isArrayDestructure ? i : b])
+      )
+    } else {
+      data[valueExp] = value
+    }
+    if (objKey) {
+      indexExp && (data[indexExp] = objKey)
+      objIndexExp && (data[objIndexExp] = index)
+    } else {
+      indexExp && (data[indexExp] = index)
+    }
+
+    const ctx = ctxRoot.scope(el, data)
+    const key = keyExp ? evaluate(keyExp, ctx) : index
+    map.set(key, index)
+    ctx.key = key
+
+    return ctx
+  }
+
+  let mounted = false
+  let ctxs: Context[]
+  let keyToIndexMap: Map<any, number>
+
   const dispose = effect(() => {
-    try {
-      cleanSaved()
-
-      // Evaluate the array expression
-      let items = evaluate(itemsExp, ctx)
-      if (Number.isInteger(items)) {
-        items = [...Array(items).keys()]
-      }
-      if (!Array.isArray(items)) {
-        return
-      }
-
-      items.forEach((item: any, idx: Number) => {
-        const data: Record<string, any> = {
-          [indexName]: idx,
+    const source = evaluate(sourceExp, ctxRoot)
+    const prevKeyToIndexMap = keyToIndexMap
+    ;[ctxs, keyToIndexMap] = createChildContexts(source)
+    if (!mounted) {
+      ctxs.forEach(ctx => ctx.mount(parent, anchor))
+      mounted = true
+    } else {
+      for (const ctx of ctxs) {
+        if (!keyToIndexMap.has(ctx.key)) {
+          ctx.remove()
         }
+      }
 
-        if (destructureBindings) {
-          destructureBindings.forEach((b, i) => {
-            data[b] = item[isArrayDestructure ? i : b]
-          })
+      const nextCxts: Context[] = []
+      let i = ctxs.length
+      let nextCtx: Context | undefined
+      let prevMovedCtx: Context | undefined
+
+      while (i--) {
+        const childCtx = ctxs[i]
+        const oldIndex = prevKeyToIndexMap.get(childCtx.key)
+
+        let ctx: Context
+        if (oldIndex == null) {
+          // new
+          ctx = childCtx.mount(parent, nextCtx?.dup ?? anchor)
         } else {
-          data[itemName] = item
+          // update
+          ctx = ctxs[oldIndex]
+          ctx.store = childCtx.store.copy(ctx.store.data)
+
+          if (oldIndex !== i) {
+            // moved
+            if (
+              ctxs[oldIndex + 1] !== nextCtx ||
+              // If the next has moved, it must move too
+              prevMovedCtx === nextCtx
+            ) {
+              prevMovedCtx = ctx
+              ctx.insert(parent, nextCtx?.dup ?? anchor)
+            }
+          }
         }
 
-        // Clone the template for this item
-        const clone = template.cloneNode(true) as ContextableNode
-
-        const elSubArr = isTemplate ? Array.from(clone.children) : [clone as Element]
-
-        // Create a shared store for all contexts in this iteration of loop.
-        const store = ctx.store.copy(data)
-
-        elSubArr.forEach(elSub => {
-          // Create a new scoped context with loop variables
-          const scoped = createScopedContext(ctx, elSub, store)
-
-          walk(elSub, scoped)
-          parent.insertBefore(elSub, marker)
-          saved.push(elSub)
-        })
-      })
-    } catch (e) {
-      console.error('[u-for] Error: ', e)
+        nextCtx = ctx
+        nextCxts.unshift()
+      }
+      ctxs = nextCxts
     }
   })
 
-  // Track effect disposal
-  ctx.cleanup.push(dispose, cleanSaved)
+  ctxRoot.cleanup.push(dispose)
 
   return next
 }
