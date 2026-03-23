@@ -28,9 +28,9 @@ export interface Context {
   key?: any
   dup?: DocumentFragment | HTMLElement
   ptr: ContextableNode
+  start: Node
 
   teardownCallback?(): void
-
   mount(parent: ContextableNode, anchor: Node): Context
   insert(parent: ContextableNode, anchor: Node): void
   scope(el: HTMLElement, store?: Store): Context

@@ -1,10 +1,4 @@
-import type {
-} from '../types.ts'
-import type {
-  ContextableNode,
-} from './types.ts'
-import {
-} from '../constants.ts'
+import type { ContextableNode } from './types.ts'
 
 export function getParent(el: ContextableNode): ContextableNode {
   return el.parentElement ?? el.getRootNode() as ShadowRoot

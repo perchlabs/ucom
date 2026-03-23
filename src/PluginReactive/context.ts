@@ -30,6 +30,10 @@ export function createContext(
     refs,
     cleanup: [],
 
+    get start() {
+      return start || (ctx.dup as HTMLElement)
+    },
+
     scope(el: HTMLElement, data: ProxyRecord = {}) {
       const scoped = createContext(
         el,
@@ -93,7 +97,10 @@ export function createContext(
           node = next
         }
       } else {
-        ptr.parentNode?.removeChild(ptr)
+        (ctx.dup as HTMLElement).remove()
+
+
+        // ptr.parentNode?.removeChild(ptr)
       }
 
       ctx.teardown()

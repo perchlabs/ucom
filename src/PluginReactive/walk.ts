@@ -7,15 +7,18 @@ import type {
 } from './types.ts'
 import { getDirectives, pullDir } from './directive.ts'
 import { void_meta } from './voids/void_meta.ts'
+
+import { _show } from './directives/_show.ts'
+import { _if } from './directives/_if.ts'
+import { _for } from './directives/_for.ts'
+import { _is } from './directives/_is.ts'
+
 import { _data } from './directives/_data.ts'
 import { _text } from './directives/_text.ts'
 import { _html } from './directives/_html.ts'
-import { _show } from './directives/_show.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
-import { _for } from './directives/_for.ts'
-import { _is } from './directives/_is.ts'
 
 export function walk(node: Element | DocumentFragment, ctx: Context): Element | null | void {
   // Skip text nodes, comments, etc - only process element nodes
@@ -29,14 +32,17 @@ export function walk(node: Element | DocumentFragment, ctx: Context): Element | 
   }
 
   let def: DirectiveDef | undefined 
-  if ((def = pullDir(el, 'u-show'))) {
-    _show(ctx, el, def)
+  if (def = pullDir(el, 'u-if')) {
+    return _if(ctx, el, def)
   }
   if (def = pullDir(el, 'u-for')) {
     return _for(ctx, el, def)
   }
   if (def = pullDir(el, 'u-is')) {
     return _is(ctx, el, def)
+  }
+  if ((def = pullDir(el, 'u-show'))) {
+    _show(ctx, el, def)
   }
 
   let next: DirectiveHandlerReturn
