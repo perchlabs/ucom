@@ -8,13 +8,12 @@ export function nextWalkable(el: Element): HTMLElement | null {
   return el.nextElementSibling as HTMLElement
 }
 
-export function parentAndAnchor(el: HTMLElement, dir: DirectiveDef): [ContextableNode, Comment] {
-  const parent = getParent(el)
-  const anchor = new Comment(dir.key)
+export function createAnchor({key}: DirectiveDef, parent: ContextableNode, el: HTMLElement): Comment {
+  const anchor = new Comment(key)
   parent.insertBefore(anchor, el)
-
-  return [parent, anchor]
+  return anchor
 }
+
 
 export function makeElementAs(el: Element, tagName: string) {
   const tag = document.createElement(tagName)

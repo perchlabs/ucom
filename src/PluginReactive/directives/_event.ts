@@ -1,7 +1,12 @@
-import type { Context, DirectiveDef, DirectiveHandlerReturn } from '../types.ts'
+import type {
+  Context,
+  ContextableNode,
+  DirectiveDef,
+  DirectiveHandlerReturn,
+} from '../types.ts'
 import { execute } from '../expression.ts'
 
-export function _event(ctx: Context, el: Element, dir: DirectiveDef): DirectiveHandlerReturn {
+export function _event(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: Element, ): DirectiveHandlerReturn {
   const {
     ref: eventName,
     expr,

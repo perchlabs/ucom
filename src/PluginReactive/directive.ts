@@ -5,9 +5,9 @@ import { getAttributes, pullAttr } from '../common.ts'
 
 export const getDirectives = (el: Element, reDir: RegExp) => getAttributes(el)
   .filter(([k]) => reDir.test(k))
-  .map(item => createDirective(...item))
+  .map(item => createDirectiveDefinition(...item))
 
-export function createDirective(full: string, val: string): DirectiveDef {
+export function createDirectiveDefinition(full: string, val: string): DirectiveDef {
   if (full.startsWith('u-')) {
     const [key, keyRight] = full.split(':')
     const [ref, mod] = keyRight?.split('.') ?? []
@@ -29,6 +29,6 @@ export function createDirective(full: string, val: string): DirectiveDef {
 export function pullDir(el: Element, key: string) {
   const attr = pullAttr(el, key)
   if (attr) {
-    return createDirective(key, attr)
+    return createDirectiveDefinition(key, attr)
   }
 }

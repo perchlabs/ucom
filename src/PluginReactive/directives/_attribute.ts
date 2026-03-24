@@ -1,8 +1,13 @@
-import type { Context, DirectiveDef, DirectiveHandlerReturn } from '../types.ts'
+import type {
+  Context,
+  ContextableNode,
+  DirectiveDef,
+  DirectiveHandlerReturn,
+} from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _attribute(ctx: Context, el: HTMLElement, dir: DirectiveDef): DirectiveHandlerReturn {
+export function _attribute(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: HTMLElement): DirectiveHandlerReturn {
   const {
     ref: attrName,
     expr,

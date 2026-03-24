@@ -1,7 +1,7 @@
 import {
   FILE_POSTFIX,
   DIR_POSTFIX,
-  CORE_FUNCTIONS_SET,
+  CONSTRUCTOR,
 } from './constants.ts'
 
 export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
@@ -14,7 +14,7 @@ export const isValidComponentName = (v: string, toLowerCase = false) => {
 }
 
 export function isSystemKey(k: string) {
-  if (CORE_FUNCTIONS_SET.has(k)) return true
+  if (k === CONSTRUCTOR) return true
   if (k.startsWith('$')) return true
   return false
 }

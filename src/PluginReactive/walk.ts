@@ -21,7 +21,7 @@ import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 
-export function walk(node: Element | DocumentFragment, ctx: Context): Element | null | void {
+export function walk(ctx: Context, parent: ContextableNode, node: Element | DocumentFragment): Element | null | void {
   // Skip text nodes, comments, etc - only process element nodes
   if (node.nodeType !== 1) return
 
@@ -29,31 +29,31 @@ export function walk(node: Element | DocumentFragment, ctx: Context): Element | 
 
   switch (el.tagName) {
     case 'META':
-      return void_meta(ctx, el as HTMLMetaElement)
+      return void_meta(ctx, parent, el as HTMLMetaElement)
   }
 
   let def: DirectiveDef | undefined 
 
   for (const [key, handler] of ctrlDirs) {
     if (def = pullDir(el, key)) {
-      return handler(ctx, el, def)
+      return handler(ctx, def, parent, el)
     }
   }
 
   let next: DirectiveHandlerReturn
   for (def of getDirectives(el, reDir)) {
-    if (next = dirMap[def.key]?.(ctx, el, def)) {
+    if (next = dirMap[def.key]?.(ctx, def, parent, el)) {
       return next
     }
   }
 
-  walkChildren(el, ctx)
+  walkChildren(ctx, el)
 }
 
-export function walkChildren(node: ContextableNode, ctx: Context) {
+export function walkChildren(ctx: Context, node: ContextableNode) {
   let child = node.firstElementChild
   while (child) {
-    child = walk(child, ctx) ?? nextWalkable(child)
+    child = walk(ctx, node, child) ?? nextWalkable(child)
   }
 }
 

@@ -149,7 +149,7 @@ export default class implements Plugin {
         [ContextIndex]: ctx,
       })
 
-      walkChildren(shadow, ctx)
+      walkChildren(ctx, shadow)
     }
   }
 

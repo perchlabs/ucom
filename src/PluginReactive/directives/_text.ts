@@ -1,11 +1,12 @@
 import type {
   Context,
+  ContextableNode,
   DirectiveDef,
 } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _text(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function _text(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: HTMLElement) {
   const expr = dir.ref ?? dir.expr
 
   // Create an effect that automatically re-runs when signals change

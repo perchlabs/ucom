@@ -53,7 +53,7 @@ export function createContext(
         : ptr.cloneNode(true) as HTMLElement
 
       ctx.insert(parent, anchor)
-      ctx.walk()
+      walk(ctx, parent, ctx.dup)
       return ctx
     },
 
@@ -98,9 +98,6 @@ export function createContext(
         }
       } else {
         (ctx.dup as HTMLElement).remove()
-
-
-        // ptr.parentNode?.removeChild(ptr)
       }
 
       ctx.teardown()
@@ -109,11 +106,7 @@ export function createContext(
     teardown() {
       ctx.cleanup.forEach(fn => fn())
       children.forEach(child => child.teardown())
-    },
-
-    walk() {
-      walk(ctx.dup ?? ptr, ctx)
-    },
+    }
   }
 
   return ctx

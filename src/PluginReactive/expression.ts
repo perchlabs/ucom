@@ -5,7 +5,7 @@ import type {
 
 export function evaluate(expr: string, ctxThis?: Context, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
-    $data: ctxThis ? ctxThis.store.data : {},
+    $data: ctxThis?.store.data ?? {},
     ...other,
   }
 

@@ -21,10 +21,13 @@ export const CUSTOM_CALLBACKS = [
   FORM_STATE_RESTORE,
 ]
 
+export const CUSTOM_CALLBACKS_SET = new Set(CUSTOM_CALLBACKS)
+
+export const CONSTRUCTOR = 'constructor'
+
 export const STATIC_FORM_ASSOCIATED = 'formAssociated'
 export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
 
-export const CORE_FUNCTIONS_SET = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
 export const STORE_MOD_VAR = 'var'
 export const STORE_MOD_CALC = 'calc'

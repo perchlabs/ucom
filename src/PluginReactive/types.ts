@@ -25,16 +25,15 @@ export interface Context {
   refs: RefRecord
   cleanup: (() => void)[]
 
-  key?: any
-  dup?: DocumentFragment | HTMLElement
   ptr: ContextableNode
   start: Node
+  key?: any
+  dup?: DocumentFragment | HTMLElement
 
   teardownCallback?(): void
-  mount(parent: ContextableNode, anchor: Node): Context
+  mount(root: ContextableNode, anchor: Node): Context
   insert(parent: ContextableNode, anchor: Node): void
   scope(el: HTMLElement, store?: Store): Context
-  walk(): void
   remove(): void
   teardown(): void
 }
@@ -49,7 +48,7 @@ export type DirectiveDef = {
   ref?: string
   mod?: string
 }
-export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
+export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, parent: ContextableNode, el: HTMLElement)
   => DirectiveHandlerReturn
 export type DirectiveHandlerReturn = HTMLElement | undefined | null | void
 

@@ -1,10 +1,10 @@
-import type { Context, DirectiveDef } from '../types.ts'
+import type { Context, ContextableNode, DirectiveDef } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 const attrSplitFilter = (el: HTMLElement, key: string) => el.getAttribute(key)?.split(' ').filter(c => c)
 
-export function _show(ctx: Context, el: HTMLElement, dir: DirectiveDef) {
+export function _show(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: HTMLElement) {
   const {expr} = dir
 
   // Store original display value to restore when showing (i.e. flex/grid, etc)

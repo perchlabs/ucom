@@ -1,7 +1,7 @@
-import type { Context, DirectiveDef } from '../types.ts'
+import type { Context, ContextableNode, DirectiveDef } from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
-import { nextWalkable, parentAndAnchor } from '../utils.ts'
+import { nextWalkable, createAnchor } from '../utils.ts'
 import { pullAttr, isNumber, isRecord } from '../../common.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
@@ -11,7 +11,7 @@ const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
 type KeyToIndexMap = Map<any, number>
 
-export const _for = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
+export const _for = (ctxRoot: Context, dir: DirectiveDef, parent: ContextableNode, el: HTMLElement) => {
   const {expr} = dir
 
   const inMatch = expr.match(forAliasRE)
@@ -20,7 +20,7 @@ export const _for = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
     return
   }
 
-  const [parent, anchor] = parentAndAnchor(el, dir)
+  const anchor = createAnchor(dir, parent, el)
 
   const next = nextWalkable(el)
 

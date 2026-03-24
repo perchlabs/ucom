@@ -1,8 +1,8 @@
-import type { Context, DirectiveDef } from '../types.ts'
+import type { Context, ContextableNode, DirectiveDef } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _html(ctx: Context, el: HTMLElement, dir: DirectiveDef): undefined {
+export function _html(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: HTMLElement): undefined {
   const {expr} = dir
 
   // Create an effect that automatically re-runs when signals change
