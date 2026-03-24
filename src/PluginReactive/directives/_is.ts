@@ -21,9 +21,9 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
     return console.warn(`u-is is not a template.`)
   }
 
+  const parent = getParent(el)
   const next = nextWalkable(el)
 
-  const parent = getParent(el)
   const anchor = new Comment(dir.key)
   parent.insertBefore(anchor, el)
   parent.removeChild(el)

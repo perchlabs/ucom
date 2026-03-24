@@ -12,7 +12,6 @@ interface Branch {
 export const _if = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
   const {expr} = dir
 
-  const next = nextWalkable(el)
   const parent = getParent(el)
 
   const anchor = new Comment('v-if')
@@ -36,6 +35,7 @@ export const _if = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
     }
   }
 
+  const next = nextWalkable(el)
   parent.removeChild(el)
 
   let ctx: Context | undefined

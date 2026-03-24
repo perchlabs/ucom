@@ -14,15 +14,14 @@ type KeyToIndexMap = Map<any, number>
 export const _for = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
   const {expr} = dir
 
-  const next = nextWalkable(el)
-
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
     console.warn(`invalid u-for expression: ${expr}`)
-    return next
+    return
   }
 
   const parent = getParent(el)
+  const next = nextWalkable(el)
 
   const anchor = new Text('')
   parent.insertBefore(anchor, el)
