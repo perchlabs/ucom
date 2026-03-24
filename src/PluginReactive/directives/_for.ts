@@ -1,7 +1,7 @@
 import type { Context, DirectiveDef } from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
-import { getParent } from '../utils.ts'
+import { getParent, nextWalkable } from '../utils.ts'
 import { pullAttr, isNumber, isRecord } from '../../common.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
@@ -14,7 +14,7 @@ type KeyToIndexMap = Map<any, number>
 export const _for = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
   const {expr} = dir
 
-  const next = el.nextElementSibling
+  const next = nextWalkable(el)
 
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {

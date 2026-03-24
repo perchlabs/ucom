@@ -1,7 +1,7 @@
 import type { Context, DirectiveDef } from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
-import { getParent } from '../utils.ts'
+import { getParent, nextWalkable } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
 
 interface Branch {
@@ -12,7 +12,7 @@ interface Branch {
 export const _if = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
   const {expr} = dir
 
-  const next = el.nextElementSibling
+  const next = nextWalkable(el)
   const parent = getParent(el)
 
   const anchor = new Comment('v-if')
@@ -23,7 +23,7 @@ export const _if = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
   // locate else branch
   let elseEl: HTMLElement | null
   let elseExp: string | null
-  while ((elseEl = el.nextElementSibling as HTMLElement)) {
+  while ((elseEl = nextWalkable(el))) {
     elseExp = null
     if (
       pullAttr(elseEl, 'u-else') === '' ||

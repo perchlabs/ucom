@@ -4,7 +4,7 @@ import type {
 } from '../types.ts'
 import { isValidComponentPath } from '../../common.ts'
 import { effect } from '../alien-signals'
-import { getParent, makeElementAs } from '../utils.ts'
+import { getParent, makeElementAs, nextWalkable } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
@@ -14,14 +14,14 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
 
   expr = expr.trim()
   if (!expr) {
-    return console.warn(`u-is expression cannot be empty.`)
+    return console.warn(`u-is expression is empty.`)
   }
 
   if (!(el instanceof HTMLTemplateElement)) {
-    return console.warn(`u-is may only be placed on a template.`)
+    return console.warn(`u-is is not a template.`)
   }
 
-  const next = el.nextElementSibling
+  const next = nextWalkable(el)
 
   const parent = getParent(el)
   const anchor = new Comment(dir.key)

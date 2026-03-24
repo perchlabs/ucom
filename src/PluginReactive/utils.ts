@@ -4,6 +4,10 @@ export function getParent(el: ContextableNode): ContextableNode {
   return el.parentElement ?? el.getRootNode() as ShadowRoot
 }
 
+export function nextWalkable(el: Element): HTMLElement | null {
+  return el.nextElementSibling as HTMLElement
+}
+
 export function makeElementAs(el: Element, tagName: string) {
   const tag = document.createElement(tagName)
   for (const {name, value} of Array.from(el.attributes)) {

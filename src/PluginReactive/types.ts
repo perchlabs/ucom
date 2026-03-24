@@ -51,7 +51,7 @@ export type DirectiveDef = {
 }
 export type DirectiveHandler = (ctx: Context, el: HTMLElement, dir: DirectiveDef)
   => DirectiveHandlerReturn
-export type DirectiveHandlerReturn = Element | undefined | null | void
+export type DirectiveHandlerReturn = HTMLElement | undefined | null | void
 
 
 
