@@ -1,7 +1,7 @@
 import type { Context, DirectiveDef } from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
-import { getParent, nextWalkable } from '../utils.ts'
+import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr, isNumber, isRecord } from '../../common.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
@@ -20,11 +20,10 @@ export const _for = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
     return
   }
 
-  const parent = getParent(el)
+  const [parent, anchor] = parentAndAnchor(el, dir)
+
   const next = nextWalkable(el)
 
-  const anchor = new Text('')
-  parent.insertBefore(anchor, el)
   parent.removeChild(el)
 
   const sourceExp = inMatch[2].trim()

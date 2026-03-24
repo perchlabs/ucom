@@ -1,7 +1,7 @@
 import type { Context, DirectiveDef } from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
-import { getParent, nextWalkable } from '../utils.ts'
+import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
 
 interface Branch {
@@ -12,10 +12,7 @@ interface Branch {
 export const _if = (ctxRoot: Context, el: HTMLElement, dir: DirectiveDef) => {
   const {expr} = dir
 
-  const parent = getParent(el)
-
-  const anchor = new Comment('v-if')
-  parent.insertBefore(anchor, el)
+  const [parent, anchor] = parentAndAnchor(el, dir)
 
   const branches: Branch[] = [{el, expr}]
 

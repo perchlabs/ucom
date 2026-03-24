@@ -1,4 +1,4 @@
-import type { ContextableNode } from './types.ts'
+import type { ContextableNode, DirectiveDef } from './types.ts'
 
 export function getParent(el: ContextableNode): ContextableNode {
   return el.parentElement ?? el.getRootNode() as ShadowRoot
@@ -6,6 +6,14 @@ export function getParent(el: ContextableNode): ContextableNode {
 
 export function nextWalkable(el: Element): HTMLElement | null {
   return el.nextElementSibling as HTMLElement
+}
+
+export function parentAndAnchor(el: HTMLElement, dir: DirectiveDef): [ContextableNode, Comment] {
+  const parent = getParent(el)
+  const anchor = new Comment(dir.key)
+  parent.insertBefore(anchor, el)
+
+  return [parent, anchor]
 }
 
 export function makeElementAs(el: Element, tagName: string) {

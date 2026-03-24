@@ -4,7 +4,7 @@ import type {
 } from '../types.ts'
 import { isValidComponentPath } from '../../common.ts'
 import { effect } from '../alien-signals'
-import { getParent, makeElementAs, nextWalkable } from '../utils.ts'
+import { makeElementAs, nextWalkable, parentAndAnchor } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
@@ -21,11 +21,10 @@ export function _is(ctx: Context, el: Element, dir: DirectiveDef) {
     return console.warn(`u-is is not a template.`)
   }
 
-  const parent = getParent(el)
+  const [parent, anchor] = parentAndAnchor(el, dir)
+
   const next = nextWalkable(el)
 
-  const anchor = new Comment(dir.key)
-  parent.insertBefore(anchor, el)
   parent.removeChild(el)
 
   let tagName = ''
