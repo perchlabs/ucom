@@ -41,7 +41,6 @@ export interface Context {
 
   teardownCallback?(): void
   mount(root: ContextableNode, anchor: Node): void
-  insert(parent: ContextableNode, anchor: Node): void
   scope(el: HTMLElement, data?: ProxyRecord): Context
   remove(): void
   teardown(): void

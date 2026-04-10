@@ -223,8 +223,8 @@ console.log('update store: ')
               prevMovedCtx === nextCtx
             ) {
               prevMovedCtx = ctx
-              ctx.insert(parent, nextCtx?.start ?? anchor)
-              // ctx.insert(parent, anchor)
+              ctx.mount(parent, nextCtx?.start ?? anchor)
+              // ctx.mount(parent, anchor)
             }
           }
         }

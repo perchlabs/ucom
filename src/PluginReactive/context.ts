@@ -19,7 +19,7 @@ export function createContext(
   store: Store,
   refs: RefRecord = {},
 ): Context {
-  let mounted = false
+  let initialized = false
   let isFrag: boolean = false
   let start: Text | undefined
   let end: Text | undefined
@@ -67,47 +67,38 @@ export function createContext(
     },
 
     mount(parent: ContextableNode, anchor: Node) {
-      if (mounted) {
-        console.error('Context cannot be mounted twice')
-      }
-
-      mounted = true
-
-      if (isFrag) {
-        walkChildren(ctx)
-
-        start = new Text
-        end = new Text
-        parent.insertBefore(end, anchor!)
-        parent.insertBefore(start, end)
-        parent.insertBefore(ctx.walkable, end)
-      } else {
-
-        walk(ctx, ctx.walkable as HTMLElement)
-        ctx.insert(parent, anchor)
-      }
-    },
-
-    insert(parent: ContextableNode, anchor: Node) {
-      if (!mounted) {
-        console.error('inserting context before mounting it.')
-        return
-      }
-
-      if (isFrag) {
+      if (initialized) {
         // already inserted, moving
-        let node: Node | null = start!
-        let next: Node | null
-        while (node) {
-          next = node.nextSibling
-          parent.insertBefore(node, anchor)
-          if (node === end) {
-            break
+
+        if (isFrag) {
+          let node: Node | null = start!
+          let next: Node | null
+          while (node) {
+            next = node.nextSibling
+            parent.insertBefore(node, anchor)
+            if (node === end) {
+              break
+            }
+            node = next
           }
-          node = next
+        } else {
+          parent.insertBefore(ctx.walkable, anchor)
         }
       } else {
-        parent.insertBefore(ctx.walkable, anchor)
+        initialized = true
+
+        if (isFrag) {
+          walkChildren(ctx)
+
+          start = new Text
+          end = new Text
+          parent.insertBefore(end, anchor!)
+          parent.insertBefore(start, end)
+          parent.insertBefore(ctx.walkable, end)
+        } else {
+          walk(ctx, ctx.walkable as HTMLElement)
+          parent.insertBefore(ctx.walkable, anchor)
+        }
       }
     },
 
