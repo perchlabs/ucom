@@ -2,8 +2,6 @@ import type {
   ComputedFunction,
   ProxyRecord,
   Store,
-  StoreItem,
-  StoreItemRecord,
 } from './types.ts'
 import { isFunction } from '../common.ts'
 import {
@@ -12,18 +10,24 @@ import {
   signal as createSignal,
 } from './alien-signals'
 
+type StoreItem = [
+  key: string,
+  value: (...args: any[]) => any,
+  isFunc?: boolean,
+]
+type StoreItemRecord = Record<string, StoreItem>
+
 const persistMap: StoreItemRecord = {}
 const syncMap: StoreItemRecord = {}
 
 export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: ProxyRecord = {}): Store {
   const name = el.tagName
 
-  const proxy = createProxy({}, parent)
+  const data: ProxyRecord = {}
+  const proxy = createProxy(data, parent)
   const cleanup: (() => void)[] = []
 
   const store: Store = {
-    el,
-
     get data() {
       return proxy
     },
@@ -33,13 +37,10 @@ export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: 
     },
 
     varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => store.var(k, v)),
-    var: (key: string, val: any) => addItem(store, simpleItem(key, val)),
+    var: (key: string, val: any) => addItem(simpleItem(key, val)),
 
     calc(key: string, value: ComputedFunction) {
-      addItem(store, [
-        key,
-        createComputed(value),
-      ])
+      addItem([key, createComputed(value)])
     },
 
     sync(key: string, value: any) {
@@ -47,7 +48,7 @@ export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: 
       if (!(storeId in syncMap)) {
         syncMap[storeId] = simpleItem(key, value)
       }
-      addItem(store, syncMap[storeId])
+      addItem(syncMap[storeId])
     },
 
     save(key: string, value: any) {
@@ -69,12 +70,26 @@ export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: 
         }
       }
 
-      addItem(store, persistMap[storeId])
+      addItem(persistMap[storeId])
     },
 
     copy(dataNew: ProxyRecord = {}) {
       return createStore(el, dataNew, proxy)
     },
+  }
+
+  function addItem(item: StoreItem) {
+    const [key, value, isFunc = false] = item
+
+    if (isFunc) {
+      store.data[key] = value.bind(el)
+    } else {
+      Object.defineProperty(store.data, key, {
+        get() { return value() },
+        set(val) { value(val) },
+        enumerable: true,
+      })
+    }
   }
 
   store.varRaw(dataRaw)
@@ -101,22 +116,6 @@ function createProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
       return Reflect.set(data, key, val)
     },
   })
-}
-
-
-function addItem(store: Store, item: StoreItem) {
-  const [key, value, isFunc = false] = item
-
-  if (isFunc) {
-    store.data[key] = value.bind(store.el)
-  } else {
-    Object.defineProperty(store.data, key, {
-      get() { return value() },
-      set(val) { value(val) },
-      // configurable: true,
-      enumerable: true,
-    })
-  }
 }
 
 function simpleItem(key: string, value: any): StoreItem {

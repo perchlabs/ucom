@@ -143,7 +143,7 @@ export default class implements Plugin {
   [CONNECTED](params: PluginCallbackBuilderParams) {
     const {Com, Raw, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
-      const ctx = createContext(shadow, man, makeProxyStore(Com, Raw, el))
+      const ctx = createContext(el, shadow, man, makeProxyStore(Com, Raw, el))
       const {data} = ctx.store
       Object.assign(el, {
         get [DataIndex]() { return data },
@@ -164,28 +164,26 @@ function makeProxyStore(
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
 ) {
-  const store = createStore(el, makeProps(el, propDefs))
+
+  const data: ProxyRecord = {}
+
+  // From property definition.
+  for (let [k, def] of Object.entries(propDefs)) {
+    const raw = el.getAttribute(k) ?? def.default
+    data[k] = def.cast?.(raw) ?? raw
+  }
+
+  // From user custom prototype.
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !isSystemKey(k))
     .forEach(k => {
       const v = rawProto[k]
       if (isFunction(v)) {
-        store.var(k, v)
+        data[k] = v
       }
     })
 
-  return store
-}
-
-function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
-  const d: Record<string, any> = {
-    // get $el() { return el },
-  }
-  for (let [k, def] of Object.entries(propDefs)) {
-    const raw = el.getAttribute(k) ?? def.default
-    d[k] = def.cast?.(raw) ?? raw
-  }
-  return d
+  return createStore(el, data)
 }
 
 type PropDef = {

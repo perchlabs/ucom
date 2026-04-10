@@ -6,7 +6,6 @@ export type ProxyRecord = Record<string, any>
 export type ComputedFunction = () => any
 
 export interface Store {
-  el: HTMLElement
   data: ProxyRecord
   cleanup(): void
 
@@ -17,12 +16,6 @@ export interface Store {
   varRaw: (raw: ProxyRecord) => void
   copy: (dataNew?: ProxyRecord) => Store
 }
-export type StoreItem = [
-  key: string,
-  value: (...args: any[]) => any,
-  isFunc?: boolean,
-]
-export type StoreItemRecord = Record<string, StoreItem>
 
 export type StoreAdder = (key: string, val: any) => void
 

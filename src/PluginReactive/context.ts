@@ -14,6 +14,7 @@ import { getParent } from './utils.ts'
 export const globalRefs: RefRecord = {}
 
 export function createContext(
+  rootEl: HTMLElement,
   ptr: ContextableNode,
   man: ComponentManager,
   store: Store,
@@ -54,9 +55,10 @@ export function createContext(
       return tpl
     },
 
-    scope(el: HTMLElement, data: ProxyRecord = {}) {
+    scope(ptr: HTMLElement, data: ProxyRecord = {}) {
       const scoped = createContext(
-        el,
+        rootEl,
+        ptr,
         man,
         store.copy(data),
         {...refs},
