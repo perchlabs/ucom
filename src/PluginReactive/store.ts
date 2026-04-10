@@ -2,56 +2,38 @@ import type {
   ComputedFunction,
   ProxyRecord,
   Store,
+  StoreItem,
+  StoreItemRecord,
 } from './types.ts'
-import { computed, effect, signal as createSignal } from './alien-signals'
+import { isFunction } from '../common.ts'
+import {
+  computed as createComputed,
+  effect as createEffect,
+  signal as createSignal,
+} from './alien-signals'
 
-type Item = [
-  key: string,
-  value: (...args: any[]) => any,
-  isFunc?: boolean,
-]
-type ItemRecord = Record<string, Item>
+const persistMap: StoreItemRecord = {}
+const syncMap: StoreItemRecord = {}
 
-const persistMap: ItemRecord = {}
-const syncMap: ItemRecord = {}
-
-export function createStore(el: HTMLElement): Store {
+export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: ProxyRecord = {}): Store {
   const name = el.tagName
-  const data: ProxyRecord = {}
 
-  const addItem = ([key, value, isFunc = false]: Item) => {
-    if (isFunc) {
-      data[key] = value.bind(el)
-    } else {
-      Object.defineProperty(data, key, {
-        get() { return value() },
-        set(val) { value(val) },
-        configurable: true,
-        enumerable: true,
-      })
-    }
-  }
+  const proxy = createProxy({}, parent)
 
-  const add = (key: string, val: any) => addItem(simpleItem(key, val))
+  const store: Store = {
+    el,
 
-  const simpleItem = (key: string, value: any): Item => {
-    const isFunc = typeof value === 'function'
-    return [
-      key,
-      isFunc ? value : createSignal(value),
-      isFunc,
-    ]
-  }
+    get data() {
+      return proxy
+    },
 
-  return {
-    data,
-    varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => add(k, v)),
-    var: add,
+    varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => store.var(k, v)),
+    var: (key: string, val: any) => addItem(store, simpleItem(key, val)),
 
     calc(key: string, value: ComputedFunction) {
-      addItem([
+      addItem(store, [
         key,
-        computed(value),
+        createComputed(value),
       ])
     },
 
@@ -60,13 +42,13 @@ export function createStore(el: HTMLElement): Store {
       if (!(storeId in syncMap)) {
         syncMap[storeId] = simpleItem(key, value)
       }
-      addItem(syncMap[storeId])
+      addItem(store, syncMap[storeId])
     },
 
     save(key: string, value: any) {
       const storeId = `${name}-${key}`
       if (!(storeId in persistMap)) {
-        if (typeof value === 'function') {
+        if (isFunction(value)) {
           persistMap[storeId] = [key, value, true]
         } else {
           const getItem = () => {
@@ -77,19 +59,66 @@ export function createStore(el: HTMLElement): Store {
           const [,signal] = persistMap[storeId] = simpleItem(key, getItem() ?? value)
           if (signal) {
             const setItem = () => localStorage.setItem(storeId, JSON.stringify(signal()))
-            effect(() => setItem())
+            createEffect(() => setItem())
           }
         }
       }
 
-      addItem(persistMap[storeId])
+      addItem(store, persistMap[storeId])
     },
 
     copy(dataNew: ProxyRecord = {}) {
-      const store = createStore(el)
-      Object.assign(store.data, Object.create(data))
-      store.varRaw(dataNew)
-      return store
+      return createStore(el, dataNew, proxy)
     },
   }
+
+  store.varRaw(dataRaw)
+
+  return store
+}
+
+function createProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
+  return new Proxy(data, {
+    has(_target, key) {
+      return Reflect.has(data, key) || Reflect.has(parent, key)
+    },
+    ownKeys(_target) {
+      return [...new Set(...Object.keys(data), ...Object.keys(parent))]
+    },
+    get(_target, key) {
+      if (key === Symbol.unscopables) {
+        return
+      }
+
+      return Reflect.get(data, key) ?? Reflect.get(parent, key)
+    },
+    set(_target, key, val) {
+      return Reflect.set(data, key, val)
+    },
+  })
+}
+
+
+function addItem(store: Store, item: StoreItem) {
+  const [key, value, isFunc = false] = item
+
+  if (isFunc) {
+    store.data[key] = value.bind(store.el)
+  } else {
+    Object.defineProperty(store.data, key, {
+      get() { return value() },
+      set(val) { value(val) },
+      // configurable: true,
+      enumerable: true,
+    })
+  }
+}
+
+function simpleItem(key: string, value: any): StoreItem {
+  const isFunc = isFunction(value)
+  return [
+    key,
+    isFunc ? value : createSignal(value),
+    isFunc,
+  ]
 }

@@ -11,10 +11,11 @@
   },
   "devDependencies": {
     "typescript": "^6.0.2",
-    "vite": "^8.0.2"
+    "vite": "^8.0.2",
+    "esbuild": "^0.28.0"
   },
   "dependencies": {
-    "@vue/shared": "file:./local_modules/vue-shared@3.2.27",
-    "@vue/reactivity": "file:./local_modules/vue-reactivity@3.2.27"
+    "@vue/reactivity": "file:./local_modules/vue-reactivity@3.2.27",
+    "@vue/shared": "file:./local_modules/vue-shared@3.2.27"
   }
 }

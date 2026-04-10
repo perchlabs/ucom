@@ -24,6 +24,7 @@ import {
 import {
   isSystemKey,
   getTopLevelChildren,
+  isFunction,
 } from '../common.ts'
 import {
   computed as $computed,
@@ -96,7 +97,7 @@ export default class implements Plugin {
 
     for (const k of propKeys) {
       Object.defineProperty(proto, k, {
-        configurable: false,
+        // configurable: false,
         get() {
           return this[DataIndex][k]
         },
@@ -149,7 +150,7 @@ export default class implements Plugin {
         [ContextIndex]: ctx,
       })
 
-      walkChildren(ctx, shadow)
+      walkChildren(ctx)
     }
   }
 
@@ -163,13 +164,12 @@ function makeProxyStore(
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
 ) {
-  const store = createStore(el)
-  store.varRaw(makeProps(el, propDefs))
+  const store = createStore(el, makeProps(el, propDefs))
   Object.getOwnPropertyNames(rawProto)
     .filter(k => !isSystemKey(k))
     .forEach(k => {
       const v = rawProto[k]
-      if (typeof v === 'function') {
+      if (isFunction(v)) {
         store.var(k, v)
       }
     })

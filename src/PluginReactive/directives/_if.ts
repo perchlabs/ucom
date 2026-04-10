@@ -1,7 +1,10 @@
-import type { Context, ContextableNode, DirectiveDef } from '../types.ts'
+import type {
+  Context,
+  DirectiveDef,
+} from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
-import { nextWalkable, createAnchor } from '../utils.ts'
+import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
 
 interface Branch {
@@ -9,10 +12,14 @@ interface Branch {
   expr?: string | null
 }
 
-export const _if = (ctxRoot: Context, dir: DirectiveDef, parent: ContextableNode, el: HTMLElement) => {
+export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
   const {expr} = dir
 
-  const anchor = createAnchor(dir, parent, el)
+  const [parent, anchor] = parentAndAnchor(dir, el)
+  if (!parent) {
+    console.log('warn u-if no parent')
+    return
+  }
 
   const branches: Branch[] = [{el, expr}]
 

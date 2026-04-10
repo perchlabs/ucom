@@ -8,7 +8,8 @@ import type {
   RefRecord,
   ProxyRecord,
 } from './types.ts'
-import { walk } from './walk.ts'
+import { walk, walkChildren } from './walk.ts'
+import { getParent } from './utils.ts'
 
 export const globalRefs: RefRecord = {}
 
@@ -18,20 +19,39 @@ export function createContext(
   store: Store,
   refs: RefRecord = {},
 ): Context {
-  let isFrag: boolean
+  let mounted = false
+  let isFrag: boolean = false
   let start: Text | undefined
   let end: Text | undefined
   let children = new Set<Context>()
 
+  let tpl: ContextableNode
+
+  if (ptr.nodeType === 1) {
+    tpl = (isFrag = ptr instanceof HTMLTemplateElement)
+      ? (ptr.content).cloneNode(true) as DocumentFragment
+      : ptr.cloneNode(true) as HTMLElement
+  } else if (ptr instanceof ShadowRoot) {
+    tpl = ptr
+  } else {
+    throw new Error('Invalid ContextableNode')
+  }
+
   const ctx: Context = {
-    ptr,
     man,
     store,
     refs,
     cleanup: [],
 
+    children,
+
     get start() {
-      return start || (ctx.dup as HTMLElement)
+      return start ?? ctx.walkable
+    },
+
+    // walkable: tpl,
+    get walkable() {
+      return tpl
     },
 
     scope(el: HTMLElement, data: ProxyRecord = {}) {
@@ -47,57 +67,71 @@ export function createContext(
     },
 
     mount(parent: ContextableNode, anchor: Node) {
-      isFrag = ptr instanceof HTMLTemplateElement
-      ctx.dup = isFrag
-        ? (ptr as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment
-        : ptr.cloneNode(true) as HTMLElement
+      if (mounted) {
+        console.error('Context cannot be mounted twice')
+      }
 
-      ctx.insert(parent, anchor)
-      walk(ctx, parent, ctx.dup)
-      return ctx
-    },
+      mounted = true
 
-    insert(parent: ContextableNode, anchor: Node) {
       if (isFrag) {
-        if (start) {
-          // already inserted, moving
-          let node: Node | null = start
-          let next: Node | null
-          while (node) {
-            next = node.nextSibling
-            parent.insertBefore(node, anchor)
-            if (node === end) {
-              break
-            }
-            node = next
-          }
-        } else {
-          start = new Text('')
-          end = new Text('')
-          parent.insertBefore(end, anchor)
-          parent.insertBefore(start, end)
-          parent.insertBefore(ctx.dup!, end)
-        }
+        walkChildren(ctx)
+
+        start = new Text
+        end = new Text
+        parent.insertBefore(end, anchor!)
+        parent.insertBefore(start, end)
+        parent.insertBefore(ctx.walkable, end)
       } else {
-        parent.insertBefore(ctx.dup!, anchor)
+
+        walk(ctx, ctx.walkable as HTMLElement)
+        ctx.insert(parent, anchor)
       }
     },
 
-    remove() {
-      if (start) {
-        const parent = start.parentNode!
-        let node: Node | null = start
+    insert(parent: ContextableNode, anchor: Node) {
+      if (!mounted) {
+        console.error('inserting context before mounting it.')
+        return
+      }
+
+      if (isFrag) {
+        // already inserted, moving
+        let node: Node | null = start!
         let next: Node | null
         while (node) {
           next = node.nextSibling
-          parent.removeChild(node)
+          parent.insertBefore(node, anchor)
           if (node === end) {
             break
           }
           node = next
         }
       } else {
-        (ctx.dup as HTMLElement).remove()
+        parent.insertBefore(ctx.walkable, anchor)
+      }
+    },
+
+    remove() {
+      if (isFrag) {
+        if (ctx.start) {
+          const parent = getParent(ctx.start)
+          if (!parent) {
+            return
+          }
+
+          let node: Node | null = ctx.start
+          let next: Node | null
+          while (node) {
+            next = node.nextSibling
+            parent.removeChild(node)
+            if (node === end) {
+              break
+            }
+            node = next
+          }
+        }
+      } else {
+        (ctx.walkable as HTMLElement)?.remove()
       }
 
       ctx.teardown()

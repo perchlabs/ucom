@@ -1,12 +1,12 @@
 import type {
   Context,
-  ContextableNode,
+  // ContextableNode,
   DirectiveDef,
   DirectiveHandlerReturn,
 } from '../types.ts'
 import { execute } from '../expression.ts'
 
-export function _event(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: Element, ): DirectiveHandlerReturn {
+export function _event(ctx: Context, dir: DirectiveDef, el: Element, ): DirectiveHandlerReturn {
   const {
     ref: eventName,
     expr,

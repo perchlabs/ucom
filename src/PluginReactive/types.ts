@@ -6,15 +6,23 @@ export type ProxyRecord = Record<string, any>
 export type ComputedFunction = () => any
 
 export interface Store {
+  el: HTMLElement
   data: ProxyRecord
-  varRaw: (raw: Record<string, any>) => void
-  copy: (dataNew?: ProxyRecord) => Store
 
   var: StoreAdder
   calc: StoreAdder
   sync: StoreAdder
   save: StoreAdder
+  varRaw: (raw: ProxyRecord) => void
+  copy: (dataNew?: ProxyRecord) => Store
 }
+export type StoreItem = [
+  key: string,
+  value: (...args: any[]) => any,
+  isFunc?: boolean,
+]
+export type StoreItemRecord = Record<string, StoreItem>
+
 export type StoreAdder = (key: string, val: any) => void
 
 
@@ -25,20 +33,20 @@ export interface Context {
   refs: RefRecord
   cleanup: (() => void)[]
 
-  ptr: ContextableNode
+  walkable: ContextableNode
   start: Node
-  key?: any
-  dup?: DocumentFragment | HTMLElement
+
+  children: Set<Context>
 
   teardownCallback?(): void
-  mount(root: ContextableNode, anchor: Node): Context
+  mount(root: ContextableNode, anchor: Node): void
+  // mount(root: ContextableNode): void
   insert(parent: ContextableNode, anchor: Node): void
-  scope(el: HTMLElement, store?: Store): Context
+  scope(el: HTMLElement, data?: ProxyRecord): Context
   remove(): void
   teardown(): void
 }
-// export type ContextableNode = ShadowRoot | Element
-export type ContextableNode = ShadowRoot | HTMLElement
+export type ContextableNode = DocumentFragment | HTMLElement
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export type DirectiveDef = {
@@ -48,7 +56,7 @@ export type DirectiveDef = {
   ref?: string
   mod?: string
 }
-export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, parent: ContextableNode, el: HTMLElement)
+export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: HTMLElement)
   => DirectiveHandlerReturn
 export type DirectiveHandlerReturn = HTMLElement | undefined | null | void
 

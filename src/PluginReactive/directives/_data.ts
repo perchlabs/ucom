@@ -1,6 +1,6 @@
 import type {
   Context,
-  ContextableNode,
+  // ContextableNode,
   DirectiveDef,
 } from '../types.ts'
 import {
@@ -13,7 +13,7 @@ import { isRecord } from '../../common.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _data(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, _el: HTMLElement) {
+export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
   const {
     ref,
     expr,

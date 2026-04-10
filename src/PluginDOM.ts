@@ -9,6 +9,7 @@ import {
   ATTR_CORE,
 } from './constants.ts'
 import {
+  // createElement
   isValidComponentName,
 } from './common.ts'
 

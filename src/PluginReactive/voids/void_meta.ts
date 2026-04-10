@@ -1,25 +1,31 @@
 import type {
   Context,
-  ContextableNode,
 } from '../types.ts'
 import { getDirectives } from '../directive.ts'
-import { makeElementAs } from '../utils.ts'
+import { nextWalkable, getParent } from '../utils.ts'
 import { _data } from '../directives/_data.ts'
 import { _text } from '../directives/_text.ts'
 
-export function void_meta(ctx: Context, parent: ContextableNode, el: HTMLMetaElement) {
+export function void_meta(ctx: Context, el: HTMLMetaElement) {
+  const next = nextWalkable(el)
+  const parent = getParent(el)!
+
   for (const def of getDirectives(el, /^\$|%/)) {
     switch (def.key) {
       case '$': {
-        _data(ctx, def, parent, el)
+        _data(ctx, def, el)
         break
       }
       case '%': {
-        const span = makeElementAs(el, 'span')
-        _text(ctx, def, parent, span)
-        el.replaceWith(span)
-        return span
+        const span = document.createElement('span')
+        _text(ctx, def, span)
+        parent.insertBefore(span, el)
+        break
       }
     }
   }
+
+  el.remove()
+
+  return next
 }

@@ -3,7 +3,7 @@ import type {
   Context,
 } from './types.ts'
 
-export function evaluate(expr: string, ctxThis?: Context, other: ProxyRecord = {}) {
+export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
     $data: ctxThis?.store.data ?? {},
     ...other,
@@ -25,7 +25,7 @@ export function evaluate(expr: string, ctxThis?: Context, other: ProxyRecord = {
   }
 }
 
-export function execute(code: string, ctxThis?: Context, other: ProxyRecord = {}) {
+export function execute(code: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
   const $data = ctxThis ? ctxThis.store.data : {}
   const params: ProxyRecord = {
     $data,

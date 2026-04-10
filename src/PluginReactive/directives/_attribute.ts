@@ -1,13 +1,13 @@
 import type {
   Context,
-  ContextableNode,
+  // ContextableNode,
   DirectiveDef,
   DirectiveHandlerReturn,
 } from '../types.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _attribute(ctx: Context, dir: DirectiveDef, _parent: ContextableNode, el: HTMLElement): DirectiveHandlerReturn {
+export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement): DirectiveHandlerReturn {
   const {
     ref: attrName,
     expr,
@@ -59,7 +59,7 @@ export function _attribute(ctx: Context, dir: DirectiveDef, _parent: Contextable
 export function bindClass(ctx: Context, el: Element, expr: string): undefined {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
-    
+
   const dispose = effect(() => {
     try {
       const value = evaluate(expr, ctx)
@@ -75,8 +75,8 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
           }
         }
       } else if (typeof value === 'string') {
-          // String (from ternary or direct expression): "bg-blue text-white"
-          value.split(' ').filter(c => c).forEach(c => classes.add(c))
+        // String (from ternary or direct expression): "bg-blue text-white"
+        value.split(' ').filter(c => c).forEach(c => classes.add(c))
       }
       
       // Apply the final class list
@@ -93,7 +93,7 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
 function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''
-    
+
   const dispose = effect(() => {
     try {
       const value = evaluate(expr, ctx)

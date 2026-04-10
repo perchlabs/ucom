@@ -4,27 +4,32 @@
   cast="parseInt"
 >
 
-<meta $cells.calc="() => {
-  const cells = []
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      cells.push(`${i}:${j}`)
-    }
-  }
-  return cells
-}">
+<button @click="rows++">rows</button>
+<button @click="cols++">cols</button>
 
 <div>
-  <!-- SLOT GAME <meta %rows> x <meta %cols> -->
-  SLOT GAME <meta %="`${rows} x ${cols}`">
+  SLOT GAME <meta %rows> x <meta %cols>
+  <!-- SLOT GAME <meta %="`${rows} x ${cols}`"> -->
 </div>
 
 <main :style="{'--rows': rows, '--cols': cols}">
-  <section u-for="name in cells">
-    <slot :name>
-      <div %name></div>
-    </slot>
-  </section>
+  <template u-for="i in rows">
+    <section u-for="j in cols">
+      <meta $name="`${i}:${j}`">
+      <slot :name><div %name></div></slot>
+    </section>
+  </template>
+
+<!-- 
+  <template u-for="i in rows">
+    <template u-for="j in cols">
+      <meta $name="`${i}:${j}`">
+      <section>
+        <slot :name><div %name></div></slot>
+      </section>
+    </template>
+  </template>
+ -->
 </main>
 
 <style>

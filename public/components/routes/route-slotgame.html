@@ -2,9 +2,9 @@
 <source src="slot-game.html">
 
 <meta
-  $maxlen="8"
-  $rows.save="4"
-  $cols.save="4"
+  $maxlen=8
+  $rows.save=4
+  $cols.save=4
 >
 
 <header>
@@ -22,24 +22,20 @@
 </slot-game>
 
 <script>
-  export function connectedCallback() {
-    this.$game = this.$('slot-game')
-  }
-
-  export function inputData(name) {
-    const {$data} = this
-    return {
-      get value() {
-        return $data[name]
-      },
-      set value(text) {
-        const val = parseInt(text)
-        if (val <= $data.MAX_LENGTH && val > 0) {
-          $data[name] = val
-        }
-      },
-    }
-  }
+  // export function inputData(name) {
+  //   const {$data} = this
+  //   return {
+  //     get value() {
+  //       return $data[name]
+  //     },
+  //     set value(text) {
+  //       const val = parseInt(text)
+  //       if (val <= $data.MAX_LENGTH && val > 0) {
+  //         $data[name] = val
+  //       }
+  //     },
+  //   }
+  // }
 </script>
 
 <style>

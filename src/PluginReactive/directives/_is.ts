@@ -1,15 +1,14 @@
 import type {
   Context,
-  ContextableNode,
   DirectiveDef,
 } from '../types.ts'
 import { isValidComponentPath } from '../../common.ts'
 import { effect } from '../alien-signals'
-import { makeElementAs, nextWalkable, createAnchor } from '../utils.ts'
+import { makeElementAs, nextWalkable, parentAndAnchor } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
-export function _is(ctx: Context, dir: DirectiveDef, parent: ContextableNode, el: Element) {
+export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
   const {man} = ctx
   let {expr} = dir
 
@@ -22,14 +21,18 @@ export function _is(ctx: Context, dir: DirectiveDef, parent: ContextableNode, el
     return console.warn(`u-is is not a template.`)
   }
 
-  const anchor = createAnchor(dir, parent, el)
+  const [parent, anchor] = parentAndAnchor(dir, el)
+  if (!parent) {
+    console.log('warn u-is no parent')
+    return
+  }
 
   const next = nextWalkable(el)
 
   parent.removeChild(el)
 
   let tagName = ''
-  let tag: Element | undefined
+  let tag: HTMLElement | undefined
 
   const dispose = effect(() => {
     if (tag) {
@@ -63,7 +66,7 @@ export function _is(ctx: Context, dir: DirectiveDef, parent: ContextableNode, el
     parent.insertBefore(tag, anchor)
     parent.removeChild(anchor)
 
-    walk(ctx, parent, tag)
+    walk(ctx, tag)
   })
 
   ctx.cleanup.push(dispose)

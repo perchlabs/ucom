@@ -65,3 +65,7 @@ export function isRecord(value: unknown): value is Record<string | number | symb
 export function isNumber(value: unknown) {
   return typeof value === 'number'
 }
+
+export function isFunction(value: unknown) {
+  return typeof value === 'function'
+}
