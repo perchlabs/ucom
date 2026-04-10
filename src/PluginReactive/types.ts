@@ -8,6 +8,7 @@ export type ComputedFunction = () => any
 export interface Store {
   el: HTMLElement
   data: ProxyRecord
+  cleanup(): void
 
   var: StoreAdder
   calc: StoreAdder
@@ -36,11 +37,10 @@ export interface Context {
   walkable: ContextableNode
   start: Node
 
-  children: Set<Context>
+  // children: Set<Context>
 
   teardownCallback?(): void
   mount(root: ContextableNode, anchor: Node): void
-  // mount(root: ContextableNode): void
   insert(parent: ContextableNode, anchor: Node): void
   scope(el: HTMLElement, data?: ProxyRecord): Context
   remove(): void

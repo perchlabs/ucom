@@ -19,12 +19,17 @@ export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: 
   const name = el.tagName
 
   const proxy = createProxy({}, parent)
+  const cleanup: (() => void)[] = []
 
   const store: Store = {
     el,
 
     get data() {
       return proxy
+    },
+
+    cleanup() {
+      cleanup.forEach(f => f())
     },
 
     varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => store.var(k, v)),
@@ -59,7 +64,7 @@ export function createStore(el: HTMLElement, dataRaw: ProxyRecord = {}, parent: 
           const [,signal] = persistMap[storeId] = simpleItem(key, getItem() ?? value)
           if (signal) {
             const setItem = () => localStorage.setItem(storeId, JSON.stringify(signal()))
-            createEffect(() => setItem())
+            cleanup.push(createEffect(() => setItem()))
           }
         }
       }

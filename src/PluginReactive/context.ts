@@ -43,7 +43,7 @@ export function createContext(
     refs,
     cleanup: [],
 
-    children,
+    // children,
 
     get start() {
       return start ?? ctx.walkable
@@ -140,6 +140,7 @@ export function createContext(
     teardown() {
       ctx.cleanup.forEach(fn => fn())
       children.forEach(child => child.teardown())
+      ctx.store.cleanup()
     }
   }
 
