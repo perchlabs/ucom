@@ -4,12 +4,9 @@
   cast="parseInt"
 >
 
-<button @click="rows++">rows</button>
-<button @click="cols++">cols</button>
-
 <div>
-  SLOT GAME <meta %rows> x <meta %cols>
-  <!-- SLOT GAME <meta %="`${rows} x ${cols}`"> -->
+  <!-- SLOT GAME <meta %rows> x <meta %cols> -->
+  SLOT GAME <meta %="`${rows} x ${cols}`">
 </div>
 
 <main :style="{'--rows': rows, '--cols': cols}">
