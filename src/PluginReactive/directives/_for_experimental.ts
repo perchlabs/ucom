@@ -94,14 +94,15 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
       let ctx: Context
       if (oldIndex !== undefined) {
         ctx = prevCtxs[oldIndex]
-        const store = ctx.store
-        for (const k in data) {
+        // const store = ctx.store
+        for (const k in ctx.data) {
+          ctx.data[k] = data[k]
 // console.log('updating data: ', k)
-          if (k in store.data) {
-            store.data[k] = data[k]
-          } else {
-            store.var(k, data[k])
-          }
+          // if (k in store.data) {
+          //   store.data[k] = data[k]
+          // } else {
+          //   store.var(k, data[k])
+          // }
         }
       } else {
         ctx = ctxRoot.scope(el, data)
@@ -163,7 +164,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
     )
 
 // console.log('mounted: ', mounted, ctxs.length)
-// ctxs.forEach(ctx => console.log(`ctx ${sourceExp}:`, {...ctx.store.data}))
+// ctxs.forEach(ctx => console.log(`ctx ${sourceExp}:`, {...ctx.data}))
 
     if (!mounted) {
 
@@ -179,8 +180,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
 
       for (const ctx of prevCtxs) {
         if (!ctxToIndexMap.has(ctx)) {
-// console.log('removing')
-          ctx.remove()
+          ctx.teardown()
         }
       }
 
@@ -198,7 +198,7 @@ console.log(`loop: ${sourceExp}`)
         let ctx: Context
         if (oldIndex == null) {
           // new
-          console.log('ctx new index: ', {...childCtx.store.data})
+          console.log('ctx new index: ', {...childCtx.data})
 
           childCtx.mount(parent, nextCtx?.start ?? anchor)
           // childCtx.mount(parent, anchor)
@@ -212,7 +212,7 @@ console.log('update store: ')
           // ctx.store = copyStore(childCtx.store, ctx.store.data)
 
 
-          ctx.store = childCtx.store
+          // ctx.store = childCtx.store
           // ctx.store.assign(childCtx.store)
 
           if (oldIndex !== i) {

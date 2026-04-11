@@ -114,7 +114,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
   let ctxs: Context[]
   const cleanSaved = () => {
     // Clean up previous render
-    ctxs?.forEach(ctx => ctx.remove())
+    ctxs?.forEach(ctx => ctx.teardown())
     ctxs = []
   }
 

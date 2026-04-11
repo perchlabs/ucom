@@ -29,6 +29,7 @@ import {
 } from './constants.ts'
 
 import {
+  cloneTemplateContent,
   getTopLevelChildren,
   reComponentPath,
 } from './common.ts'
@@ -87,7 +88,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
   const {name, tpl} = def
 
   // Copy the fragment so that the original version will be available for printing.
-  const frag = tpl.content.cloneNode(true) as DocumentFragment
+  const frag = cloneTemplateContent(tpl)
   if (frag.querySelector('template[shadowrootmode]')) {
     throw `Component '${name}' used template attribute 'shadowrootmode'. Declarative Shadow Dom (DSD) is not allowed.`
   }
@@ -162,7 +163,7 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
 
 export function hashContent(tpl: HTMLTemplateElement): string {
   const div = document.createElement('div')
-  div.appendChild(tpl.content.cloneNode(true))
+  div.appendChild(cloneTemplateContent(tpl))
   return div.innerHTML
     .split('')
     .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)

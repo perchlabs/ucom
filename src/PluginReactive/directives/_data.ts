@@ -42,13 +42,13 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
   // Track effect disposal
   ctx.cleanup.push(dispose)
 
-  function addItem({store}: Context, ref: string, v: any) {
+  function addItem(ctx: Context, ref: string, v: any) {
     switch (mod) {
       case STORE_MOD_VAR:
       case STORE_MOD_CALC:
       case STORE_MOD_SYNC:
       case STORE_MOD_SAVE:
-        store[mod](ref, v)
+        ctx[mod](ref, v)
     }
   }
 }

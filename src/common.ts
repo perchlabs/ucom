@@ -69,3 +69,7 @@ export function isNumber(value: unknown) {
 export function isFunction(value: unknown) {
   return typeof value === 'function'
 }
+
+export function cloneTemplateContent(tpl: HTMLTemplateElement) {
+  return tpl.content.cloneNode(true) as DocumentFragment
+}

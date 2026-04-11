@@ -2,65 +2,88 @@ import type {
   ComponentManager,
 } from '../types.ts'
 import type {
-  Store,
   Context,
   ContextableNode,
   RefRecord,
   ProxyRecord,
+  ComputedFunction,
 } from './types.ts'
+import {
+  computed as createComputed,
+  effect as createEffect,
+  signal as createSignal,
+} from './alien-signals'
+import { isFunction, cloneTemplateContent } from '../common.ts'
 import { walk, walkChildren } from './walk.ts'
 import { getParent } from './utils.ts'
+
+interface Frag {
+  start: Text
+  end: Text
+}
+
+type StoreItem = [
+  key: string,
+  value: (...args: any[]) => any,
+  isFunc?: boolean,
+]
+type StoreItemRecord = Record<string, StoreItem>
+
+const persistMap: StoreItemRecord = {}
+const syncMap: StoreItemRecord = {}
 
 export const globalRefs: RefRecord = {}
 
 export function createContext(
-  rootEl: HTMLElement,
-  ptr: ContextableNode,
   man: ComponentManager,
-  store: Store,
+  customEl: HTMLElement,
+  ptr: ContextableNode,
+
+  dataRaw: ProxyRecord = {},
+  dataParent: ProxyRecord = {},
+
   refs: RefRecord = {},
 ): Context {
+  const frag: Frag | null = ptr instanceof HTMLTemplateElement
+    ? {start: new Text, end: new Text}
+    : null
+  const tpl: ContextableNode = frag ? cloneTemplateContent(ptr as HTMLTemplateElement)
+    : ptr instanceof ShadowRoot ? ptr
+    : ptr.cloneNode(true) as HTMLElement
+
   let initialized = false
-  let isFrag: boolean = false
-  let start: Text | undefined
-  let end: Text | undefined
-  let children = new Set<Context>()
+  const children = new Set<Context>()
 
-  let tpl: ContextableNode
-
-  if (ptr.nodeType === 1) {
-    tpl = (isFrag = ptr instanceof HTMLTemplateElement)
-      ? (ptr.content).cloneNode(true) as DocumentFragment
-      : ptr.cloneNode(true) as HTMLElement
-  } else if (ptr instanceof ShadowRoot) {
-    tpl = ptr
-  } else {
-    throw new Error('Invalid ContextableNode')
-  }
+  const storeName = customEl.tagName
+  const data: ProxyRecord = {}
+  const proxy = createFallbackProxy(data, dataParent)
 
   const ctx: Context = {
     man,
-    store,
     refs,
     cleanup: [],
 
-    // children,
-
     get start() {
-      return start ?? ctx.walkable
+      return frag?.start ?? ctx.walkable
     },
 
-    // walkable: tpl,
     get walkable() {
       return tpl
     },
 
-    scope(ptr: HTMLElement, data: ProxyRecord = {}) {
+    get data() {
+      return proxy
+    },
+
+    scope(ptr: HTMLElement, dataNew: ProxyRecord = {}) {
       const scoped = createContext(
-        rootEl,
-        ptr,
         man,
-        store.copy(data),
+        customEl,
+        ptr,
+
+        dataNew,
+        proxy,
+
         {...refs},
       )
       children.add(scoped)
@@ -69,10 +92,10 @@ export function createContext(
     },
 
     mount(parent: ContextableNode, anchor: Node) {
-      if (initialized) {
-        // already inserted, moving
+      if (frag) {
+        const {start, end} = frag
 
-        if (isFrag) {
+        if (initialized) {
           let node: Node | null = start!
           let next: Node | null
           while (node) {
@@ -84,28 +107,22 @@ export function createContext(
             node = next
           }
         } else {
-          parent.insertBefore(ctx.walkable, anchor)
-        }
-      } else {
-        initialized = true
-
-        if (isFrag) {
           walkChildren(ctx)
-
-          start = new Text
-          end = new Text
           parent.insertBefore(end, anchor!)
           parent.insertBefore(start, end)
           parent.insertBefore(ctx.walkable, end)
-        } else {
-          walk(ctx, ctx.walkable as HTMLElement)
-          parent.insertBefore(ctx.walkable, anchor)
         }
+      } else {
+        if (!initialized) {
+          walk(ctx, ctx.walkable as HTMLElement)
+        }
+
+        parent.insertBefore(ctx.walkable, anchor)
       }
     },
 
     remove() {
-      if (isFrag) {
+      if (frag) {
         if (ctx.start) {
           const parent = getParent(ctx.start)
           if (!parent) {
@@ -117,7 +134,7 @@ export function createContext(
           while (node) {
             next = node.nextSibling
             parent.removeChild(node)
-            if (node === end) {
+            if (node === frag.end) {
               break
             }
             node = next
@@ -126,16 +143,97 @@ export function createContext(
       } else {
         (ctx.walkable as HTMLElement)?.remove()
       }
-
-      ctx.teardown()
     },
 
     teardown() {
-      ctx.cleanup.forEach(fn => fn())
       children.forEach(child => child.teardown())
-      ctx.store.cleanup()
+      ctx.remove()
+      ctx.cleanup.forEach(fn => fn())
+    },
+
+    varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => ctx.var(k, v)),
+
+    var: (key: string, val: any) => addItem(simpleItem(key, val)),
+
+    calc(key: string, value: ComputedFunction) {
+      addItem([key, createComputed(value)])
+    },
+
+    sync(key: string, value: any) {
+      const keyId = `${storeName}-${key}`
+      if (!(keyId in syncMap)) {
+        syncMap[keyId] = simpleItem(key, value)
+      }
+      addItem(syncMap[keyId])
+    },
+
+    save(key: string, value: any) {
+      const keyId = `${storeName}-${key}`
+      if (!(keyId in persistMap)) {
+        if (isFunction(value)) {
+          persistMap[keyId] = [key, value, true]
+        } else {
+          const getItem = () => {
+            const json = localStorage.getItem(keyId)
+            return json ? JSON.parse(json) : undefined
+          }
+  
+          const [,signal] = persistMap[keyId] = simpleItem(key, getItem() ?? value)
+          if (signal) {
+            const setItem = () => localStorage.setItem(keyId, JSON.stringify(signal()))
+            ctx.cleanup.push(createEffect(() => setItem()))
+          }
+        }
+      }
+
+      addItem(persistMap[keyId])
+    },
+  }
+
+  function addItem(item: StoreItem) {
+    const [key, value, isFunc = false] = item
+
+    if (isFunc) {
+      data[key] = value.bind(customEl)
+    } else {
+      Object.defineProperty(data, key, {
+        get() { return value() },
+        set(val) { value(val) },
+        enumerable: true,
+      })
     }
   }
 
+  ctx.varRaw(dataRaw)
   return ctx
+}
+
+function createFallbackProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
+  return new Proxy(data, {
+    has(_target, key) {
+      return Reflect.has(data, key) || Reflect.has(parent, key)
+    },
+    ownKeys(_target) {
+      return [...new Set(...Object.keys(data), ...Object.keys(parent))]
+    },
+    get(_target, key) {
+      if (key === Symbol.unscopables) {
+        return
+      }
+
+      return Reflect.get(data, key) ?? Reflect.get(parent, key)
+    },
+    set(_target, key, val) {
+      return Reflect.set(data, key, val)
+    },
+  })
+}
+
+function simpleItem(key: string, value: any): StoreItem {
+  const isFunc = isFunction(value)
+  return [
+    key,
+    isFunc ? value : createSignal(value),
+    isFunc,
+  ]
 }

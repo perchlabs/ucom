@@ -48,7 +48,7 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
   const removeActiveContext = () => {
     if (ctx) {
       parent.insertBefore(anchor, ctx.start)
-      ctx.remove()
+      ctx.teardown()
       ctx = undefined
     }
   }

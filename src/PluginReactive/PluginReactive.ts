@@ -39,7 +39,6 @@ import {
 } from '../common.ts'
 import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'
-import { createStore } from './store.ts'
 import { walkChildren } from './walk.ts'
 
 // Proto and constructor constants.
@@ -143,8 +142,8 @@ export default class implements Plugin {
   [CONNECTED](params: PluginCallbackBuilderParams) {
     const {Com, Raw, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
-      const ctx = createContext(el, shadow, man, makeProxyStore(Com, Raw, el))
-      const {data} = ctx.store
+      const ctx = createContext(man, el, shadow, makeContextData(Com, Raw, el))
+      const {data} = ctx
       Object.assign(el, {
         get [DataIndex]() { return data },
         [ContextIndex]: ctx,
@@ -159,7 +158,7 @@ export default class implements Plugin {
   }
 }
 
-function makeProxyStore(
+function makeContextData(
   {[PropsIndex]: propDefs}: UpgradeComponentConstructor,
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
@@ -183,7 +182,7 @@ function makeProxyStore(
       }
     })
 
-  return createStore(el, data)
+  return data
 }
 
 type PropDef = {
