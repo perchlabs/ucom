@@ -4,6 +4,7 @@ import type {
   PluginConstructParams,
   Plugin,
 } from './types.ts'
+import { ArrayFrom } from './common.ts'
 import {
   ATTR_CORE,
 } from './constants.ts'
@@ -54,7 +55,7 @@ export default class implements Plugin {
       .map((domSheet: CSSStyleSheet) => {
         // Shadowdom can only use constructable style sheets.
         const sheet = new CSSStyleSheet()
-        sheet.replaceSync(Array.from(domSheet.cssRules).map(v => v.cssText).join(' '))
+        sheet.replaceSync(ArrayFrom(domSheet.cssRules).map(v => v.cssText).join(' '))
         return sheet
       })
   }

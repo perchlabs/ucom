@@ -9,7 +9,7 @@ import {
   STORE_MOD_SYNC,
   STORE_MOD_SAVE,
 } from '../../constants.ts'
-import { isRecord } from '../../common.ts'
+import { isObject } from '../../common.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
@@ -27,7 +27,7 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
 
       if (ref) {
         addItem(ctx, ref, v)
-      } else if (isRecord(v)) {
+      } else if (isObject(v)) {
         for (const k in v) {
           addItem(ctx, k, v[k])
         }

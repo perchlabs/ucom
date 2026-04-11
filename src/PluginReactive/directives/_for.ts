@@ -4,7 +4,7 @@ import type {
   DirectiveDef,
   ProxyRecord,
 } from '../types.ts'
-import { isNumber, isRecord } from '../../common.ts'
+import { isNumber, isObject, isArray } from '../../common.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 import { parentAndAnchor, getParent, nextWalkable } from '../utils.ts'
@@ -57,7 +57,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
   ): Context[] => {
     const dataArr: ProxyRecord[] = []
 
-    if (Array.isArray(source)) {
+    if (isArray(source)) {
       for (let i = 0; i < source.length; i++) {
         dataArr.push(createChildData(source[i], i))
       }
@@ -65,7 +65,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
       for (let i = 0; i < source; i++) {
         dataArr.push(createChildData(i, i))
       }
-    } else if (isRecord(source)) {
+    } else if (isObject(source)) {
       let i = 0
       for (const k in source) {
         dataArr.push(createChildData(source[k], i++, k))

@@ -22,9 +22,12 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../constants.ts'
 import {
+  isFunction,
+  ObjectEntriesEach,
+  ObjectKeys,
+  uniqueArr,
   isSystemKey,
   getTopLevelChildren,
-  isFunction,
 } from '../common.ts'
 import {
   computed as $computed,
@@ -34,7 +37,7 @@ import {
   trigger as $trigger,
 } from './alien-signals'
 import {
-  getAttributes,
+  attributeEntries,
   $attr,
 } from '../common.ts'
 import { createContext } from './context.ts'
@@ -60,7 +63,7 @@ function parseParams(frag: DocumentFragment) {
       ? evaluate(`${castVal}`) as (value: string) => any
       : undefined
 
-    getAttributes(el)
+    attributeEntries(el)
       .filter(([k]) => k.startsWith('$'))
       .forEach(([line, expr]) => {
         const matches = line.match(reParamKey)
@@ -90,9 +93,10 @@ export default class implements Plugin {
       [PropsIndex]: propDefs,
     })
 
-    const propKeys = Object.keys(propDefs)
+    const propKeys = ObjectKeys(propDefs)
     const attrKeysOld = Com[STATIC_OBSERVED_ATTRIBUTES]
-    Com[STATIC_OBSERVED_ATTRIBUTES] = [...new Set([...propKeys, ...attrKeysOld])]
+    // Com[STATIC_OBSERVED_ATTRIBUTES] = [...new Set([...propKeys, ...attrKeysOld])]
+    Com[STATIC_OBSERVED_ATTRIBUTES] = uniqueArr(propKeys, attrKeysOld)
 
     for (const k of propKeys) {
       Object.defineProperty(proto, k, {
@@ -163,14 +167,13 @@ function makeContextData(
   {prototype: rawProto}: RawComponentConstructor,
   el: UpgradeComponent,
 ) {
-
   const data: ProxyRecord = {}
 
   // From property definition.
-  for (let [k, def] of Object.entries(propDefs)) {
+  ObjectEntriesEach(propDefs, ([k, def]) => {
     const raw = el.getAttribute(k) ?? def.default
     data[k] = def.cast?.(raw) ?? raw
-  }
+  })
 
   // From user custom prototype.
   Object.getOwnPropertyNames(rawProto)

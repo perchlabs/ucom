@@ -4,6 +4,12 @@ import type {
   DirectiveDef,
   DirectiveHandlerReturn,
 } from '../types.ts'
+import {
+  isObject,
+  isString,
+  ArrayFrom,
+  ObjectEntriesEach,
+} from '../../common.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
@@ -67,20 +73,20 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
       // Start with original classes
       const classes = new Set(originalClasses)
       
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        // Object: { 'active': isActive, 'disabled': isDisabled }
-        for (const [cls, condition] of Object.entries(value)) {
+      if (isObject(value)) {
+        ObjectEntriesEach(value, ([cls, condition]) => {
           if (condition) {
             classes.add(cls)
           }
-        }
-      } else if (typeof value === 'string') {
+        })
+
+      } else if (isString(value)) {
         // String (from ternary or direct expression): "bg-blue text-white"
         value.split(' ').filter(c => c).forEach(c => classes.add(c))
       }
       
       // Apply the final class list
-      el.className = Array.from(classes).join(' ')
+      el.className = ArrayFrom(classes).join(' ')
     } catch (e) {
       console.error('[bind:class] Error: ', e)
     }
@@ -101,19 +107,19 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
       // Restore original styles first
       el.setAttribute('style', originalStyle)
       
-      if (typeof value === 'string') {
+      if (isString(value)) {
         // String: "color: red; font-size: 14px"
         el.style.cssText = `${originalStyle}; ${value}`
       }
-      else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      else if (isObject(value)) {
         // Object: { color: 'red', fontSize: '14px' }
-        for (const [prop, val] of Object.entries(value)) {
+        ObjectEntriesEach(value, ([prop, val]) => {
           if (val != null) {
             // Convert camelCase to kebab-case (fontSize -> font-size)
             const cssProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase()
             el.style.setProperty(cssProp, String(val))
           }
-        }
+        })
       }
     } catch (e) {
       console.error('[bind:style] Error: ', e)

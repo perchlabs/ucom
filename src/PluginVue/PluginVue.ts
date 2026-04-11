@@ -14,9 +14,10 @@ import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
-  CUSTOM_CALLBACKS,
+  // CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../constants.ts'
+import { ObjectEntriesEach, isSystemKey } from '../common.ts'
 import {createApp, ref, reactive, effect, stop, nextTick} from './petite-shadow-vue'
 
 // Proto and constructor constants.
@@ -29,7 +30,7 @@ const CleanupIndex = Symbol('clean')
 const persistMap: Record<string, any> = {}
 const syncMap: Record<string, any> = {}
 
-const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
+// const storeProhibitedFunctions = new Set(['constructor', ...CUSTOM_CALLBACKS])
 
 // const PROP_REFLECT_DEFAULT = true
 
@@ -166,7 +167,7 @@ function makeReactive(
     synced: (v: any) => new Synced(v),
   }) ?? {}
   Object.getOwnPropertyNames(rawProto)
-    .filter(k => !storeProhibitedFunctions.has(k))
+    .filter(k => !isSystemKey(k))
     .forEach(k => {
       const v = rawProto[k]
       if (typeof v === 'function') {
@@ -174,7 +175,7 @@ function makeReactive(
       }
     })
 
-  for (let [k, v] of Object.entries(store)) {
+  ObjectEntriesEach(store, ([k, v]) => {
     if (v instanceof Synced) {
       d[k] = makeSynced(name, k, v)
     } else if (v instanceof Persisted) {
@@ -182,17 +183,19 @@ function makeReactive(
     } else {
       d[k] = v
     }
-  }
+  })
 
   return reactive(d)
 }
 
 function makeProps(el: UpgradeComponent, propDefs: PropDefs) {
   const d: Record<string, any> = {}
-  for (let [k, v] of Object.entries(propDefs)) {
+
+  ObjectEntriesEach(propDefs, ([k, v]) => {
     const raw = el.getAttribute(k) ?? v.default
     d[k] = v.cast?.(raw) ?? raw
-  }
+  })
+
   return d
 }
 

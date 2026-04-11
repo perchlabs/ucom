@@ -22,11 +22,9 @@ import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 
-export function walk(ctx: Context, node: HTMLElement): Element | null | void {
+export function walk(ctx: Context, el: HTMLElement): Element | null | void {
   // Skip text nodes, comments, etc - only process element nodes
-  if (node.nodeType !== 1) return
-
-  let el = node as HTMLElement
+  if (el.nodeType !== 1) return
 
   switch (el.tagName) {
     case 'META':

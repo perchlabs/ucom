@@ -29,6 +29,7 @@ import {
 } from './constants.ts'
 
 import {
+  attributeEntries,
   cloneTemplateContent,
   getTopLevelChildren,
   reComponentPath,
@@ -133,10 +134,10 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
   const metaMap: Record<string, string> = {}
   const metaArr = getTopLevelChildren<HTMLMetaElement>(frag, 'META')
   metaArr.forEach(meta => {
-    Array.from(meta.attributes).forEach(({name, value}) => {
-      const match = name.match(reMeta)
+    attributeEntries(meta).forEach(([k, v]) => {
+      const match = k.match(reMeta)
       if (match) {
-        metaMap[match[1]] = value
+        metaMap[match[1]] = v
         meta.remove()
       }
     })

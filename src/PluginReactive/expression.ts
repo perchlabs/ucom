@@ -2,6 +2,7 @@ import type {
   ProxyRecord,
   Context,
 } from './types.ts'
+import { ObjectKeys } from '../common.ts'
 
 export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
@@ -13,7 +14,7 @@ export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: P
     // Create a function that evaluates the expression
     // The 'with' statement allows: "count" instead of "$data.count"
     const fn = new Function(
-      ...Object.keys(params),
+      ...ObjectKeys(params),
       `with($data) { return ${expr}; }`
     )
 
@@ -35,7 +36,7 @@ export function execute(code: string, ctxThis?: Context | ProxyRecord, other: Pr
   try {
     // Create an async function to support await
     const fn = new Function(
-      ...Object.keys(params),
+      ...ObjectKeys(params),
       `return (async () => {
         with($data) { ${code} }
       })();`,

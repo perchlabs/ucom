@@ -1,11 +1,12 @@
 import type {
   DirectiveDef,
 } from './types.ts'
-import { getAttributes, pullAttr } from '../common.ts'
+import { attributeEntries, pullAttr } from '../common.ts'
 
-export const getDirectives = (el: Element, reDir: RegExp) => getAttributes(el)
-  .filter(([k]) => reDir.test(k))
-  .map(item => createDirectiveDefinition(...item))
+export const getDirectives = (el: Element, reDir: RegExp) =>
+  attributeEntries(el).
+  filter(([k]) => reDir.test(k)).
+  map(item => createDirectiveDefinition(...item))
 
 export function createDirectiveDefinition(full: string, val: string): DirectiveDef {
   if (full.startsWith('u-')) {

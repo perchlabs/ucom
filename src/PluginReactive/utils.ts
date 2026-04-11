@@ -1,4 +1,8 @@
-import type { ContextableNode, DirectiveDef } from './types.ts'
+import type {
+  ContextableNode,
+  DirectiveDef,
+} from './types.ts'
+import { attributeEntries } from '../common.ts'
 
 export function getParent(el: Node): ContextableNode | undefined{
   const parent = el.parentElement
@@ -37,9 +41,7 @@ export function parentAndAnchor(
 
 export function makeElementAs(el: Element, tagName: string) {
   const tag = document.createElement(tagName)
-  for (const {name, value} of Array.from(el.attributes)) {
-    tag.setAttribute(name, value)
-  }
+  attributeEntries(el).forEach(e => tag.setAttribute(...e))
 
   if (el instanceof HTMLTemplateElement) {
     tag.append(el.content)

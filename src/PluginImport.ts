@@ -10,14 +10,17 @@ import type {
   ComponentImporter,
 } from './types.ts'
 import {
+  ArrayFrom,
+  ObjectFromEntries,
   $attrBool,
+  attributeEntries,
 } from './common.ts'
 
 // const ATTR_SRC = 'u-src'
 
 export default class implements Plugin {
   async parse({man, frag}: PluginParseParams) {
-    await importElements(man, Array.from(frag.children))
+    await importElements(man, ArrayFrom(frag.children))
   }
 
   async define({man, Com}: PluginDefineParams) {
@@ -73,7 +76,7 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => 
 }
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
-  const arr = Array.from(root.querySelectorAll(':not(:defined)')) as Element[]
+  const arr = ArrayFrom(root.querySelectorAll(':not(:defined)')) as Element[]
 
   if ('tagName' in root && man.isName(root.tagName, true) && !man.registered(root.tagName)) {
     arr.push(root)
@@ -108,11 +111,6 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
     return
   }
 
-  const attributes: Record<string, any> = {}
-  for (const {name, value} of el.attributes) {
-    attributes[name] = value
-  }
-
   const ident = man.resolve(urlPrefix + src)
   const {name, resolved} = ident
 
@@ -125,8 +123,8 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
   }
 
   return {
-    attributes,
     ident,
+    attributes: ObjectFromEntries(attributeEntries(el))
   }
 }
 

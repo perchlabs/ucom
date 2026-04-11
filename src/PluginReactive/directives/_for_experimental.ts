@@ -3,7 +3,12 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
-import { pullAttr, isNumber, isRecord } from '../../common.ts'
+import {
+  isNumber,
+  isObject,
+  isArray,
+  pullAttr,
+} from '../../common.ts'
 import { evaluate } from '../expression.ts'
 import { effect } from '../alien-signals'
 import { nextWalkable, getParent, parentAndAnchor } from '../utils.ts'
@@ -70,7 +75,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
     const ctxToIndexMap: ContextToIndexMap = new WeakMap
     const dataArr: ProxyRecord[] = []
 
-    if (Array.isArray(source)) {
+    if (isArray(source)) {
       for (let i = 0; i < source.length; i++) {
         dataArr.push(createChildData(source[i], i))
       }
@@ -78,7 +83,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
       for (let i = 0; i < source; i++) {
         dataArr.push(createChildData(i, i))
       }
-    } else if (isRecord(source)) {
+    } else if (isObject(source)) {
       let i = 0
       for (const k in source) {
         dataArr.push(createChildData(source[k], i++, k))
@@ -142,7 +147,6 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
 
     return data
   }
-
 
   let mounted = false
   let ctxs: Context[]

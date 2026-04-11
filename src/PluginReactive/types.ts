@@ -23,7 +23,6 @@ export interface Context {
   calc: StoreAdder
   sync: StoreAdder
   save: StoreAdder
-  varRaw: (raw: ProxyRecord) => void
 }
 export type StoreAdder = (key: string, val: any) => void
 export type ContextableNode = DocumentFragment | HTMLElement

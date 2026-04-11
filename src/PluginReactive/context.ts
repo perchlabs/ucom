@@ -9,11 +9,23 @@ import type {
   ComputedFunction,
 } from './types.ts'
 import {
+  STORE_MOD_VAR,
+  STORE_MOD_CALC,
+  STORE_MOD_SYNC,
+  STORE_MOD_SAVE,
+} from '../constants.ts'
+import {
   computed as createComputed,
   effect as createEffect,
   signal as createSignal,
 } from './alien-signals'
-import { isFunction, cloneTemplateContent } from '../common.ts'
+import {
+  isFunction,
+  ObjectEntriesEach,
+  ObjectKeys,
+  uniqueArr,
+  cloneTemplateContent,
+} from '../common.ts'
 import { walk, walkChildren } from './walk.ts'
 import { getParent } from './utils.ts'
 
@@ -57,6 +69,21 @@ export function createContext(
   const storeName = customEl.tagName
   const data: ProxyRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
+
+  function addItem(item: StoreItem) {
+    const [key, value, isFunc = false] = item
+
+    if (isFunc) {
+      data[key] = value.bind(customEl)
+    } else {
+      Object.defineProperty(data, key, {
+        get() { return value() },
+        set(val) { value(val) },
+        enumerable: true,
+      })
+    }
+  }
+
 
   const ctx: Context = {
     man,
@@ -151,15 +178,15 @@ export function createContext(
       ctx.cleanup.forEach(fn => fn())
     },
 
-    varRaw: (raw: Record<string, any>) => Object.entries(raw).forEach(([k, v]) => ctx.var(k, v)),
+    [STORE_MOD_VAR](key: string, val: any) {
+      addItem(simpleItem(key, val))
+    },
 
-    var: (key: string, val: any) => addItem(simpleItem(key, val)),
-
-    calc(key: string, value: ComputedFunction) {
+    [STORE_MOD_CALC](key: string, value: ComputedFunction) {
       addItem([key, createComputed(value)])
     },
 
-    sync(key: string, value: any) {
+    [STORE_MOD_SYNC](key: string, value: any) {
       const keyId = `${storeName}-${key}`
       if (!(keyId in syncMap)) {
         syncMap[keyId] = simpleItem(key, value)
@@ -167,7 +194,7 @@ export function createContext(
       addItem(syncMap[keyId])
     },
 
-    save(key: string, value: any) {
+    [STORE_MOD_SAVE](key: string, value: any) {
       const keyId = `${storeName}-${key}`
       if (!(keyId in persistMap)) {
         if (isFunction(value)) {
@@ -190,31 +217,19 @@ export function createContext(
     },
   }
 
-  function addItem(item: StoreItem) {
-    const [key, value, isFunc = false] = item
+  ObjectEntriesEach(dataRaw, e => ctx.var(...e))
 
-    if (isFunc) {
-      data[key] = value.bind(customEl)
-    } else {
-      Object.defineProperty(data, key, {
-        get() { return value() },
-        set(val) { value(val) },
-        enumerable: true,
-      })
-    }
-  }
-
-  ctx.varRaw(dataRaw)
   return ctx
 }
 
 function createFallbackProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
   return new Proxy(data, {
     has(_target, key) {
-      return Reflect.has(data, key) || Reflect.has(parent, key)
+      return key in data || key in parent
     },
     ownKeys(_target) {
-      return [...new Set(...Object.keys(data), ...Object.keys(parent))]
+      // return [...new Set(...ObjectKeys(data), ...ObjectKeys(parent))]
+      return uniqueArr(ObjectKeys(data), ObjectKeys(parent))
     },
     get(_target, key) {
       if (key === Symbol.unscopables) {
@@ -223,9 +238,9 @@ function createFallbackProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
 
       return Reflect.get(data, key) ?? Reflect.get(parent, key)
     },
-    set(_target, key, val) {
-      return Reflect.set(data, key, val)
-    },
+    // set(_target, key, val) {
+    //   return Reflect.set(data, key, val)
+    // },
   })
 }
 

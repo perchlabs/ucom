@@ -4,6 +4,26 @@ import {
   CONSTRUCTOR,
 } from './constants.ts'
 
+export const isArray = Array.isArray
+export const isObject = (v: unknown): v is Record<any, any> =>
+  typeof v === 'object' && v !== null && !isArray(v)
+export const isNumber = (v: unknown): v is number => typeof v === 'number'
+export const isFunction = (v: unknown) => typeof v === 'function'
+export const isString = (v: unknown): v is string => typeof v === 'string'
+
+export const ObjectEntries = Object.entries
+export const ObjectFromEntries = Object.fromEntries
+export const ObjectKeys = Object.keys
+export const ArrayFrom = Array.from
+
+export function ObjectEntriesEach<T>(
+  obj: Record<string, T>,
+  each: (entry: [k: string, v: T]) => void,
+) {
+  ObjectEntries(obj).forEach(each)
+}
+
+
 export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
 export const isValidComponentName = (v: string, toLowerCase = false) => {
@@ -28,12 +48,12 @@ export const $attr = (el: HTMLElement | null, name: string, fallback?: any): any
 }
 
 export const $attrBool = (el: HTMLElement | null, name: string): boolean => {
-  return name in (el?.attributes ?? {})
+  return el?.hasAttribute(name) ?? false
 }
 
-export const $attrList = (el: HTMLElement | null, name: string): string[] => {
-  return (el?.getAttribute?.(name) ?? '').split(',').filter(Boolean)
-}
+// export const $attrList = (el: HTMLElement | null, name: string): string[] => {
+//   return (el?.getAttribute?.(name) ?? '').split(',').filter(Boolean)
+// }
 
 export const pullAttr = (el: Element, name: string): string | null => {
   const val = el.getAttribute(name)
@@ -47,27 +67,15 @@ export const getTopLevelChildren = <T extends HTMLElement>(
   container: DocumentFragment | HTMLElement,
   ...tags: string[]
 ) => {
-  return Array.from(container.children).filter(({tagName: k}) => tags.includes(k)) as T[]
+  return ArrayFrom(container.children).filter(({tagName: k}) => tags.includes(k)) as T[]
 }
 
-export function getAttributes(el: Element): [k: string, v: string][] {
-  return Array.from(el.attributes).map(({name, value}) => [name, value])
+export function attributeEntries(el: Element): [k: string, v: string][] {
+  return ArrayFrom(el.attributes).map(({name, value}) => [name, value])
 }
 
-export function isRecord(value: unknown): value is Record<string | number | symbol, unknown> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value)
-  )
-}
-
-export function isNumber(value: unknown) {
-  return typeof value === 'number'
-}
-
-export function isFunction(value: unknown) {
-  return typeof value === 'function'
+export function uniqueArr(...arrArr: any[]) {
+  return [...new Set(arrArr.flat())]
 }
 
 export function cloneTemplateContent(tpl: HTMLTemplateElement) {
