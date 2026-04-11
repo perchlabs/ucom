@@ -141,7 +141,7 @@ export function createContext(
           }
         }
       } else {
-        (ctx.walkable as HTMLElement)?.remove()
+        (ctx.walkable as HTMLElement).remove?.()
       }
     },
 
