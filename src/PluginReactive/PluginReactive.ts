@@ -145,8 +145,8 @@ export default class implements Plugin {
       const ctx = createContext(man, el, shadow, makeContextData(Com, Raw, el))
       const {data} = ctx
       Object.assign(el, {
-        get [DataIndex]() { return data },
         [ContextIndex]: ctx,
+        get [DataIndex]() { return data },
       })
 
       walkChildren(ctx)

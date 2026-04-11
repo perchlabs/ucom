@@ -66,8 +66,6 @@ export async function fetchTemplate(resolved: string): Promise<HTMLTemplateEleme
 
   const tpl = document.createElement('template')
   tpl.innerHTML = text
-  // Keep the prestine template so that plugins can reference it.
-  Object.freeze(tpl)
 
   return tpl
 }
