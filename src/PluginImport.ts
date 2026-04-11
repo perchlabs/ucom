@@ -12,6 +12,7 @@ import type {
 import {
   ArrayFrom,
   ObjectFromEntries,
+  queryAll,
   $attrBool,
   attributeEntries,
 } from './common.ts'
@@ -76,8 +77,7 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => 
 }
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
-  const arr = ArrayFrom(root.querySelectorAll(':not(:defined)')) as Element[]
-
+  const arr = queryAll(root, ':not(:defined)')
   if ('tagName' in root && man.isName(root.tagName, true) && !man.registered(root.tagName)) {
     arr.push(root)
   }

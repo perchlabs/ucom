@@ -5,6 +5,7 @@ import type {
 } from './types.ts'
 import {
   isSystemKey,
+  queryAll,
 } from './common.ts'
 
 export default class implements Plugin {
@@ -19,8 +20,8 @@ export default class implements Plugin {
 
   construct({el, shadow}: PluginConstructParams): void {
     Object.assign(el, {
-      $: (v: string) => shadow.querySelector(v),
-      $$: (v: string) => shadow.querySelectorAll(v),
+      $querySelector: (v: string) => shadow.querySelector(v),
+      $querySelectorAll: (v: string) => queryAll(shadow, v),
     })
   }
 }

@@ -9,8 +9,8 @@ import {
   ATTR_CORE,
 } from './constants.ts'
 import {
-  // createElement
   isValidComponentName,
+  queryAll,
 } from './common.ts'
 
 export default class implements Plugin {
@@ -69,9 +69,7 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
     .flat()
 }
 
-const queryForTemplates = (root: QueryableRoot) => [...(
-  root.querySelectorAll?.(`template[${ATTR_CORE}]`) ?? []
-)] as HTMLTemplateElement[]
+const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${ATTR_CORE}]`)
 
 const templateHandler = (
   tplArr: HTMLTemplateElement[],

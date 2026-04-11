@@ -4,7 +4,10 @@ import type {
   PluginConstructParams,
   Plugin,
 } from './types.ts'
-import { ArrayFrom } from './common.ts'
+import {
+  queryAll,
+  ArrayFrom,
+} from './common.ts'
 import {
   ATTR_CORE,
 } from './constants.ts'
@@ -37,7 +40,7 @@ export default class implements Plugin {
   // Note: Constructed stylesheet asynchronous replace method no longer handles CSS @import rules as 2025.
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
   async #loadSheets(): Promise<CSSStyleSheet[]> {
-    const loading = $queryForStyles(document.head)
+    const loading = queryForStyles(document.head)
       .map(el => {
         return new Promise((resolve, reject) => {
           if (el.sheet) {
@@ -61,7 +64,7 @@ export default class implements Plugin {
   }
 }
 
-function $queryForStyles(root: QueryableRoot) {
+function queryForStyles(root: QueryableRoot) {
   const selector = ['LINK', 'STYLE'].map(k => `${k}[${ATTR_CORE}]`).join(',')
-  return [...root.querySelectorAll(selector)] as (HTMLStyleElement | HTMLLinkElement)[]
+  return queryAll<HTMLStyleElement | HTMLLinkElement>(root, selector)
 }

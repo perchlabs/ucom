@@ -16,7 +16,7 @@
 
     async connectedCallback() {
       const {$data} = this
-      const slot = this.$('slot')
+      const slot = this.$querySelector('slot')
 
       this.#routes = makeRoutes(await this.$importSlot(slot))
       this.dispatchEvent(new CustomEvent('routes', {

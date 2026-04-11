@@ -70,21 +70,6 @@ export function createContext(
   const data: ProxyRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
 
-  function addItem(item: StoreItem) {
-    const [key, value, isFunc = false] = item
-
-    if (isFunc) {
-      data[key] = value.bind(customEl)
-    } else {
-      Object.defineProperty(data, key, {
-        get() { return value() },
-        set(val) { value(val) },
-        enumerable: true,
-      })
-    }
-  }
-
-
   const ctx: Context = {
     man,
     refs,
@@ -217,6 +202,20 @@ export function createContext(
     },
   }
 
+  function addItem(item: StoreItem) {
+    const [key, value, isFunc = false] = item
+
+    if (isFunc) {
+      data[key] = value.bind(customEl)
+    } else {
+      Object.defineProperty(data, key, {
+        get() { return value() },
+        set(val) { value(val) },
+        enumerable: true,
+      })
+    }
+  }
+
   ObjectEntriesEach(dataRaw, e => ctx.var(...e))
 
   return ctx
@@ -228,7 +227,6 @@ function createFallbackProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
       return key in data || key in parent
     },
     ownKeys(_target) {
-      // return [...new Set(...ObjectKeys(data), ...ObjectKeys(parent))]
       return uniqueArr(ObjectKeys(data), ObjectKeys(parent))
     },
     get(_target, key) {
@@ -238,7 +236,11 @@ function createFallbackProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
 
       return Reflect.get(data, key) ?? Reflect.get(parent, key)
     },
-    // set(_target, key, val) {
+    // set(target, key, val) {
+    //   if (!(key in target)) {
+    //     console.warn(`Property '${key}' must be set on the store before updating it.`)
+    //   }
+
     //   return Reflect.set(data, key, val)
     // },
   })

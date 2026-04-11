@@ -3,6 +3,10 @@ import {
   DIR_POSTFIX,
   CONSTRUCTOR,
 } from './constants.ts'
+import type {
+  // ContextableNode,
+  QueryableRoot,
+} from './types.ts'
 
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
@@ -22,7 +26,6 @@ export function ObjectEntriesEach<T>(
 ) {
   ObjectEntries(obj).forEach(each)
 }
-
 
 export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
@@ -63,13 +66,6 @@ export const pullAttr = (el: Element, name: string): string | null => {
   return val
 }
 
-export const getTopLevelChildren = <T extends HTMLElement>(
-  container: DocumentFragment | HTMLElement,
-  ...tags: string[]
-) => {
-  return ArrayFrom(container.children).filter(({tagName: k}) => tags.includes(k)) as T[]
-}
-
 export function attributeEntries(el: Element): [k: string, v: string][] {
   return ArrayFrom(el.attributes).map(({name, value}) => [name, value])
 }
@@ -80,4 +76,16 @@ export function uniqueArr(...arrArr: any[]) {
 
 export function cloneTemplateContent(tpl: HTMLTemplateElement) {
   return tpl.content.cloneNode(true) as DocumentFragment
+}
+
+export function queryAll<T extends Element>(root: QueryableRoot, selector: string): T[] {
+  const nodeList = root.querySelectorAll(selector)
+  return nodeList ? ArrayFrom(nodeList) as T[] : []
+}
+
+export const getTopLevelChildren = <T extends HTMLElement>(
+  container: DocumentFragment | HTMLElement,
+  ...tags: string[]
+) => {
+  return ArrayFrom(container.children).filter(({tagName: k}) => tags.includes(k)) as T[]
 }

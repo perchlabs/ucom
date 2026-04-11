@@ -3,7 +3,7 @@
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
 * ucom (`20.0k` minified) (`8.1k` gzipped)
-* ucom_vue (`28.7k` minified) (`11.9k` gzipped)
+* ucom_vue (`28.6k` minified) (`11.9k` gzipped)
 * ucom_lite (`7.0k` minified) (`3.1k` gzipped)
 
 **Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
@@ -169,7 +169,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
   import data from './field_data.json' with { type: 'json' }
 
   export function connectedCallback() {
-    const main = this.$('main')
+    const main = this.$querySelector('main')
     lib.load(data)
     lib.bind(main)
   }

@@ -93,9 +93,9 @@
 <template u-com="example-04">
   Use helpers to access shadowRoot:
   <br>
-  <code>$</code>: <code>querySelector</code>
+  <code>$querySelector</code>: <code>querySelector</code>
   <br>
-  <code>$$</code>: <code>querySelectorAll</code>
+  <code>$querySelectorAll</code>: <code>querySelectorAll</code>
   <br>
 
   <div>
@@ -108,7 +108,7 @@
 
   <script>
     export function connectedCallback() {
-      this.main = this.$('main')
+      this.main = this.$querySelector('main')
     }
 
     export function attributeChangedCallback(name, oldValue, newValue) {
