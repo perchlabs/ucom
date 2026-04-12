@@ -29,7 +29,9 @@ import {
 } from './constants.ts'
 
 import {
+  ObjectFromEntries,
   attributeEntries,
+  paramsAttrEach,
   cloneTemplateContent,
   getTopLevelChildren,
   reComponentPath,
@@ -94,7 +96,14 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
 
   await plugins.parse({man, def, frag})
 
-  const [Raw, exports, shadowRootOpts, customElementOpts, webComponentOpts] = await processFragment(frag)
+  const [Raw, exports, params] = await processFragment(frag)
+
+  const modes: Record<string, string> = {}
+  params.forEach(attrMap => {
+    paramsAttrEach(attrMap, /^\+([a-z]+)/, (k, mode) => {
+      modes[k] = mode
+    })
+  })
 
   const Com = createComponentConstructor(
     man,
@@ -102,17 +111,25 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
     def,
     Raw,
     frag,
-    shadowRootOpts,
-    webComponentOpts,
+    {
+      mode: modes?.mode as ShadowRootMode ?? 'closed',
+      slotAssignment: modes?.slotAssignment as SlotAssignmentMode ?? undefined,
+      delegatesFocus: 'delegatesFocus' in modes,
+    },
+    {
+      internals: 'internals' in modes,
+    },
   )
 
-  await plugins.define({man, Com, Raw, frag, exports})
-  customElements.define(name, Com, customElementOpts)
+  await plugins.define({man, Com, Raw, frag, exports, params})
+  customElements.define(name, Com, {
+    extends: modes?.extends,
+  })
 
   return def
 }
 
-async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
+async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> {
   const script = frag.querySelector('script')
   script?.remove()
 
@@ -130,33 +147,13 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
     ...exports
   } = module as {default: RawComponentConstructor} & ModuleExports
 
-  const reMode = /^\+([a-z]+)/
-  const modes: Record<string, string> = {}
-  getTopLevelChildren<HTMLParamElement>(frag, 'PARAM').forEach(el => {
-    attributeEntries(el).forEach(([k, v]) => {
-      const mode = k.match(reMode)?.[1]
-      if (mode) {
-        modes[mode] = v
-        el.remove()
-      }
+  const params: Record<string, string>[] = getTopLevelChildren<HTMLParamElement>(frag, 'PARAM')
+    .map(el => {
+      el.remove()
+      return ObjectFromEntries(attributeEntries(el))
     })
-  })
 
-  return [
-    Raw,
-    exports,
-    {
-      mode: modes?.mode as ShadowRootMode ?? 'closed',
-      slotAssignment: modes?.slotAssignment as SlotAssignmentMode ?? undefined,
-      delegatesFocus: 'delegatesFocus' in modes,
-    },
-    {
-      extends: modes?.extends,
-    },
-    {
-      internals: 'internals' in modes,
-    },
-  ]
+  return [Raw, exports, params]
 }
 
 export function hashContent(tpl: HTMLTemplateElement): string {
@@ -250,12 +247,10 @@ function createComponentConstructor(
   return Com
 }
 
-type ParsedScript = [
+type ParsedFragment = [
   Raw: RawComponentConstructor,
   exports: ModuleExports,
-  shadowRootOpts: ShadowRootInit,
-  customElementOpts: ElementDefinitionOptions,
-  webComponentOpts: WebComponentOpts,
+  params: Record<string, string>[],
 ]
 
 type WebComponentOpts = {

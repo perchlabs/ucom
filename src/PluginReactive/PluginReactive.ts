@@ -26,9 +26,9 @@ import {
   ObjectAssign,
   ObjectKeys,
   ObjectEntriesEach,
+  pullKey,
   isSystemKey,
   uniqueArr,
-  getTopLevelChildren,
 } from '../common.ts'
 import {
   computed as $computed,
@@ -39,14 +39,14 @@ import {
 } from './alien-signals'
 import {
   ObjectDefineProperty,
-  attributeEntries,
-  pullAttr,
+  paramsAttrEach,
 } from '../common.ts'
 import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'
 import { walkChildren } from './walk.ts'
 
 // Proto and constructor constants.
+const FunctionsIndex = Symbol()
 const PropsIndex = Symbol()
 // Instance constants.
 const ContextIndex = Symbol()
@@ -55,48 +55,56 @@ const DataIndex = '$data'
 // const PROP_REFLECT_DEFAULT = true
 const reParamKey = /^\$([a-z]+)$/
 
-function parseParams(frag: DocumentFragment) {
+function parseParams(funcs: FunctionRecord, params: Record<string, string>[]) {
   const propDefs: PropDefs = {}
-  for (const el of getTopLevelChildren<HTMLParamElement>(frag, 'PARAM')) {
-    el.remove()
 
-    const castVal = pullAttr(el, 'cast')
+  params.forEach(attrMap => {
+    const castVal = pullKey(attrMap, 'cast')
     const cast = castVal
-      ? evaluate(`${castVal}`) as (value: string) => any
+      ? evaluate(castVal, null, funcs) as (value: string) => any
       : undefined
 
-    attributeEntries(el)
-      .forEach(([line, expr]) => {
-        const k = line.match(reParamKey)?.[1]
-        if (k) {
-          propDefs[k] = {
-            cast,
-            default: evaluate(expr),
-          }
-        }
-      })
-  }
+    paramsAttrEach(attrMap, reParamKey, (k, expr) => {
+      propDefs[k] = {
+        cast,
+        default: evaluate(expr, null, funcs),
+      }
+    })
+  })
 
   return propDefs
 }
 
 export default class implements Plugin {
-  async define({Com, frag}: PluginDefineParams) {
+  async define({Com, Raw, params}: PluginDefineParams) {
     const Upgrade = Com as UpgradeComponentConstructor
     const proto = Upgrade.prototype
-    const propDefs = parseParams(frag)
+    const rawProto = Raw.prototype
 
+    // From user custom prototype.
+    const funcs: FunctionRecord = {}
+    Object.getOwnPropertyNames(rawProto)
+      .filter(k => !isSystemKey(k))
+      .forEach(k => {
+        const v = rawProto[k]
+        if (isFunction(v)) {
+          funcs[k] = v
+        }
+      })
+
+    const propDefs = parseParams(funcs, params)
     ObjectAssign(Upgrade, {
+      [FunctionsIndex]: funcs,
       [PropsIndex]: propDefs,
     })
 
-    const propKeys = ObjectKeys(propDefs)
-    const attrKeysOld = Com[STATIC_OBSERVED_ATTRIBUTES]
-    Com[STATIC_OBSERVED_ATTRIBUTES] = uniqueArr(propKeys, attrKeysOld)
+    Com[STATIC_OBSERVED_ATTRIBUTES] = uniqueArr(
+      Com[STATIC_OBSERVED_ATTRIBUTES],
+      ObjectKeys(propDefs),
+    )
 
-    for (const k of propKeys) {
+    for (const k in propDefs) {
       ObjectDefineProperty(proto, k, {
-        // configurable: false,
         get() {
           return this[DataIndex][k]
         },
@@ -140,9 +148,9 @@ export default class implements Plugin {
   }
 
   [CONNECTED](params: PluginCallbackBuilderParams) {
-    const {Com, Raw, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
+    const {Com, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
-      const ctx = createContext(man, el, shadow, makeContextData(Com, Raw, el))
+      const ctx = createContext(man, el, shadow, makeContextData(Com, el))
       const {data} = ctx
       ObjectAssign(el, {
         [ContextIndex]: ctx,
@@ -159,11 +167,13 @@ export default class implements Plugin {
 }
 
 function makeContextData(
-  {[PropsIndex]: propDefs}: UpgradeComponentConstructor,
-  {prototype: rawProto}: RawComponentConstructor,
+  {
+    [FunctionsIndex]: funcs,
+    [PropsIndex]: propDefs,
+  }: UpgradeComponentConstructor,
   el: UpgradeComponent,
 ) {
-  const data: ProxyRecord = {}
+  const data: ProxyRecord = {...funcs}
 
   // From property definition.
   ObjectEntriesEach(propDefs, ([k, def]) => {
@@ -171,24 +181,16 @@ function makeContextData(
     data[k] = def.cast?.(raw) ?? raw
   })
 
-  // From user custom prototype.
-  Object.getOwnPropertyNames(rawProto)
-    .filter(k => !isSystemKey(k))
-    .forEach(k => {
-      const v = rawProto[k]
-      if (isFunction(v)) {
-        data[k] = v
-      }
-    })
-
   return data
 }
+
+type FunctionRecord = Record<string, (...args: any[]) => any>
 
 type PropDef = {
   default: any
   // TODO: Investigate ways to control reflective attributes/properties
   // reflect: boolean,
-  cast?: ((value: any) => any)
+  cast?: (value: any) => any
 }
 type PropDefs = Record<string, PropDef>
 
@@ -204,6 +206,7 @@ interface UpgradeComponent extends WebComponent {
 
 interface UpgradeComponentConstructor extends WebComponentConstructor {
   new (...args: any[]): UpgradeComponent
+  [FunctionsIndex]: FunctionRecord
   [PropsIndex]: PropDefs
 }
 

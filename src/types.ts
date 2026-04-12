@@ -131,6 +131,7 @@ export type PluginDefineParams = {
   Raw: RawComponentConstructor,
   frag: DocumentFragment,
   exports: ModuleExports,
+  params: Record<string, string>[]
 }
 
 export type PluginConstructParams = {

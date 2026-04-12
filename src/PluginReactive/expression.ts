@@ -4,7 +4,7 @@ import type {
 } from './types.ts'
 import { ObjectKeys, ObjectValues } from '../common.ts'
 
-export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
+export function evaluate(expr: string, ctxThis?: Context | ProxyRecord | null, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
     $data: ctxThis?.data ?? {},
     ...other,
@@ -26,7 +26,7 @@ export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: P
   }
 }
 
-export function execute(code: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
+export function execute(code: string, ctxThis?: Context | ProxyRecord | null, other: ProxyRecord = {}) {
   const $data = ctxThis?.data ?? {}
   const params: ProxyRecord = {
     $data,

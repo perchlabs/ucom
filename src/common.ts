@@ -44,8 +44,15 @@ export function isSystemKey(k: string) {
   return false
 }
 
-export const attrToggled = (el: HTMLElement | null, name: string): boolean => {
-  return el?.hasAttribute(name) ?? false
+export const attrToggled = (el: HTMLElement | null, name: string): boolean =>
+  el?.hasAttribute(name) ?? false
+
+export const pullKey = <T>(obj: Record<string, T>, k: string): (T | undefined) => {
+  const v = obj[k]
+  if (v != null) {
+    delete obj[k]
+  }
+  return v
 }
 
 export const pullAttr = (el: Element, name: string): string | null => {
@@ -54,6 +61,19 @@ export const pullAttr = (el: Element, name: string): string | null => {
     el.removeAttribute(name)
   }
   return val
+}
+
+export function paramsAttrEach(
+  obj: Record<string, string>,
+  re: RegExp,
+  func: (k: string, v: string) => void,
+) {
+  for (const k in obj) {
+    const kk = k.match(re)?.[1]
+    if (kk) {
+      func(kk, pullKey(obj, k)!)
+    }
+  }
 }
 
 export function attributeEntries(el: Element): [k: string, v: string][] {
@@ -77,5 +97,5 @@ export const getTopLevelChildren = <T extends HTMLElement>(
   container: DocumentFragment | HTMLElement,
   ...tags: string[]
 ) => {
-  return ArrayFrom(container.children).filter(({tagName: k}) => tags.includes(k)) as T[]
+  return ArrayFrom(container.children).filter(el => tags.includes(el.tagName)) as T[]
 }
