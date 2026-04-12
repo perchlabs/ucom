@@ -17,7 +17,7 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
 
   const [parent, anchor] = parentAndAnchor(dir, el)
   if (!parent) {
-    console.log('warn u-if no parent')
+    console.log('warn #if no parent')
     return
   }
 
@@ -29,8 +29,8 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
   while ((elseEl = nextWalkable(el))) {
     elseExp = null
     if (
-      pullAttr(elseEl, 'u-else') === '' ||
-      (elseExp = pullAttr(elseEl, 'u-else-if'))
+      pullAttr(elseEl, '#else') === '' ||
+      (elseExp = pullAttr(elseEl, '#else-if'))
     ) {
       parent.removeChild(elseEl)
       branches.push([elseEl, elseExp])

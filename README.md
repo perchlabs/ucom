@@ -216,14 +216,14 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
   </head>
 ```
 
-### Templating
+### Template Directives
 
-Ucom has Alpine/Vue style templating.
+#### Directives that create a subscope ####
 
-Directives include;
+- `#if` (`#else`, `#else-if`)
+- `#each`
 
-- `u-if` (`u-else`, `u-else-if`)
-- `u-for`
+#### Normal directives ####
 - `u-is`
 - `u-html`
 - `u-show`
@@ -239,7 +239,7 @@ Directives include;
 
 ```html
 <template u-com>
-  <div u-for="n in 10" @click="alert(n)" %n></div>
+  <div #each="n in 10" @click="alert(n)" %n></div>
 </template>
 ```
 
@@ -251,13 +251,13 @@ This was chosen as a compromise between the ugly verbose Alpine style and the mo
 <template u-com>
   <!-- Inline calculation -->
   Exponential:
-  <div u-for="n in 5">
+  <div #each="n in 5">
     <meta %n=>, <meta %n="n**2">, <meta %="n**3">
   </div>
 
   <!-- Precalculate (saved to the current sub-scope) -->
   Exponential:
-  <div u-for="n in 5">
+  <div #each="n in 5">
     <meta
       $n1="n**1"
       $n2="n**2"

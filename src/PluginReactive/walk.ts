@@ -57,8 +57,8 @@ export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable)
 }
 
 const ctrlDirs: [string, DirectiveHandler][] = [
-  ['u-if', _if],
-  ['u-for', _for],
+  ['#if', _if],
+  ['#each', _for],
   ['u-is', _is],
   ['u-show', _show],
 ]

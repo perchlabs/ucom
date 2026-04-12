@@ -3,7 +3,7 @@
 </div>
 
 <main :style="{'--rows': rows, '--cols': cols}">
-  <section u-for="cell in cellList">
+  <section #each="cell in cellList">
     <slot :name="cell">
       <div>{{ cell }}</div>
     </slot>

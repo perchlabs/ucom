@@ -26,13 +26,13 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
 
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
-    console.warn(`[u-for] invalid expression: ${expr}`)
+    console.warn(`[#each] invalid expression: ${expr}`)
     return
   }
 
   let [parent, anchor] = parentAndAnchor(dir, el, expr)
   if (!parent) {
-    console.warn('[u-for] no parent')
+    console.warn('[#each] no parent')
     return
   }
 
@@ -178,7 +178,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
       // Update parent in case of document fragment.
       parent = getParent(anchor)!
   if (!parent) {
-    console.log('warn u-for no parent')
+    console.log('warn #each no parent')
     return
   }
 

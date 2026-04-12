@@ -30,7 +30,7 @@
   <meta $tabs="[]">
 
   <nav>
-    <a u-for="([href, text]) in tabs" :href %text></a>
+    <a #each="([href, text]) in tabs" :href %text></a>
   </nav>
 
   <template u-is="`@com/rou-ter.html`" @routes="routesInit($event)">
