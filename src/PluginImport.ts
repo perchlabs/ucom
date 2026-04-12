@@ -79,7 +79,7 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => 
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = queryAll(root, ':not(:defined)')
-  if ('tagName' in root && man.isName(root.tagName, true) && !man.registered(root.tagName)) {
+  if ('tagName' in root && man.isName(root.tagName, true) && !man.has(root.tagName)) {
     arr.push(root)
   }
   return arr
@@ -114,7 +114,7 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
   const ident = man.resolve(urlPrefix + src)
   const {name, resolved} = ident
 
-  if (!man.registered(name)) {
+  if (!man.has(name)) {
     if (lazy || attrToggled(el, 'lazy')) {
       man.lazy[name] = ident
     } else {

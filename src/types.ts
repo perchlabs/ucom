@@ -102,7 +102,7 @@ export interface ComponentManager {
   define: ComponentDefiner,
   import: ComponentImporter,
   resolve: ComponentResolver,
-  registered: (name: string) => boolean
+  has: (name: string) => boolean
   isName: (name: string, toLowerCase?: boolean) => boolean
   isPath: (path: string) => boolean
 }
@@ -143,7 +143,6 @@ export type PluginConstructParams = {
 }
 
 export type ModuleExports = Record<string, any>
-
 
 export interface RawComponent extends HTMLElement {
   attributeChangedCallback?(...args: Parameters<AttributeChangedCallback>): CustomElementCallbackReturn

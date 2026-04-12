@@ -42,7 +42,7 @@ export default (pluginClasses: PluginConstructor[]) => {
       plugins.start({man})
     },
 
-    registered(name: string): boolean {
+    has(name: string): boolean {
       name = name.toLowerCase()
       return name in idents || customElements.get(name) !== undefined
     },

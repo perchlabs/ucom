@@ -62,7 +62,6 @@ async function loadSheets(): Promise<CSSStyleSheet[]> {
     })
 }
 
-
 function queryForStyles(root: QueryableRoot) {
   const selector = ['STYLE', 'LINK'].map(k => `${k}[${ATTR_CORE}]`).join(',')
   return queryAll<HTMLStyleElement | HTMLLinkElement>(root, selector)

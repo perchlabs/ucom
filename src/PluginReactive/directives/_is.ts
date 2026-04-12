@@ -48,7 +48,7 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
       try {
         const {name, resolved} = man.resolve(ref)
         tagNameNew = name
-        if (!man.registered(tagNameNew)) {
+        if (!man.has(tagNameNew)) {
           man.import(resolved)
         }
       } catch (e) {

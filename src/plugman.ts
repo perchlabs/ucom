@@ -43,8 +43,7 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
 
   return {
     async start(params: PluginStartParams) {
-      const promises = plugins.map(v => v.start?.(params))
-      await Promise.all(promises)
+      await Promise.all(plugins.map(v => v.start?.(params)))
     },
     async parse(params: PluginParseParams) {
       plugins.forEach(async p => await p.parse?.(params))
