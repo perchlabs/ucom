@@ -1,6 +1,5 @@
 import type {
   Context,
-  // ContextableNode,
   DirectiveDef,
 } from '../types.ts'
 import {

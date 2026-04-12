@@ -92,7 +92,6 @@ export default class implements Plugin {
 
     const propKeys = ObjectKeys(propDefs)
     const attrKeysOld = Com[STATIC_OBSERVED_ATTRIBUTES]
-    // Com[STATIC_OBSERVED_ATTRIBUTES] = [...new Set([...propKeys, ...attrKeysOld])]
     Com[STATIC_OBSERVED_ATTRIBUTES] = uniqueArr(propKeys, attrKeysOld)
 
     for (const k of propKeys) {
