@@ -21,8 +21,8 @@ export function createDirectiveDefinition(full: string, val: string): DirectiveD
       full,
       key,
       ref,
-      expr: val,
       mod,
+      expr: val,
     }
   }
 }

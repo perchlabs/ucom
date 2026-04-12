@@ -64,7 +64,7 @@ export default (pluginClasses: PluginConstructor[]) => {
         return idents[name] ??= defineActual(name, resolved, tpl)
       } catch (e) {
         if (e instanceof ComponentFetchError) {
-          console.error(`Problem fetching component '${e.resolved}'. Hint: ${e.reason}.`)
+          console.error(`Fetching component '${e.resolved}'. Hint: ${e.reason}.`)
         }
       }
     },

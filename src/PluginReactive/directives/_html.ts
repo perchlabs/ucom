@@ -1,6 +1,5 @@
 import type {
   Context,
-  // ContextableNode,
   DirectiveDef,
 } from '../types.ts'
 import { effect } from '../alien-signals'
@@ -15,7 +14,7 @@ export function _html(ctx: Context, dir: DirectiveDef, el: HTMLElement): undefin
       // Evaluate the expression (e.g., "count" or "firstName + ' ' + lastName")
       el.innerHTML = evaluate(expr, ctx) ?? ''
     } catch (e) {
-      console.error('[u-html] Error: ', e)
+      console.error('[u-html] ', e)
     }
   })
 

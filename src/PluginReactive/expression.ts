@@ -2,7 +2,7 @@ import type {
   ProxyRecord,
   Context,
 } from './types.ts'
-import { ObjectKeys } from '../common.ts'
+import { ObjectKeys, ObjectValues } from '../common.ts'
 
 export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
   const params: ProxyRecord = {
@@ -19,15 +19,15 @@ export function evaluate(expr: string, ctxThis?: Context | ProxyRecord, other: P
     )
 
     // Execute and return result
-    return fn(...Object.values(params))
+    return fn(...ObjectValues(params))
   } catch (e) {
-    console.error('[evaluate] Error: ', expr, e)
+    console.error('[evaluate] ', expr, e)
     return null
   }
 }
 
 export function execute(code: string, ctxThis?: Context | ProxyRecord, other: ProxyRecord = {}) {
-  const $data = ctxThis ? ctxThis.data : {}
+  const $data = ctxThis?.data ?? {}
   const params: ProxyRecord = {
     $data,
     ...other,
@@ -43,9 +43,9 @@ export function execute(code: string, ctxThis?: Context | ProxyRecord, other: Pr
     )
 
     // Execute and return promise for error handling
-    return fn.call($data, ...Object.values(params)) as Promise<void>
+    return fn.call($data, ...ObjectValues(params)) as Promise<void>
   } catch (err) {
-    console.error('[execute] Error: ', err)
+    console.error('[execute] ', err)
     return Promise.reject(err)
   }
 }

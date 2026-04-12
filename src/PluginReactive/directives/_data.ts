@@ -32,10 +32,10 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
           addItem(ctx, k, v[k])
         }
       } else {
-        console.error('$data invalid format')
+        console.warn(`[$${ref}] invalid type`)
       }
     } catch (e) {
-      console.error('$data: ', e)
+      console.error(`[$${ref}] `, e)
     }
   })
 

@@ -23,10 +23,11 @@ import {
 } from '../constants.ts'
 import {
   isFunction,
-  ObjectEntriesEach,
+  ObjectAssign,
   ObjectKeys,
-  uniqueArr,
+  ObjectEntriesEach,
   isSystemKey,
+  uniqueArr,
   getTopLevelChildren,
 } from '../common.ts'
 import {
@@ -37,8 +38,9 @@ import {
   trigger as $trigger,
 } from './alien-signals'
 import {
+  ObjectDefineProperty,
   attributeEntries,
-  $attr,
+  pullAttr,
 } from '../common.ts'
 import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'
@@ -58,24 +60,19 @@ function parseParams(frag: DocumentFragment) {
   for (const el of getTopLevelChildren<HTMLParamElement>(frag, 'PARAM')) {
     el.remove()
 
-    const castVal = $attr(el, 'cast', null)
+    const castVal = pullAttr(el, 'cast')
     const cast = castVal
       ? evaluate(`${castVal}`) as (value: string) => any
       : undefined
 
     attributeEntries(el)
-      .filter(([k]) => k.startsWith('$'))
       .forEach(([line, expr]) => {
-        const matches = line.match(reParamKey)
-        if (!matches) {
-          console.warn(`Invalid param line '${line}'`)
-          return
-        }
-        const k = matches[1]
-
-        propDefs[k] = {
-          cast,
-          default: evaluate(expr),
+        const k = line.match(reParamKey)?.[1]
+        if (k) {
+          propDefs[k] = {
+            cast,
+            default: evaluate(expr),
+          }
         }
       })
   }
@@ -89,7 +86,7 @@ export default class implements Plugin {
     const proto = Upgrade.prototype
     const propDefs = parseParams(frag)
 
-    Object.assign(Upgrade, {
+    ObjectAssign(Upgrade, {
       [PropsIndex]: propDefs,
     })
 
@@ -99,7 +96,7 @@ export default class implements Plugin {
     Com[STATIC_OBSERVED_ATTRIBUTES] = uniqueArr(propKeys, attrKeysOld)
 
     for (const k of propKeys) {
-      Object.defineProperty(proto, k, {
+      ObjectDefineProperty(proto, k, {
         // configurable: false,
         get() {
           return this[DataIndex][k]
@@ -117,7 +114,7 @@ export default class implements Plugin {
       })
     }
 
-    Object.assign(proto, {
+    ObjectAssign(proto, {
       $computed,
       $effect,
       $effectScope,
@@ -148,7 +145,7 @@ export default class implements Plugin {
     return () => {
       const ctx = createContext(man, el, shadow, makeContextData(Com, Raw, el))
       const {data} = ctx
-      Object.assign(el, {
+      ObjectAssign(el, {
         [ContextIndex]: ctx,
         get [DataIndex]() { return data },
       })

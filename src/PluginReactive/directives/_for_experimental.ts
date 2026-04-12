@@ -26,13 +26,13 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
 
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
-    console.warn(`invalid u-for expression: ${expr}`)
+    console.warn(`[u-for] invalid expression: ${expr}`)
     return
   }
 
   let [parent, anchor] = parentAndAnchor(dir, el, expr)
   if (!parent) {
-    console.log('warn u-for no parent')
+    console.warn('[u-for] no parent')
     return
   }
 

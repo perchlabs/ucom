@@ -21,8 +21,9 @@ import {
 } from './alien-signals'
 import {
   isFunction,
-  ObjectEntriesEach,
   ObjectKeys,
+  ObjectEntriesEach,
+  ObjectDefineProperty,
   uniqueArr,
   cloneTemplateContent,
 } from '../common.ts'
@@ -202,13 +203,11 @@ export function createContext(
     },
   }
 
-  function addItem(item: StoreItem) {
-    const [key, value, isFunc = false] = item
-
+  function addItem([key, value, isFunc = false]: StoreItem) {
     if (isFunc) {
       data[key] = value.bind(customEl)
     } else {
-      Object.defineProperty(data, key, {
+      ObjectDefineProperty(data, key, {
         get() { return value() },
         set(val) { value(val) },
         enumerable: true,

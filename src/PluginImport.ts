@@ -11,9 +11,10 @@ import type {
 } from './types.ts'
 import {
   ArrayFrom,
+  ObjectAssign,
   ObjectFromEntries,
   queryAll,
-  $attrBool,
+  attrToggled,
   attributeEntries,
 } from './common.ts'
 
@@ -25,7 +26,7 @@ export default class implements Plugin {
   }
 
   async define({man, Com}: PluginDefineParams) {
-    Object.assign(Com.prototype, {
+    ObjectAssign(Com.prototype, {
       $import: man.import
     })
   }
@@ -33,7 +34,7 @@ export default class implements Plugin {
   construct({man, el, shadow}: PluginConstructParams): void {
     (el as UpgradeComponent).$importSlot = async (ref: unknown): Promise<ImportComponentData[]> => {
       if (!(ref instanceof HTMLSlotElement)) {
-        throw 'Invalid arugment.  Must be an HTML Element.'
+        throw 'Import must be an HTMLSlotElement.'
       }
 
       const dataArr = importElements(man, ref.assignedElements())
@@ -81,7 +82,6 @@ const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   if ('tagName' in root && man.isName(root.tagName, true) && !man.registered(root.tagName)) {
     arr.push(root)
   }
-
   return arr
 }
 
@@ -93,7 +93,7 @@ async function importElements(man: ComponentManager, elArr: Element[]): Promise<
       el.remove()
       base = [
         el.getAttribute('href') ?? '',
-        $attrBool(el, 'lazy'),
+        attrToggled(el, 'lazy'),
       ]
     } else if (el instanceof HTMLSourceElement) {
       return handleSourceElement(man, el, base)
@@ -107,7 +107,7 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
 
   const src = el.getAttribute('src')
   if (!src) {
-    console.error("SOURCE element needs a 'src' attribute")
+    console.error("SOURCE import must have a 'src' attribute")
     return
   }
 
@@ -115,7 +115,7 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
   const {name, resolved} = ident
 
   if (!man.registered(name)) {
-    if (lazy || $attrBool(el, 'lazy')) {
+    if (lazy || attrToggled(el, 'lazy')) {
       man.lazy[name] = ident
     } else {
       man.import(resolved)

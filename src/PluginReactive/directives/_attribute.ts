@@ -1,6 +1,5 @@
 import type {
   Context,
-  // ContextableNode,
   DirectiveDef,
   DirectiveHandlerReturn,
 } from '../types.ts'
@@ -54,7 +53,7 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement): Di
         el.setAttribute(attrName, value)
       }
     } catch (e) {
-      console.error(`[bind:${attrName}] Error: `, e)
+      console.error(`[:${attrName}] `, e)
     }
   })
 
@@ -88,7 +87,7 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
       // Apply the final class list
       el.className = ArrayFrom(classes).join(' ')
     } catch (e) {
-      console.error('[bind:class] Error: ', e)
+      console.error('[:class] ', e)
     }
   })
 
@@ -122,7 +121,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
         })
       }
     } catch (e) {
-      console.error('[bind:style] Error: ', e)
+      console.error('[:style] ', e)
     }
   })
 

@@ -4,7 +4,6 @@ import {
   CONSTRUCTOR,
 } from './constants.ts'
 import type {
-  // ContextableNode,
   QueryableRoot,
 } from './types.ts'
 
@@ -15,9 +14,12 @@ export const isNumber = (v: unknown): v is number => typeof v === 'number'
 export const isFunction = (v: unknown) => typeof v === 'function'
 export const isString = (v: unknown): v is string => typeof v === 'string'
 
+export const ObjectAssign = Object.assign
+export const ObjectKeys = Object.keys
+export const ObjectValues = Object.values
 export const ObjectEntries = Object.entries
 export const ObjectFromEntries = Object.fromEntries
-export const ObjectKeys = Object.keys
+export const ObjectDefineProperty = Object.defineProperty
 export const ArrayFrom = Array.from
 
 export function ObjectEntriesEach<T>(
@@ -42,21 +44,9 @@ export function isSystemKey(k: string) {
   return false
 }
 
-export const $attr = (el: HTMLElement | null, name: string, fallback?: any): any => {
-  const attr = el?.getAttribute(name)
-  if (fallback !== undefined && !attr) {
-    return fallback
-  }
-  return attr === '' ? true : attr
-}
-
-export const $attrBool = (el: HTMLElement | null, name: string): boolean => {
+export const attrToggled = (el: HTMLElement | null, name: string): boolean => {
   return el?.hasAttribute(name) ?? false
 }
-
-// export const $attrList = (el: HTMLElement | null, name: string): string[] => {
-//   return (el?.getAttribute?.(name) ?? '').split(',').filter(Boolean)
-// }
 
 export const pullAttr = (el: Element, name: string): string | null => {
   const val = el.getAttribute(name)

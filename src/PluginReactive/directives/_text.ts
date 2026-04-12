@@ -13,7 +13,7 @@ export function _text(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
     try {
       el.textContent = evaluate(expr, ctx) ?? ''
     } catch (e) {
-      console.error('u-text Error: ', e)
+      console.error('[u-text] ', e)
     }
   })
 

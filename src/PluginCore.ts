@@ -4,6 +4,7 @@ import type {
   PluginConstructParams,
 } from './types.ts'
 import {
+  ObjectAssign,
   isSystemKey,
   queryAll,
 } from './common.ts'
@@ -19,7 +20,7 @@ export default class implements Plugin {
   }
 
   construct({el, shadow}: PluginConstructParams): void {
-    Object.assign(el, {
+    ObjectAssign(el, {
       $querySelector: (v: string) => shadow.querySelector(v),
       $querySelectorAll: (v: string) => queryAll(shadow, v),
     })

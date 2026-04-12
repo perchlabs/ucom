@@ -36,9 +36,10 @@ export default (pluginClasses: PluginConstructor[]): PluginManager  => {
   const provide = <T extends PluginCallbackType>(
     key: PluginCallbackKey,
     builderParams: PluginCallbackBuilderParams,
-  ) => plugins
-    .map((p: PluginCallbacks) => (p[key] as PluginCallbackBuilder<T>)?.(builderParams))
-    .filter(v => !!v)
+  ) =>
+    plugins.
+    map((p: PluginCallbacks) => (p[key] as PluginCallbackBuilder<T>)?.(builderParams)).
+    filter(v => !!v)
 
   return {
     async start(params: PluginStartParams) {

@@ -130,15 +130,14 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
     ...exports
   } = module as {default: RawComponentConstructor} & ModuleExports
 
-  const reMeta = /^\+([a-z]+)/
-  const metaMap: Record<string, string> = {}
-  const metaArr = getTopLevelChildren<HTMLMetaElement>(frag, 'META')
-  metaArr.forEach(meta => {
-    attributeEntries(meta).forEach(([k, v]) => {
-      const match = k.match(reMeta)
-      if (match) {
-        metaMap[match[1]] = v
-        meta.remove()
+  const reMode = /^\+([a-z]+)/
+  const modes: Record<string, string> = {}
+  getTopLevelChildren<HTMLParamElement>(frag, 'PARAM').forEach(el => {
+    attributeEntries(el).forEach(([k, v]) => {
+      const mode = k.match(reMode)?.[1]
+      if (mode) {
+        modes[mode] = v
+        el.remove()
       }
     })
   })
@@ -147,15 +146,15 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedScript> {
     Raw,
     exports,
     {
-      mode: metaMap?.mode as ShadowRootMode ?? 'closed',
-      slotAssignment: metaMap?.slotAssignment as SlotAssignmentMode ?? undefined,
-      delegatesFocus: 'delegatesFocus' in metaMap,
+      mode: modes?.mode as ShadowRootMode ?? 'closed',
+      slotAssignment: modes?.slotAssignment as SlotAssignmentMode ?? undefined,
+      delegatesFocus: 'delegatesFocus' in modes,
     },
     {
-      extends: metaMap?.extends,
+      extends: modes?.extends,
     },
     {
-      internals: 'internals' in metaMap,
+      internals: 'internals' in modes,
     },
   ]
 }

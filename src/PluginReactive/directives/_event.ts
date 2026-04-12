@@ -1,6 +1,5 @@
 import type {
   Context,
-  // ContextableNode,
   DirectiveDef,
   DirectiveHandlerReturn,
 } from '../types.ts'
@@ -21,7 +20,7 @@ export function _event(ctx: Context, dir: DirectiveDef, el: Element, ): Directiv
     try {
       execute(expr, ctx, {$event: e})
     } catch (err) {
-      console.error(`[handle:${eventName}] Error: `, err)
+      console.error(`[@${eventName}] `, err)
     }
   }
 

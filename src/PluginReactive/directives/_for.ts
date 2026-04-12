@@ -1,6 +1,5 @@
 import type {
   Context,
-  // ContextableNode,
   DirectiveDef,
   ProxyRecord,
 } from '../types.ts'
@@ -21,7 +20,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
 
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
-    console.warn(`invalid u-for expression: ${expr}`)
+    console.warn(`[u-for] invalid expression: ${expr}`)
     return next
   }
 
@@ -130,7 +129,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
 
       ctxs.forEach(ctx => ctx.mount(parent!, anchor))
     } catch (e) {
-      console.error('[u-for] Error: ', e)
+      console.error('[u-for] ', e)
     }
   })
 
