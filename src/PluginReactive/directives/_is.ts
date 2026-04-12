@@ -14,16 +14,18 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
 
   expr = expr.trim()
   if (!expr) {
-    return console.warn(`u-is expression is empty.`)
+    console.warn(`[u-is] empty expression.`)
+    return
   }
 
   if (!(el instanceof HTMLTemplateElement)) {
-    return console.warn(`u-is is not a template.`)
+    console.warn(`[u-is] not a template.`)
+    return
   }
 
   const [parent, anchor] = parentAndAnchor(dir, el)
   if (!parent) {
-    console.log('warn u-is no parent')
+    console.warn('[u-is] no parent')
     return
   }
 

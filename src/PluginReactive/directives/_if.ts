@@ -33,7 +33,7 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
       (elseExp = pullAttr(elseEl, 'u-else-if'))
     ) {
       parent.removeChild(elseEl)
-      branches.push([elseEl, elseExp ])
+      branches.push([elseEl, elseExp])
     } else {
       break
     }
