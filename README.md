@@ -222,11 +222,12 @@ Ucom has Alpine/Vue style templating.
 
 Directives include;
 
-- `u-show`
+- `u-if` (`u-else`, `u-else-if`)
 - `u-for`
-- `u-html`
-- `u-ref`
 - `u-is`
+- `u-html`
+- `u-show`
+- `u-ref`
 - `@` (handler)
 - `%` (text)
 - `:` (bind)
