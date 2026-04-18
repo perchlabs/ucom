@@ -1,11 +1,11 @@
 import type {
-  ProxyRecord,
+  DataRecord,
   Context,
 } from './types.ts'
 import { ObjectKeys, ObjectValues } from '../common.ts'
 
-export function evaluate(expr: string, ctxThis?: Context | ProxyRecord | null, other: ProxyRecord = {}) {
-  const params: ProxyRecord = {
+export function evaluate(expr: string, ctxThis?: Context | DataRecord | null, other: DataRecord = {}) {
+  const params: DataRecord = {
     $data: ctxThis?.data ?? {},
     ...other,
   }
@@ -26,9 +26,9 @@ export function evaluate(expr: string, ctxThis?: Context | ProxyRecord | null, o
   }
 }
 
-export function execute(code: string, ctxThis?: Context | ProxyRecord | null, other: ProxyRecord = {}) {
+export function execute(code: string, ctxThis?: Context | DataRecord | null, other: DataRecord = {}) {
   const $data = ctxThis?.data ?? {}
-  const params: ProxyRecord = {
+  const params: DataRecord = {
     $data,
     ...other,
   }

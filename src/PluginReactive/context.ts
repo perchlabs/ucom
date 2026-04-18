@@ -5,7 +5,7 @@ import type {
   Context,
   ContextableNode,
   RefRecord,
-  ProxyRecord,
+  DataRecord,
   ComputedFunction,
 } from './types.ts'
 import {
@@ -52,8 +52,8 @@ export function createContext(
   customEl: HTMLElement,
   ptr: ContextableNode,
 
-  dataRaw: ProxyRecord = {},
-  dataParent: ProxyRecord = {},
+  dataRaw: DataRecord = {},
+  dataParent: DataRecord = {},
 
   refs: RefRecord = {},
 ): Context {
@@ -68,7 +68,7 @@ export function createContext(
   const children = new Set<Context>()
 
   const storeName = customEl.tagName
-  const data: ProxyRecord = {}
+  const data: DataRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
 
   const ctx: Context = {
@@ -88,7 +88,7 @@ export function createContext(
       return proxy
     },
 
-    scope(ptr: Element, dataNew: ProxyRecord = {}) {
+    scope(ptr: Element, dataNew: DataRecord = {}) {
       const scoped = createContext(
         man,
         customEl,
@@ -223,7 +223,7 @@ export function createContext(
   return ctx
 }
 
-function createFallbackProxy(data: ProxyRecord, parent: ProxyRecord = {}) {
+function createFallbackProxy(data: DataRecord, parent: DataRecord = {}) {
   return new Proxy(data, {
     has(_target, key) {
       return key in data || key in parent

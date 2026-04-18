@@ -3,7 +3,7 @@ import type {
   ContextableNode,
   DirectiveDef,
   DirectiveHandler,
-  DirectiveHandlerReturn,
+  WalkableReturnType,
 } from './types.ts'
 import { getDirectives, pullDir } from './directive.ts'
 import { nextWalkable } from './utils.ts'
@@ -23,7 +23,7 @@ import { _attribute } from './directives/_attribute.ts'
 import { _cssprop } from './directives/_cssprop.ts'
 import { _ref } from './directives/_ref.ts'
 
-export function walk(ctx: Context, el: Element): Element | null | void {
+export function walk(ctx: Context, el: Element): WalkableReturnType {
   // Skip text nodes, comments, etc - only process element nodes
   if (el.nodeType !== 1) return
 
@@ -40,7 +40,7 @@ export function walk(ctx: Context, el: Element): Element | null | void {
     }
   }
 
-  let next: DirectiveHandlerReturn
+  let next: WalkableReturnType
   for (def of getDirectives(el, reDir)) {
     if (next = dirMap[def.key]?.(ctx, def, el)) {
       return next

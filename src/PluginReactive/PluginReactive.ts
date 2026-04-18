@@ -13,7 +13,7 @@ import type {
 } from '../types.ts'
 import type {
   Context,
-  ProxyRecord,
+  DataRecord,
 } from './types.ts'
 import {
   ATTRIBUTE_CHANGED,
@@ -173,7 +173,7 @@ function makeContextData(
   }: UpgradeComponentConstructor,
   el: UpgradeComponent,
 ) {
-  const data: ProxyRecord = {...funcs}
+  const data: DataRecord = {...funcs}
 
   // From property definition.
   ObjectEntriesEach(propDefs, ([k, def]) => {
@@ -196,7 +196,7 @@ type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {
   [ContextIndex]: Context
-  [DataIndex]: ProxyRecord
+  [DataIndex]: DataRecord
   $computed: () => any
   $effect: () => any
   $effectScope: () => any

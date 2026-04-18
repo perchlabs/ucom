@@ -17,7 +17,7 @@ export function createDirectiveDefinition(full: string, expr: string): Directive
   if (match) {
     let [, key, ref, mods = ''] = match
 
-    ref = ref.charAt(0) === ':' ? ref.substring(1) : ref
+    ref = ref?.charAt(0) === ':' ? ref.substring(1) : ref
 
     const modList = mods
       .split('.')

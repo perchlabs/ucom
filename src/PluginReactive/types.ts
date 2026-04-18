@@ -1,8 +1,6 @@
 import type { ComponentManager } from '../types.ts'
-import type { signal} from './alien-signals'
 
-export type Signal = ReturnType<typeof signal>
-export type ProxyRecord = Record<string, any>
+export type DataRecord = Record<string, any>
 export type ComputedFunction = () => any
 
 export interface Context {
@@ -16,11 +14,11 @@ export interface Context {
 
   teardownCallback?(): void
   mount(root: ContextableNode, anchor: Node): void
-  scope(el: Element, data?: ProxyRecord): Context
+  scope(el: Element, data?: DataRecord): Context
   remove(): void
   teardown(): void
 
-  data: ProxyRecord
+  data: DataRecord
   var: StoreAdder
   calc: StoreAdder
   sync: StoreAdder
@@ -40,5 +38,5 @@ export type DirectiveDef = {
   mods: Set<string>
 }
 export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: Element)
-  => DirectiveHandlerReturn
-export type DirectiveHandlerReturn = Element | undefined | null | void
+  => WalkableReturnType
+export type WalkableReturnType = Element | undefined | null | void

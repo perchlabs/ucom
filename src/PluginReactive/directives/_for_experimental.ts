@@ -1,5 +1,5 @@
 import type {
-  ProxyRecord,
+  DataRecord,
   Context,
   DirectiveDef,
 } from '../types.ts'
@@ -72,7 +72,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
   ): [Context[], KeyToIndexMap, ContextToIndexMap] => {
     const keyToIndexMap: KeyToIndexMap = new Map
     const ctxToIndexMap: ContextToIndexMap = new WeakMap
-    const dataArr: ProxyRecord[] = []
+    const dataArr: DataRecord[] = []
 
     if (isArray(source)) {
       for (let i = 0; i < source.length; i++) {
@@ -128,7 +128,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
     index: number,
     objKey?: string
   ) => {
-    const data: ProxyRecord = {}
+    const data: DataRecord = {}
     if (destructureBindings) {
       destructureBindings.forEach(
         (b, i) => (data[b] = value[isArrayDestructure ? i : b])

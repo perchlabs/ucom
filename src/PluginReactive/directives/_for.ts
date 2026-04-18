@@ -1,7 +1,7 @@
 import type {
   Context,
   DirectiveDef,
-  ProxyRecord,
+  DataRecord,
 } from '../types.ts'
 import { isNumber, isObject, isArray } from '../../common.ts'
 import { evaluate } from '../expression.ts'
@@ -53,7 +53,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
   const createChildContexts = (
     source: unknown,
   ): Context[] => {
-    const dataArr: ProxyRecord[] = []
+    const dataArr: DataRecord[] = []
 
     if (isArray(source)) {
       for (let i = 0; i < source.length; i++) {
@@ -88,7 +88,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
     index: number,
     objKey?: string
   ) => {
-    const data: ProxyRecord = {}
+    const data: DataRecord = {}
     if (destructureBindings) {
       destructureBindings.forEach(
         (b, i) => (data[b] = value[isArrayDestructure ? i : b])
