@@ -20,7 +20,7 @@ const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 type KeyToIndexMap = Map<any, number>
 type ContextToIndexMap = WeakMap<Context, number>
 
-export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
+export const _for = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
   const {expr} = dir
 
   const inMatch = expr.match(forAliasRE)

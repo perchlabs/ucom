@@ -12,7 +12,7 @@ const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
-export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
+export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
   const {expr} = dir
 
   const next = nextWalkable(el)

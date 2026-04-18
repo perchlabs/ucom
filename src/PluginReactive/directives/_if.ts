@@ -7,11 +7,11 @@ import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
 
 type Branch = [
-  el: HTMLElement,
+  el: Element,
   expr?: string | null
 ]
 
-export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
+export const _if = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
   const {expr} = dir
 
   const [parent, anchor] = parentAndAnchor(dir, el)

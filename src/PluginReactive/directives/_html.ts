@@ -4,7 +4,7 @@ import type {
 } from '../types.ts'
 import { evaluate } from '../expression.ts'
 
-export function _html(ctx: Context, dir: DirectiveDef, el: HTMLElement): undefined {
+export function _html(ctx: Context, dir: DirectiveDef, el: Element): undefined {
   const {expr} = dir
 
   // Create an effect that automatically re-runs when signals change

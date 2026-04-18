@@ -11,7 +11,7 @@ import {
 import { isObject } from '../../common.ts'
 import { evaluate } from '../expression.ts'
 
-export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
+export function _data(ctx: Context, dir: DirectiveDef, _el: Element) {
   const {
     ref,
     expr,

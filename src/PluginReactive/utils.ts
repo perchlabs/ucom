@@ -26,7 +26,7 @@ export function nextWalkable(el: Element): HTMLElement | null {
 
 export function parentAndAnchor(
   dir: DirectiveDef, 
-  el: HTMLElement,
+  el: Element,
   anchorText: string = '',
 ): [ContextableNode | undefined, Comment] {
   const parent = getParent(el)

@@ -16,7 +16,7 @@ export interface Context {
 
   teardownCallback?(): void
   mount(root: ContextableNode, anchor: Node): void
-  scope(el: HTMLElement, data?: ProxyRecord): Context
+  scope(el: Element, data?: ProxyRecord): Context
   remove(): void
   teardown(): void
 
@@ -27,7 +27,9 @@ export interface Context {
   save: StoreAdder
 }
 export type StoreAdder = (key: string, val: any) => void
-export type ContextableNode = DocumentFragment | HTMLElement
+
+// ContextableNode should use Element so that SVGElement is considered.
+export type ContextableNode = DocumentFragment | Element
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export type DirectiveDef = {
@@ -35,9 +37,8 @@ export type DirectiveDef = {
   key: string
   expr: string
   ref?: string
-  // mod?: string
   mods: Set<string>
 }
-export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: HTMLElement)
+export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: Element)
   => DirectiveHandlerReturn
-export type DirectiveHandlerReturn = HTMLElement | undefined | null | void
+export type DirectiveHandlerReturn = Element | undefined | null | void

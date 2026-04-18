@@ -11,7 +11,7 @@ import {
 } from '../../common.ts'
 import { evaluate } from '../expression.ts'
 
-export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
+export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
   const {
     ref: attrName,
     expr,
@@ -21,12 +21,12 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
 
   // Special handling for 'class' attribute
   if (attrName === 'class') {
-    return bindClass(ctx, el, expr)
+    return bindClass(ctx, el as HTMLElement, expr)
   }
 
   // Special handling for 'style' attribute
   if (attrName === 'style') {
-    return bindStyle(ctx, el, expr)
+    return bindStyle(ctx, el as HTMLElement, expr)
   }
 
   // General attribute binding
@@ -57,7 +57,7 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
   })
 }
 
-export function bindClass(ctx: Context, el: Element, expr: string): undefined {
+export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefined {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
 

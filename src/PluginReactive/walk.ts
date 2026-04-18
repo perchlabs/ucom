@@ -23,7 +23,7 @@ import { _attribute } from './directives/_attribute.ts'
 import { _cssprop } from './directives/_cssprop.ts'
 import { _ref } from './directives/_ref.ts'
 
-export function walk(ctx: Context, el: HTMLElement): Element | null | void {
+export function walk(ctx: Context, el: Element): Element | null | void {
   // Skip text nodes, comments, etc - only process element nodes
   if (el.nodeType !== 1) return
 

@@ -88,7 +88,7 @@ export function createContext(
       return proxy
     },
 
-    scope(ptr: HTMLElement, dataNew: ProxyRecord = {}) {
+    scope(ptr: Element, dataNew: ProxyRecord = {}) {
       const scoped = createContext(
         man,
         customEl,

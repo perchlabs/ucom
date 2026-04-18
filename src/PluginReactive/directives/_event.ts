@@ -5,7 +5,7 @@ import type {
 } from '../types.ts'
 import { execute } from '../expression.ts'
 
-export function _event(ctx: Context, dir: DirectiveDef, el: Element, ): DirectiveHandlerReturn {
+export function _event(ctx: Context, dir: DirectiveDef, el: Element): DirectiveHandlerReturn {
   const {
     ref: eventName,
     expr,
