@@ -1,18 +1,18 @@
 import type {
   Context,
   DirectiveDef,
-  DirectiveHandlerReturn,
 } from '../types.ts'
 import {
   isObject,
   isString,
   ArrayFrom,
   ObjectEntriesEach,
+  kebabize,
 } from '../../common.ts'
 import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
-export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement): DirectiveHandlerReturn {
+export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
   const {
     ref: attrName,
     expr,
@@ -109,14 +109,12 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
       if (isString(value)) {
         // String: "color: red; font-size: 14px"
         el.style.cssText = `${originalStyle}; ${value}`
-      }
-      else if (isObject(value)) {
+      } else if (isObject(value)) {
         // Object: { color: 'red', fontSize: '14px' }
         ObjectEntriesEach(value, ([prop, val]) => {
           if (val != null) {
             // Convert camelCase to kebab-case (fontSize -> font-size)
-            const cssProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase()
-            el.style.setProperty(cssProp, String(val))
+            el.style.setProperty(kebabize(prop), `${val}`)
           }
         })
       }

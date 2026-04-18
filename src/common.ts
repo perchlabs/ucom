@@ -99,3 +99,7 @@ export const getTopLevelChildren = <T extends HTMLElement>(
 ) => {
   return ArrayFrom(container.children).filter(el => tags.includes(el.tagName)) as T[]
 }
+
+export const kebabize = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
+
+export const kebabToCamel = (v: string) => v.replace(/-./g, m => m.toUpperCase()[1])

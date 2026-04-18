@@ -20,6 +20,7 @@ import { _text } from './directives/_text.ts'
 import { _html } from './directives/_html.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
+import { _cssprop } from './directives/_cssprop.ts'
 import { _ref } from './directives/_ref.ts'
 
 export function walk(ctx: Context, el: HTMLElement): Element | null | void {
@@ -63,11 +64,12 @@ const ctrlDirs: [string, DirectiveHandler][] = [
   ['u-show', _show],
 ]
 
-const reDir = /^u-|%|@|:/
+const reDir = /^u-|%|@|:|--/
 const dirMap: Record<string, DirectiveHandler> = {
   'u-ref': _ref,
   'u-html': _html,
   '%': _text,
   ':': _attribute,
   '@': _event,
+  '--': _cssprop,
 }

@@ -9,7 +9,7 @@
   SLOT GAME <meta %="`${rows} x ${cols}`">
 </div>
 
-<main :style="{'--rows': rows, '--cols': cols}">
+<main --rows --cols>
   <template #each="i in rows">
     <section #each="j in cols">
       <meta $name="`${i}:${j}`">

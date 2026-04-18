@@ -7,8 +7,8 @@ import {
 } from '../context.ts'
 
 export function _ref(ctx: Context, dir: DirectiveDef, el: HTMLElement): undefined {
-  const {mod, expr} = dir
+  const {mods, expr} = dir
 
-  const refs = mod === 'global' ? globalRefs : ctx.refs
+  const refs = mods.has('global') ? globalRefs : ctx.refs
   refs[expr] = new WeakRef(el)
 }

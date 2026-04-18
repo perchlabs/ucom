@@ -3,26 +3,32 @@ import type {
 } from './types.ts'
 import { attributeEntries, pullAttr } from '../common.ts'
 
-export const getDirectives = (el: Element, reDir: RegExp) =>
+export const getDirectives = (el: Element, reFilter: RegExp) =>
   attributeEntries(el).
-  filter(([k]) => reDir.test(k)).
-  map(item => createDirectiveDefinition(...item))
+  filter(([k]) => reFilter.test(k)).
+  map(item => createDirectiveDefinition(...item)).
+  filter(v => !!v)
 
-export function createDirectiveDefinition(full: string, val: string): DirectiveDef {
-  if (full.startsWith('u-')) {
-    const [key, keyRight] = full.split(':')
-    const [ref, mod] = keyRight?.split('.') ?? []
-    return {full, key, ref, expr: val, mod}
-  } else {
-    const [key] = full
-    const [ref, mod] = full.substring(1).split('.')
+export const reDirDef = /^(u-[a-z]+|[^a-z]{1,2})(:?[a-z0-9]+[a-z0-9\-]*)?(\..+)*$/
+
+export function createDirectiveDefinition(full: string, expr: string): DirectiveDef | undefined {
+  const match = full.match(reDirDef)
+
+  if (match) {
+    let [, key, ref = '', mods = ''] = match
+
+    ref = ref.charAt(0) === ':' ? ref.substring(1) : ref
+
+    const modList = mods
+      .split('.')
+      .filter(v => !!v)
 
     return {
       full,
       key,
       ref,
-      mod,
-      expr: val,
+      expr,
+      mods: new Set<string>(modList),
     }
   }
 }

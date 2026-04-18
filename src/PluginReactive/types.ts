@@ -33,7 +33,8 @@ export type DirectiveDef = {
   key: string
   expr: string
   ref?: string
-  mod?: string
+  // mod?: string
+  mods: Set<string>
 }
 export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: HTMLElement)
   => DirectiveHandlerReturn

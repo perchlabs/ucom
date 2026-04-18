@@ -16,8 +16,10 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
   const {
     ref,
     expr,
-    mod = STORE_MOD_VAR,
+    mods,
   } = dir
+
+  const [mod = STORE_MOD_VAR] = mods
 
   // Create an effect that automatically re-runs when signals change
   const dispose = effect(() => {
