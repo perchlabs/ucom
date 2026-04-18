@@ -228,14 +228,15 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 - `u-html`
 - `u-show`
 - `u-ref`
-- `@` (handler)
-- `%` (text)
-- `:` (bind)
+- `@` handler
+- `%` text
+- `:` bind (supports :class and :style)
+- `--` CSS custom property shorthand
 
 `meta` void element specific options.
 
-- `$` (data)
-- `%` (text)
+- `$` data
+- `%` text
 
 ```html
 <template u-com>
