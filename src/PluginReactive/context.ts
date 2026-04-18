@@ -158,6 +158,10 @@ export function createContext(
       }
     },
 
+    effect(fn: () => void) {
+      ctx.cleanup.push(createEffect(fn))
+    },
+
     teardown() {
       children.forEach(child => child.teardown())
       ctx.remove()
@@ -193,8 +197,7 @@ export function createContext(
   
           const [,signal] = persistMap[keyId] = simpleItem(key, getItem() ?? value)
           if (signal) {
-            const setItem = () => localStorage.setItem(keyId, JSON.stringify(signal()))
-            ctx.cleanup.push(createEffect(() => setItem()))
+            ctx.effect(() => localStorage.setItem(keyId, JSON.stringify(signal())))
           }
         }
       }

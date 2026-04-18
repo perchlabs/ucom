@@ -3,7 +3,6 @@ import type {
   DirectiveDef,
 } from '../types.ts'
 import { evaluate } from '../expression.ts'
-import { effect } from '../alien-signals'
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
 
@@ -53,7 +52,7 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
     }
   }
 
-  const dispose = effect(() => {
+  ctxRoot.effect(() => {
     for (let i = 0; i < branches.length; i++) {
       const [el, expr] = branches[i]
       if (!expr || evaluate(expr, ctxRoot)) {
@@ -72,8 +71,6 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
     activeBranchIndex = -1
     removeActiveContext()
   })
-
-  ctxRoot.cleanup.push(dispose)
 
   return next
 }

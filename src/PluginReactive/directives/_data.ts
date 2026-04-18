@@ -9,7 +9,6 @@ import {
   STORE_MOD_SAVE,
 } from '../../constants.ts'
 import { isObject } from '../../common.ts'
-import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
@@ -22,7 +21,7 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
   const [mod = STORE_MOD_VAR] = mods
 
   // Create an effect that automatically re-runs when signals change
-  const dispose = effect(() => {
+  ctx.effect(() => {
     try {
       const v = evaluate(expr, ctx) ?? {}
 
@@ -39,9 +38,6 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: HTMLElement) {
       console.error(`[$${ref}] `, e)
     }
   })
-
-  // Track effect disposal
-  ctx.cleanup.push(dispose)
 
   function addItem(ctx: Context, ref: string, v: any) {
     switch (mod) {

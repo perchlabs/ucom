@@ -5,7 +5,6 @@ import type {
 import {
   kebabToCamel,
 } from '../../common.ts'
-import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function _cssprop(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
@@ -19,7 +18,7 @@ export function _cssprop(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
   }
 
   const exprReal = expr ? expr : kebabToCamel(cssVarName)
-  const dispose = effect(() => {
+  ctx.effect(() => {
     try {
       const value = evaluate(exprReal, ctx)
       el.style.setProperty(`--${cssVarName}`, value)
@@ -27,7 +26,4 @@ export function _cssprop(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
       console.error(`[--${cssVarName}] `, e)
     }
   })
-
-  // Track effect disposal
-  ctx.cleanup.push(dispose)
 }

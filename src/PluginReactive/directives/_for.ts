@@ -4,7 +4,6 @@ import type {
   ProxyRecord,
 } from '../types.ts'
 import { isNumber, isObject, isArray } from '../../common.ts'
-import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 import { parentAndAnchor, getParent, nextWalkable } from '../utils.ts'
 
@@ -118,7 +117,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
   }
 
   // Create effect that re-renders whenever array changes
-  const dispose = effect(() => {
+  ctxRoot.effect(() => {
     try {
       cleanSaved()
       parent = getParent(anchor)!
@@ -132,9 +131,6 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) {
       console.error('[#each] ', e)
     }
   })
-
-  // Track effect disposal
-  ctxRoot.cleanup.push(dispose, cleanSaved)
 
   return next
 }

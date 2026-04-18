@@ -12,6 +12,8 @@ export interface Context {
   refs: RefRecord
   cleanup: (() => void)[]
 
+  effect: (fn: () => void) => void
+
   teardownCallback?(): void
   mount(root: ContextableNode, anchor: Node): void
   scope(el: HTMLElement, data?: ProxyRecord): Context

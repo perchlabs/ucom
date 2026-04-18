@@ -9,7 +9,6 @@ import {
   ObjectEntriesEach,
   kebabize,
 } from '../../common.ts'
-import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
@@ -32,7 +31,7 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
 
   // General attribute binding
   const exprReal = expr ? expr : attrName
-  const dispose = effect(() => {
+  ctx.effect(() => {
     try {
       const value = evaluate(exprReal, ctx)
 
@@ -56,16 +55,13 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: HTMLElement) {
       console.error(`[:${attrName}] `, e)
     }
   })
-
-  // Track effect disposal
-  ctx.cleanup.push(dispose)
 }
 
 export function bindClass(ctx: Context, el: Element, expr: string): undefined {
   // Store original classes from HTML
   const originalClasses = el.className.split(' ').filter(c => c)
 
-  const dispose = effect(() => {
+  ctx.effect(() => {
     try {
       const value = evaluate(expr, ctx)
       
@@ -90,16 +86,13 @@ export function bindClass(ctx: Context, el: Element, expr: string): undefined {
       console.error('[:class] ', e)
     }
   })
-
-  // Track effect disposal
-  ctx.cleanup.push(dispose)
 }
 
 function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''
 
-  const dispose = effect(() => {
+  ctx.effect(() => {
     try {
       const value = evaluate(expr, ctx)
 
@@ -122,7 +115,4 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
       console.error('[:style] ', e)
     }
   })
-
-  // Track effect disposal
-  ctx.cleanup.push(dispose)
 }

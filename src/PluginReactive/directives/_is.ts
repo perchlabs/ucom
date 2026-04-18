@@ -3,7 +3,6 @@ import type {
   DirectiveDef,
 } from '../types.ts'
 import { isValidComponentPath } from '../../common.ts'
-import { effect } from '../alien-signals'
 import { makeElementAs, nextWalkable, parentAndAnchor } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
@@ -36,7 +35,7 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
   let tagName = ''
   let tag: HTMLElement | undefined
 
-  const dispose = effect(() => {
+  ctx.effect(() => {
     if (tag) {
       parent.insertBefore(anchor, tag)
       tag.remove()
@@ -70,8 +69,6 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
 
     walk(ctx, tag)
   })
-
-  ctx.cleanup.push(dispose)
 
   return next
 }

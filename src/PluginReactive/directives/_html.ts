@@ -2,14 +2,13 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
-import { effect } from '../alien-signals'
 import { evaluate } from '../expression.ts'
 
 export function _html(ctx: Context, dir: DirectiveDef, el: HTMLElement): undefined {
   const {expr} = dir
 
   // Create an effect that automatically re-runs when signals change
-  const dispose = effect(() => {
+  ctx.effect(() => {
     try {
       // Evaluate the expression (e.g., "count" or "firstName + ' ' + lastName")
       el.innerHTML = evaluate(expr, ctx) ?? ''
@@ -17,7 +16,4 @@ export function _html(ctx: Context, dir: DirectiveDef, el: HTMLElement): undefin
       console.error('[u-html] ', e)
     }
   })
-
-  // Track effect disposal
-  ctx.cleanup.push(dispose)
 }

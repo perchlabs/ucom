@@ -10,7 +10,6 @@ import {
   pullAttr,
 } from '../../common.ts'
 import { evaluate } from '../expression.ts'
-import { effect } from '../alien-signals'
 import { nextWalkable, getParent, parentAndAnchor } from '../utils.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
@@ -153,7 +152,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: HTMLElement) => {
   let keyToIndexMap: KeyToIndexMap
   let ctxToIndexMap: ContextToIndexMap
 
-  const dispose = effect(() => {
+  ctxRoot.effect(() => {
 // console.log('sourceExp :', sourceExp)
     const source = evaluate(sourceExp, ctxRoot)
 
@@ -239,8 +238,6 @@ console.log('update store: ')
       ctxs = nextCxts
     }
   })
-
-  ctxRoot.cleanup.push(dispose)
 
   return next
 }
