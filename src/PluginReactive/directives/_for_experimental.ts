@@ -92,7 +92,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
 // dataArr.forEach(data => console.log('createChildContexts data index: ', {...data}))
 
     const ctxs: Context[] = dataArr.map((data, index) => {
-      const key = keyExp ? evaluate(keyExp, data) : index
+      const key = keyExp ? evaluate(keyExp, null, data) : index
       const oldIndex = prevKeyToIndexMap?.get(key)
 
       let ctx: Context
