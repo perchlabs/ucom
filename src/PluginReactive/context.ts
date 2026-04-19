@@ -183,23 +183,23 @@ export function createContext(
 
     [STORE_MOD_SAVE](key: string, value: any) {
       const keyId = `${storeName}-${key}`
-      if (!(keyId in syncMap)) {
-        if (isFunction(value)) {
-          syncMap[keyId] = [key, value, true]
-        } else {
-          const getItem = () => {
-            const json = localStorage.getItem(keyId)
-            return json ? JSON.parse(json) : undefined
-          }
-  
-          const [,signal] = syncMap[keyId] = simpleItem(key, getItem() ?? value)
-          if (signal) {
-            ctx.effect(() => localStorage.setItem(keyId, JSON.stringify(signal())))
-          }
-        }
-      }
-
+      syncMap[keyId] ??= persistItem(key, value)
       addItem(syncMap[keyId])
+
+      function persistItem(key: string, value: any): StoreItem {
+        if (isFunction(value)) {
+          return [key, value, true]
+        }
+
+        const json = localStorage.getItem(keyId)
+        const signal = createSignal(json ? JSON.parse(json) : value)
+
+        ctx.effect(() =>
+          localStorage.setItem(keyId, JSON.stringify(signal()))
+        )
+
+        return [key, signal]
+      }
     },
   }
 
@@ -253,3 +253,4 @@ function simpleItem(key: string, value: any): StoreItem {
     isFunc,
   ]
 }
+
