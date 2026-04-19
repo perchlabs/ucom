@@ -35,7 +35,7 @@ async function loadSheets(): Promise<CSSStyleSheet[]> {
           return resolve(el.sheet)
         }
         el.addEventListener('load', () => resolve(el.sheet), false)
-        el.addEventListener('error', () => reject(new Error('theme failed loading')), false)
+        el.addEventListener('error', () => reject(new Error('theme loading')), false)
       })
     })
     .filter(v => Boolean(v))
