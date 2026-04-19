@@ -9,7 +9,7 @@ import {
   queryAll,
 } from './common.ts'
 
-export default class implements Plugin {
+export default {
   async define({Raw, exports}: PluginDefineParams): Promise<void> {
     const rawProto = Raw.prototype
     for (const k in exports) {
@@ -17,12 +17,12 @@ export default class implements Plugin {
       if (k in rawProto) { continue }
       rawProto[k] = exports[k]
     }
-  }
+  },
 
   construct({el, shadow}: PluginConstructParams): void {
     ObjectAssign(el, {
       $querySelector: (v: string) => shadow.querySelector(v),
       $querySelectorAll: (v: string) => queryAll(shadow, v),
     })
-  }
-}
+  },
+} as Plugin

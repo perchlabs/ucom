@@ -12,28 +12,17 @@ import {
   ATTR_CORE,
 } from './constants.ts'
 
-export default class implements Plugin {
-  #sheetsLoader?: Promise<CSSStyleSheet[]>
-  #sheets: CSSStyleSheet[] = []
+let sheets: CSSStyleSheet[]
 
-  async init() {
-    // Preload sheets
-    this.#getSheetsLoader()
-  }
-
+export default {
   async start(_params: PluginStartParams) {
-    this.#sheets.push(...await this.#getSheetsLoader())
-  }
+    sheets = await loadSheets()
+  },
 
   construct({shadow}: PluginConstructParams): void {
-    shadow.adoptedStyleSheets.push(...this.#sheets)
-  }
-
-  #getSheetsLoader(): Promise<CSSStyleSheet[]> {
-    this.#sheetsLoader ??= loadSheets()
-    return this.#sheetsLoader
-  }
-}
+    shadow.adoptedStyleSheets.push(...sheets)
+  },
+} as Plugin
 
 // TODO: Revisit this when Safari and Firefox support CSS imports "with {type: 'css'}".
 // Note: Constructed stylesheet asynchronous replace method no longer handles CSS @import rules as 2025.
@@ -54,7 +43,7 @@ async function loadSheets(): Promise<CSSStyleSheet[]> {
   return (await Promise.allSettled(loading))
     .filter(v => v?.status === 'fulfilled')
     .map(v => v.value as CSSStyleSheet)
-    .map((domSheet: CSSStyleSheet) => {
+    .map((domSheet) => {
       // Shadowdom can only use constructable style sheets.
       const sheet = new CSSStyleSheet()
       sheet.replaceSync(ArrayFrom(domSheet.cssRules).map(v => v.cssText).join(' '))

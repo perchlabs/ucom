@@ -1,6 +1,6 @@
 import type {
   PluginManager,
-  PluginConstructor,
+  Plugin,
   PluginStartParams,
   PluginParseParams,
   PluginDefineParams,
@@ -30,9 +30,7 @@ import {
   // FORM_STATE_RESTORE,
 } from './constants.ts'
 
-export default (pluginClasses: PluginConstructor[]): PluginManager  => {
-  const plugins = pluginClasses.map(v => new v)
-
+export default (plugins: Plugin[]): PluginManager  => {
   const provide = <T extends PluginCallbackType>(
     key: PluginCallbackKey,
     builderParams: PluginCallbackBuilderParams,

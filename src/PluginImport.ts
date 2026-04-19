@@ -20,16 +20,16 @@ import {
 
 // const ATTR_SRC = 'u-src'
 
-export default class implements Plugin {
+export default {
   async parse({man, frag}: PluginParseParams) {
     await importElements(man, ArrayFrom(frag.children))
-  }
+  },
 
   async define({man, Com}: PluginDefineParams) {
     ObjectAssign(Com.prototype, {
       $import: man.import
     })
-  }
+  },
 
   construct({man, el, shadow}: PluginConstructParams): void {
     (el as UpgradeComponent).$importSlot = async (ref: unknown): Promise<ImportComponentData[]> => {
@@ -44,8 +44,8 @@ export default class implements Plugin {
 
     // processUndefinedElements(man, queryForUndefined(man, shadow))
     observeMutations(man, shadow)
-  }
-}
+  },
+} as Plugin
 
 async function processUndefinedElements(man: ComponentManager, undefArr: Element[]) {
   undefArr.forEach(el => {

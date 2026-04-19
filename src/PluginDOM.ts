@@ -13,17 +13,17 @@ import {
   queryAll,
 } from './common.ts'
 
-export default class implements Plugin {
+export default {
   async start({man}: PluginStartParams) {
     const root = document
     await processTemplates(man, queryForTemplates(root))
     observeMutations(man, root)
-  }
+  },
 
   async parse({man, frag}: PluginParseParams) {
     await processTemplates(man, queryForTemplates(frag))
-  }
-}
+  },
+} as Plugin
 
 const processTemplates = async (
   man: ComponentManager,

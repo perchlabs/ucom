@@ -4,7 +4,7 @@ import type {
 } from './types.ts'
 import { queryAll } from './common.ts'
 
-export default class implements Plugin {
+export default {
   async parse({
     frag,
     def: {resolved},
@@ -28,5 +28,5 @@ export default class implements Plugin {
         }
       )
     }
-  }
-}
+  },
+} as Plugin

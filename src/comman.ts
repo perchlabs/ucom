@@ -1,7 +1,7 @@
 import type {
   ComponentManager,
   ComponentIdentity,
-  PluginConstructor,
+  Plugin,
 } from './types.ts'
 import {
   isValidComponentName as isName,
@@ -18,8 +18,8 @@ import plugMan from './plugman.ts'
 
 const AUTO_NAME_PREFIX = 'ucom'
 
-export default (pluginClasses: PluginConstructor[]) => {
-  const plugins = plugMan(pluginClasses)
+export default (pluginsRaw: Plugin[]) => {
+  const plugins = plugMan(pluginsRaw)
 
   const idents: Record<string, ReturnType<typeof defineComponent>> = {}
   const lazy: Record<string, ComponentIdentity> = {}

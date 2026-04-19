@@ -1,17 +1,17 @@
 import comman from './comman.ts'
-import PluginCore from './PluginCore.ts'
-import PluginDOM from './PluginDOM.ts'
-import PluginRelative from './PluginRelative.ts'
-import PluginImport from './PluginImport.ts'
-import PluginStyle from './PluginStyle.ts'
-import PluginReactive from './PluginReactive'
+import pluginCore from './PluginCore.ts'
+import pluginDOM from './PluginDOM.ts'
+import pluginRelative from './PluginRelative.ts'
+import pluginImport from './PluginImport.ts'
+import pluginStyle from './PluginStyle.ts'
+import pluginReactive from './PluginReactive'
 
 const ucom = comman([
-  PluginCore,
-  PluginDOM,
-  PluginRelative,
-  PluginImport,
-  PluginStyle,
-  PluginReactive,
+  pluginCore,
+  pluginDOM,
+  pluginRelative,
+  pluginImport,
+  pluginStyle,
+  pluginReactive,
 ])
 ucom.start()

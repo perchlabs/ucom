@@ -34,7 +34,7 @@ const syncMap: Record<string, any> = {}
 
 // const PROP_REFLECT_DEFAULT = true
 
-export default class implements Plugin {
+export default {
   async define({Com, exports}: PluginDefineParams) {
     const Upgrade = Com as UpgradeComponentConstructor
     const proto = Upgrade.prototype
@@ -78,7 +78,7 @@ export default class implements Plugin {
       $reactive: reactive,
       $nextTick: nextTick,
     })
-  }
+  },
 
   [ATTRIBUTE_CHANGED]({Com, el: elReal}: PluginCallbackBuilderParams): AttributeChangedCallback {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
@@ -96,7 +96,7 @@ export default class implements Plugin {
         data[k] = val
       }
     }
-  }
+  },
 
   [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
     const el = elReal as UpgradeComponent
@@ -106,13 +106,13 @@ export default class implements Plugin {
         connectData(Com as UpgradeComponentConstructor, Raw, el, shadow)
       }
     }
-  }
+  },
 
   [DISCONNECTED]({el: elReal}: PluginCallbackBuilderParams): DisconnectedCallback {
     const el = elReal as UpgradeComponent
     return () => el[CleanupIndex].forEach(stop)
-  }
-}
+  },
+} as Plugin
 
 function makePropDefs(propsMaker?: PropsMaker): PropDefs {
   const defs: PropDefs = {}

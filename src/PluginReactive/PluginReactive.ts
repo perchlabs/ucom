@@ -53,29 +53,8 @@ const ContextIndex = Symbol()
 const DataIndex = '$data'
 
 // const PROP_REFLECT_DEFAULT = true
-const reParamKey = /^\$([a-z]+)$/
 
-function parseParams(funcs: FunctionRecord, params: Record<string, string>[]) {
-  const propDefs: PropDefs = {}
-
-  params.forEach(attrMap => {
-    const castVal = pullKey(attrMap, 'cast')
-    const cast = castVal
-      ? evaluate(castVal, null, funcs) as (value: string) => any
-      : undefined
-
-    paramsAttrEach(attrMap, reParamKey, (k, expr) => {
-      propDefs[k] = {
-        cast,
-        default: evaluate(expr, null, funcs),
-      }
-    })
-  })
-
-  return propDefs
-}
-
-export default class implements Plugin {
+export default {
   async define({Com, Raw, params}: PluginDefineParams) {
     const Upgrade = Com as UpgradeComponentConstructor
     const proto = Upgrade.prototype
@@ -128,7 +107,7 @@ export default class implements Plugin {
       $signal,
       $trigger,
     })
-  }
+  },
 
   [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
@@ -145,7 +124,7 @@ export default class implements Plugin {
         data[k] = val
       }
     }
-  }
+  },
 
   [CONNECTED](params: PluginCallbackBuilderParams) {
     const {Com, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
@@ -159,11 +138,33 @@ export default class implements Plugin {
 
       walkChildren(ctx)
     }
-  }
+  },
 
   [DISCONNECTED]({el}: PluginCallbackBuilderParams) {
     return () => (el as UpgradeComponent)[ContextIndex].teardown()
-  }
+  },
+} as Plugin
+
+const reParamKey = /^\$([a-z]+)$/
+
+function parseParams(funcs: FunctionRecord, params: Record<string, string>[]) {
+  const propDefs: PropDefs = {}
+
+  params.forEach(attrMap => {
+    const castVal = pullKey(attrMap, 'cast')
+    const cast = castVal
+      ? evaluate(castVal, null, funcs) as (value: string) => any
+      : undefined
+
+    paramsAttrEach(attrMap, reParamKey, (k, expr) => {
+      propDefs[k] = {
+        cast,
+        default: evaluate(expr, null, funcs),
+      }
+    })
+  })
+
+  return propDefs
 }
 
 function makeContextData(
