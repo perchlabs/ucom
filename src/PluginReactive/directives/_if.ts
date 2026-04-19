@@ -1,6 +1,7 @@
 import type {
   Context,
   DirectiveDef,
+  WalkableReturnType as WalkableType,
 } from '../types.ts'
 import { evaluate } from '../expression.ts'
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
@@ -23,7 +24,7 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
   const branches: Branch[] = [[el, expr]]
 
   // locate else branch
-  let elseEl: HTMLElement | null
+  let elseEl: WalkableType
   let elseExp: string | null
   while ((elseEl = nextWalkable(el))) {
     elseExp = null

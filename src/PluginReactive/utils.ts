@@ -1,10 +1,11 @@
 import type {
   ContextableNode,
   DirectiveDef,
+  WalkableReturnType,
 } from './types.ts'
 import { attributeEntries } from '../common.ts'
 
-export function getParent(el: Node): ContextableNode | undefined{
+export function getParent(el: Node): ContextableNode | undefined {
   const parent = el.parentElement
   if (parent) { 
     return parent
@@ -14,7 +15,7 @@ export function getParent(el: Node): ContextableNode | undefined{
   return root && root !== el ? root : undefined
 }
 
-export function nextWalkable(el: Element): HTMLElement | null {
+export function nextWalkable(el: Element): WalkableReturnType {
   return el.nextElementSibling as HTMLElement
 }
 

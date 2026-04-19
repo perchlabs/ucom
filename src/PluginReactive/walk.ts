@@ -24,9 +24,6 @@ import { _cssprop } from './directives/_cssprop.ts'
 import { _ref } from './directives/_ref.ts'
 
 export function walk(ctx: Context, el: Element): WalkableReturnType {
-  // Skip text nodes, comments, etc - only process element nodes
-  if (el.nodeType !== 1) return
-
   switch (el.tagName) {
     case 'META':
       return void_meta(ctx, el as HTMLMetaElement)
@@ -51,7 +48,7 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
 }
 
 export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable) {
-  let child = node.firstElementChild
+  let child: WalkableReturnType = node.firstElementChild
   while (child) {
     child = walk(ctx, child as HTMLElement) ?? nextWalkable(child)
   }

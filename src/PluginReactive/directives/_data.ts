@@ -18,6 +18,7 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: Element) {
     mods,
   } = dir
 
+  // take the first mod as the store data type.
   const [mod = STORE_MOD_VAR] = mods
 
   // Create an effect that automatically re-runs when signals change
