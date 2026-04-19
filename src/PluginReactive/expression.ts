@@ -12,9 +12,9 @@ export function evaluate(expr: string, ctxThis: Context | null, other: DataRecor
   )
 }
 
-export function execute(code: string, ctxThis: Context | null, other: DataRecord = {}) {
+export function execute(expr: string, ctxThis: Context | null, other: DataRecord = {}) {
   run(
-    `with($data) { ${code}; }`,
+    `with($data) { ${expr}; }`,
     ctxThis?.data ?? {},
     other,
   )

@@ -40,7 +40,7 @@ import {
 export function resolveImport(url: string): ComponentIdentity {
   const matches = reComponentPath.exec(url)
   if (!matches) {
-    throw Error(`Problem resolving '${url}'`)
+    throw Error(`resolving '${url}'`)
   }
 
   const [,name, postfix] = matches
@@ -77,7 +77,7 @@ export class ComponentFetchError extends Error {
   resolved: string
   reason: string
 
-  constructor(resolved: string, reason: string = 'Unspecified') {
+  constructor(resolved: string, reason: string) {
     super()
 
     this.resolved = resolved
@@ -90,9 +90,6 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
 
   // Copy the fragment so that the original version will be available for printing.
   const frag = cloneTemplateContent(tpl)
-  if (frag.querySelector('template[shadowrootmode]')) {
-    throw `Component '${name}' used template attribute 'shadowrootmode'. Declarative Shadow Dom (DSD) is not allowed.`
-  }
 
   await plugins.parse({man, def, frag})
 

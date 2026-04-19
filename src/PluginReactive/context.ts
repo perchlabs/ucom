@@ -178,9 +178,7 @@ export function createContext(
 
     [STORE_MOD_SYNC](key: string, value: any) {
       const keyId = `${storeName}-${key}`
-      if (!(keyId in syncMap)) {
-        syncMap[keyId] = simpleItem(key, value)
-      }
+      syncMap[keyId] ??= simpleItem(key, value)
       addItem(syncMap[keyId])
     },
 
