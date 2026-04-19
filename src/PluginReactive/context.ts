@@ -42,7 +42,6 @@ type StoreItem = [
 ]
 type StoreItemRecord = Record<string, StoreItem>
 
-const persistMap: StoreItemRecord = {}
 const syncMap: StoreItemRecord = {}
 
 export const globalRefs: RefRecord = {}
@@ -184,23 +183,23 @@ export function createContext(
 
     [STORE_MOD_SAVE](key: string, value: any) {
       const keyId = `${storeName}-${key}`
-      if (!(keyId in persistMap)) {
+      if (!(keyId in syncMap)) {
         if (isFunction(value)) {
-          persistMap[keyId] = [key, value, true]
+          syncMap[keyId] = [key, value, true]
         } else {
           const getItem = () => {
             const json = localStorage.getItem(keyId)
             return json ? JSON.parse(json) : undefined
           }
   
-          const [,signal] = persistMap[keyId] = simpleItem(key, getItem() ?? value)
+          const [,signal] = syncMap[keyId] = simpleItem(key, getItem() ?? value)
           if (signal) {
             ctx.effect(() => localStorage.setItem(keyId, JSON.stringify(signal())))
           }
         }
       }
 
-      addItem(persistMap[keyId])
+      addItem(syncMap[keyId])
     },
   }
 
