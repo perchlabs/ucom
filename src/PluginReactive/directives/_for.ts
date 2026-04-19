@@ -19,7 +19,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
 
   const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
-    console.warn(`[#each] invalid expression: ${expr}`)
+    console.warn(`[#each] expression: ${expr}`)
     return next
   }
 

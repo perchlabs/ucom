@@ -106,25 +106,24 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
   el.remove()
 
   const src = el.getAttribute('src')
-  if (!src) {
-    console.error("SOURCE import must have a 'src' attribute")
-    return
-  }
+  if (src) {
+    const ident = man.resolve(urlPrefix + src)
+    const {name, resolved} = ident
 
-  const ident = man.resolve(urlPrefix + src)
-  const {name, resolved} = ident
-
-  if (!man.has(name)) {
-    if (lazy || attrToggled(el, 'lazy')) {
-      man.lazy[name] = ident
-    } else {
-      man.import(resolved)
+    if (!man.has(name)) {
+      if (lazy || attrToggled(el, 'lazy')) {
+        man.lazy[name] = ident
+      } else {
+        man.import(resolved)
+      }
     }
-  }
 
-  return {
-    ident,
-    attributes: ObjectFromEntries(attributeEntries(el))
+    return {
+      ident,
+      attributes: ObjectFromEntries(attributeEntries(el))
+    }
+  } else {
+    console.error("SOURCE must have a 'src'")
   }
 }
 

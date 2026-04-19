@@ -44,14 +44,13 @@ export default (pluginsRaw: Plugin[]) => {
 
     has(name: string): boolean {
       name = name.toLowerCase()
-      return name in idents || customElements.get(name) !== undefined
+      return name in idents || !!customElements.get(name)
     },
 
     // Define a component by name.  If name is null then create a name based upon the hash of the template contents.
     async define(name: string | null, tpl: HTMLTemplateElement) {
       name = name ? name.toLowerCase() : `${AUTO_NAME_PREFIX}-${hashContent(tpl)}`
-      idents[name] ??= defineActual(name, '', tpl )
-      return idents[name]
+      return idents[name] ??= defineActual(name, '', tpl )
     },
 
     // Import a component.  Providing the optional template argument prevents a fetch operation.  This is useful
@@ -64,7 +63,7 @@ export default (pluginsRaw: Plugin[]) => {
         return idents[name] ??= defineActual(name, resolved, tpl)
       } catch (e) {
         if (e instanceof ComponentFetchError) {
-          console.error(`Fetching component '${e.resolved}'. Hint: ${e.reason}.`)
+          console.error(`Fetching component '${e.resolved}', ${e.reason}`)
         }
       }
     },
