@@ -1,10 +1,11 @@
+
 export interface ComponentIdentity {
   readonly name: string,
-  readonly resolved: string,
+  readonly path: string,
 }
 export type ComponentDef = {
   readonly name: string,
-  readonly resolved: string,
+  readonly path: string,
   readonly tpl: HTMLTemplateElement,
 }
 
@@ -12,7 +13,7 @@ export interface PluginConstructor {
   new (...args: any[]): Plugin
 }
 
-type PluginStart = (params: PluginStartParams) => Promise<void>
+type PluginStart = (man: ComponentManager) => Promise<void>
 type PluginParse = (params: PluginParseParams) => Promise<void>
 type PluginDefine = (params: PluginDefineParams) => Promise<void>
 type PluginConstruct = (params: PluginConstructParams) => void
@@ -104,15 +105,14 @@ export interface ComponentManager {
   resolve: ComponentResolver,
   has: (name: string) => boolean
   isName: (name: string, toLowerCase?: boolean) => boolean
-  isPath: (path: string) => boolean
 }
 export type ComponentDefiner = (name: string | null, tpl: HTMLTemplateElement) => Promise<ComponentDef | undefined>
 export type ComponentImporter = (url: string, tpl?: HTMLTemplateElement) => Promise<ComponentDef | undefined> 
 export type ComponentResolver = (url: string) => ComponentIdentity
 
-export type PluginStartParams = {
-  man: ComponentManager,
-}
+// export type PluginStartParams = {
+//   man: ComponentManager,
+// }
 export type PluginParseParams = {
   man: ComponentManager,
   def: ComponentDef

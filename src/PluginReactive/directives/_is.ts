@@ -45,7 +45,7 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
     const ref = evaluate(expr, ctx)
     if (isValidComponentPath(ref)) {
       try {
-        const {name, resolved} = man.resolve(ref)
+        const {name, path: resolved} = man.resolve(ref)
         tagNameNew = name
         if (!man.has(tagNameNew)) {
           man.import(resolved)

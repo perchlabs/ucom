@@ -1,6 +1,5 @@
 import type {
   Plugin,
-  PluginStartParams,
   PluginParseParams,
   QueryableRoot,
   ComponentManager,
@@ -14,7 +13,7 @@ import {
 } from './common.ts'
 
 export default {
-  async start({man}: PluginStartParams) {
+  async start(man: ComponentManager) {
     const root = document
     await processTemplates(man, queryForTemplates(root))
     observeMutations(man, root)

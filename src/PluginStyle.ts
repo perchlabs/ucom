@@ -1,6 +1,6 @@
 import type {
   QueryableRoot,
-  PluginStartParams,
+  ComponentManager,
   PluginConstructParams,
   Plugin,
 } from './types.ts'
@@ -15,7 +15,7 @@ import {
 let sheets: CSSStyleSheet[]
 
 export default {
-  async start(_params: PluginStartParams) {
+  async start(_man: ComponentManager) {
     sheets = await loadSheets()
   },
 

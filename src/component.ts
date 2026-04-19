@@ -50,7 +50,7 @@ export function resolveImport(url: string): ComponentIdentity {
 
   return {
     name,
-    resolved: import.meta.resolve(url),
+    path: import.meta.resolve(url),
   }
 }
 

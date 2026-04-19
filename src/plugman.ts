@@ -1,7 +1,7 @@
 import type {
   PluginManager,
   Plugin,
-  PluginStartParams,
+  ComponentManager,
   PluginParseParams,
   PluginDefineParams,
   PluginConstructParams,
@@ -40,8 +40,8 @@ export default (plugins: Plugin[]): PluginManager  => {
     filter(v => !!v)
 
   return {
-    async start(params: PluginStartParams) {
-      await Promise.all(plugins.map(v => v.start?.(params)))
+    async start(man: ComponentManager) {
+      await Promise.all(plugins.map(v => v.start?.(man)))
     },
     async parse(params: PluginParseParams) {
       plugins.forEach(async p => await p.parse?.(params))

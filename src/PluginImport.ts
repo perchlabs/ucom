@@ -51,7 +51,7 @@ async function processUndefinedElements(man: ComponentManager, undefArr: Element
   undefArr.forEach(el => {
     const item = man.lazy[el.tagName.toLowerCase()]
     if (item) {
-      man.import(item.resolved)
+      man.import(item.path)
     }
   })
 }
@@ -108,7 +108,7 @@ function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlP
   const src = el.getAttribute('src')
   if (src) {
     const ident = man.resolve(urlPrefix + src)
-    const {name, resolved} = ident
+    const {name, path: resolved} = ident
 
     if (!man.has(name)) {
       if (lazy || attrToggled(el, 'lazy')) {

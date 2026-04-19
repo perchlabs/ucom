@@ -5,7 +5,6 @@ import type {
 } from './types.ts'
 import {
   isValidComponentName as isName,
-  isValidComponentPath as isPath,
 } from './common.ts'
 import {
   resolveImport as resolve,
@@ -26,20 +25,19 @@ export default (pluginsRaw: Plugin[]) => {
 
   const defineActual = (name: string, resolved: string, tpl: HTMLTemplateElement) => {
     delete lazy?.[name]
-    return defineComponent(man, plugins, {name, resolved, tpl})
+    return defineComponent(man, plugins, {name, path: resolved, tpl})
   }
 
   const man: ComponentManager = {
     lazy,
     resolve,
     isName,
-    isPath,
 
     async start() {
       if (document.readyState === 'loading') {
         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve))
       }
-      plugins.start({man})
+      plugins.start(man)
     },
 
     has(name: string): boolean {
@@ -57,7 +55,7 @@ export default (pluginsRaw: Plugin[]) => {
     // for inlining components on the server (with a plugin providing this functionality).  The URL is useful in
     // this case for allowing relative imports according to the public web path of the component.
     async import(url: string, tpl?: HTMLTemplateElement) {
-      const {name, resolved} = resolve(url)
+      const {name, path: resolved} = resolve(url)
       try {
         tpl ??= await fetchTemplate(resolved)
         return idents[name] ??= defineActual(name, resolved, tpl)

@@ -7,7 +7,7 @@ import { queryAll } from './common.ts'
 export default {
   async parse({
     frag,
-    def: {resolved},
+    def: {path: resolved},
   }: PluginParseParams) {
     for (const script of queryAll<HTMLScriptElement>(frag, 'script')) {
       script.text = script.text.replace(
