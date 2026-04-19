@@ -31,19 +31,19 @@ export default {
     })
   },
 
-  construct({man, el, shadow}: PluginConstructParams): void {
+  construct({man, el, root}: PluginConstructParams): void {
     (el as UpgradeComponent).$importSlot = async (ref: unknown): Promise<ImportComponentData[]> => {
       if (!(ref instanceof HTMLSlotElement)) {
         throw 'Import must be an HTMLSlotElement.'
       }
 
       const dataArr = importElements(man, ref.assignedElements())
-      processUndefinedElements(man, queryForUndefined(man, shadow))
+      processUndefinedElements(man, queryForUndefined(man, root))
       return dataArr
     }
 
-    // processUndefinedElements(man, queryForUndefined(man, shadow))
-    observeMutations(man, shadow)
+    // processUndefinedElements(man, queryForUndefined(man, root))
+    observeMutations(man, root)
   },
 } as Plugin
 

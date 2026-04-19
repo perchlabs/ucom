@@ -175,21 +175,21 @@ function createComponentConstructor(
     static [STATIC_FORM_ASSOCIATED] = Raw[STATIC_FORM_ASSOCIATED] ?? false
     static [STATIC_OBSERVED_ATTRIBUTES] = [...(Raw[STATIC_OBSERVED_ATTRIBUTES] ?? [])]
 
-    static get def() { return def }
+    static def = def
 
-    #shadow = this.attachShadow(shadowRootOpts)
-    #internals = webComponentOpts.internals ? this.attachInternals() : undefined
+    _root = this.attachShadow(shadowRootOpts)
+    _internals = webComponentOpts.internals ? this.attachInternals() : undefined
 
     constructor() {
       super()
 
-      this.#shadow.append(frag.cloneNode(true))
+      this._root.append(frag.cloneNode(true))
       plugins.construct({
         man,
         Com,
         Raw,
         el: this,
-        shadow: this.#shadow,
+        root: this._root,
       })
     }
 
@@ -200,10 +200,7 @@ function createComponentConstructor(
 
     async [CONNECTED]() {
       plugins[CONNECTED](this.#params)
-      await super[CONNECTED]?.({
-        shadow: this.#shadow,
-        internals: this.#internals,
-      })
+      await super[CONNECTED]?.()
     }
 
     async [DISCONNECTED]() {
@@ -237,7 +234,7 @@ function createComponentConstructor(
         Raw,
         man,
         el: this,
-        shadow: this.#shadow,
+        root: this._root,
       }
     }
   }

@@ -26,7 +26,7 @@ export type PluginCallbackBuilderParams = {
   Com: WebComponentConstructor,
   Raw: RawComponentConstructor,
   el: WebComponent,
-  shadow: ShadowRoot,
+  root: ShadowRoot,
   man: ComponentManager,
 }
 
@@ -139,14 +139,14 @@ export type PluginConstructParams = {
   Com: WebComponentConstructor
   Raw: RawComponentConstructor,
   el: WebComponent,
-  shadow: ShadowRoot,
+  root: ShadowRoot,
 }
 
 export type ModuleExports = Record<string, any>
 
 export interface RawComponent extends HTMLElement {
   attributeChangedCallback?(...args: Parameters<AttributeChangedCallback>): CustomElementCallbackReturn
-  connectedCallback?(params: {shadow: ShadowRoot, internals?: ElementInternals}): CustomElementCallbackReturn
+  connectedCallback?(): CustomElementCallbackReturn
   disconnectedCallback?(): CustomElementCallbackReturn
   formAssociatedCallback?(...args: Parameters<FormAssociatedCallback>): CustomElementCallbackReturn
   formDisabledCallback?(...args: Parameters<FormDisabledCallback>): CustomElementCallbackReturn
@@ -161,10 +161,11 @@ export interface RawComponentConstructor {
 }
 
 // Plugins which add to either WebComponent or its constructor should create an Upgrade interface for it.
-export interface WebComponent extends RawComponent {}
+export interface WebComponent extends RawComponent {
+}
 export interface WebComponentConstructor extends RawComponentConstructor {
   new (...args: any[]): WebComponent
-  get def(): ComponentDef
+  def: ComponentDef
   observedAttributes: string[]
 }
 

@@ -127,9 +127,9 @@ export default {
   },
 
   [CONNECTED](params: PluginCallbackBuilderParams) {
-    const {Com, el, shadow, man} = (params as UpgradedPluginCallbackBuilderParams)
+    const {Com, el, root, man} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
-      const ctx = createContext(man, el, shadow, makeContextData(Com, el))
+      const ctx = createContext(man, el, root, makeContextData(Com, el))
       const {data} = ctx
       ObjectAssign(el, {
         [ContextIndex]: ctx,
@@ -215,6 +215,6 @@ type UpgradedPluginCallbackBuilderParams = {
   Com: UpgradeComponentConstructor;
   Raw: RawComponentConstructor;
   el: UpgradeComponent;
-  shadow: ShadowRoot;
+  root: ShadowRoot;
   man: ComponentManager,
 }

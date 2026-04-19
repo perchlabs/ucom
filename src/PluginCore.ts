@@ -19,10 +19,10 @@ export default {
     }
   },
 
-  construct({el, shadow}: PluginConstructParams): void {
+  construct({el, root}: PluginConstructParams): void {
     ObjectAssign(el, {
-      $querySelector: (v: string) => shadow.querySelector(v),
-      $querySelectorAll: (v: string) => queryAll(shadow, v),
+      $querySelector: (v: string) => root.querySelector(v),
+      $querySelectorAll: (v: string) => queryAll(root, v),
     })
   },
 } as Plugin

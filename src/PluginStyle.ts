@@ -19,8 +19,8 @@ export default {
     sheets = await loadSheets()
   },
 
-  construct({shadow}: PluginConstructParams): void {
-    shadow.adoptedStyleSheets.push(...sheets)
+  construct({root}: PluginConstructParams): void {
+    root.adoptedStyleSheets.push(...sheets)
   },
 } as Plugin
 

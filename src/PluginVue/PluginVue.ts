@@ -98,12 +98,12 @@ export default {
     }
   },
 
-  [CONNECTED]({Com, Raw, shadow, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
+  [CONNECTED]({Com, Raw, root, el: elReal}: PluginCallbackBuilderParams): ConnectedCallback {
     const el = elReal as UpgradeComponent
     return async () => {
       if (!el[CleanupIndex]) {
         el[CleanupIndex] = []
-        connectData(Com as UpgradeComponentConstructor, Raw, el, shadow)
+        connectData(Com as UpgradeComponentConstructor, Raw, el, root)
       }
     }
   },
@@ -133,14 +133,14 @@ function connectData(
   Com: UpgradeComponentConstructor,
   Raw: RawComponentConstructor,
   el: UpgradeComponent,
-  shadow: ShadowRoot,
+  root: ShadowRoot,
 ) {
   const r = makeReactive(Com, Raw, el)
   Object.assign(el, {
     get [DataIndex]() { return r },
   })
 
-  createApp(shadow, r)
+  createApp(root, r)
   el.$nextTick()
 }
 
