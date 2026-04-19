@@ -61,8 +61,8 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
     .filter(el => el.nodeType === 1) as Element[]
 
   return elements
-    .map(el => el.tagName == 'TEMPLATE'
-      ? el.hasAttribute(ATTR_CORE) ? el as HTMLTemplateElement: null
+    .map(el => el.tagName == 'TEMPLATE' && el.hasAttribute(ATTR_CORE)
+      ? el as HTMLTemplateElement
       : queryForTemplates(el)
     )
     .filter(v => !!v)
