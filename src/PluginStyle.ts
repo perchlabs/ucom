@@ -9,7 +9,7 @@ import {
   ArrayFrom,
 } from './common.ts'
 import {
-  ATTR_CORE,
+  SYS_PREFIX,
 } from './constants.ts'
 
 let sheets: CSSStyleSheet[]
@@ -52,6 +52,6 @@ async function loadSheets(): Promise<CSSStyleSheet[]> {
 }
 
 function queryForStyles(root: QueryableRoot) {
-  const selector = ['STYLE', 'LINK'].map(k => `${k}[${ATTR_CORE}]`).join(',')
+  const selector = ['STYLE', 'LINK'].map(k => `${k}[${SYS_PREFIX}]`).join(',')
   return queryAll<HTMLStyleElement | HTMLLinkElement>(root, selector)
 }

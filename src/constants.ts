@@ -1,4 +1,4 @@
-export const ATTR_CORE = 'u-com'
+export const SYS_PREFIX = 'u-com'
 export const FILE_POSTFIX = '.html'
 export const DIR_POSTFIX = '.ucom'
 

@@ -5,7 +5,7 @@ import type {
   ComponentManager,
 } from './types.ts'
 import {
-  ATTR_CORE,
+  SYS_PREFIX,
 } from './constants.ts'
 import {
   isValidComponentName,
@@ -28,7 +28,7 @@ const processTemplates = async (
   man: ComponentManager,
   tplArr: HTMLTemplateElement[],
 ) => templateHandler(tplArr, async (tpl) => {
-  const ref = tpl.getAttribute(ATTR_CORE)
+  const ref = tpl.getAttribute(SYS_PREFIX)
 
   if (ref) {
     tpl.remove()
@@ -60,7 +60,7 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
     .filter(el => el.nodeType === 1) as Element[]
 
   return elements
-    .map(el => el.tagName == 'TEMPLATE' && el.hasAttribute(ATTR_CORE)
+    .map(el => el.tagName == 'TEMPLATE' && el.hasAttribute(SYS_PREFIX)
       ? el as HTMLTemplateElement
       : queryForTemplates(el)
     )
@@ -68,7 +68,7 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
     .flat()
 }
 
-const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${ATTR_CORE}]`)
+const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${SYS_PREFIX}]`)
 
 const templateHandler = (
   tplArr: HTMLTemplateElement[],

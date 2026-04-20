@@ -9,6 +9,7 @@ import type {
   ComputedFunction,
 } from './types.ts'
 import {
+  SYS_PREFIX,
   STORE_MOD_VAR,
   STORE_MOD_CALC,
   STORE_MOD_SYNC,
@@ -66,7 +67,7 @@ export function createContext(
   let initialized = false
   const children = new Set<Context>()
 
-  const storeName = customEl.tagName
+  const storeName = SYS_PREFIX + customEl.tagName
   const data: DataRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
 
