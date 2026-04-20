@@ -59,7 +59,7 @@ export function createContext(
   const frag: Frag | null = ptr instanceof HTMLTemplateElement
     ? {start: new Text, end: new Text}
     : null
-  const tpl: ContextableNode = frag ? cloneTemplateContent(ptr as HTMLTemplateElement)
+  const walkable: ContextableNode = frag ? cloneTemplateContent(ptr as HTMLTemplateElement)
     : ptr instanceof ShadowRoot ? ptr
     : ptr.cloneNode(true) as HTMLElement
 
@@ -76,15 +76,19 @@ export function createContext(
     cleanup: [],
 
     get start() {
-      return frag?.start ?? ctx.walkable
+      return frag?.start ?? walkable
     },
 
     get walkable() {
-      return tpl
+      return walkable
     },
 
     get data() {
       return proxy
+    },
+
+    effect(fn: () => void) {
+      ctx.cleanup.push(createEffect(fn))
     },
 
     scope(ptr: Element, dataNew: DataRecord = {}) {
@@ -122,14 +126,14 @@ export function createContext(
           walkChildren(ctx)
           parent.insertBefore(end, anchor!)
           parent.insertBefore(start, end)
-          parent.insertBefore(ctx.walkable, end)
+          parent.insertBefore(walkable, end)
         }
       } else {
         if (!initialized) {
-          walk(ctx, ctx.walkable as HTMLElement)
+          walk(ctx, walkable as HTMLElement)
         }
 
-        parent.insertBefore(ctx.walkable, anchor)
+        parent.insertBefore(walkable, anchor)
       }
     },
 
@@ -153,12 +157,8 @@ export function createContext(
           }
         }
       } else {
-        (ctx.walkable as HTMLElement).remove?.()
+        (walkable as HTMLElement).remove?.()
       }
-    },
-
-    effect(fn: () => void) {
-      ctx.cleanup.push(createEffect(fn))
     },
 
     teardown() {
