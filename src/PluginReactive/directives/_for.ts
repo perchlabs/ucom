@@ -42,7 +42,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
   }
 
   if ((match = valueExp.match(destructureRE))) {
-    destructureBindings = match[1].split(',').map((s) => s.trim())
+    destructureBindings = match[1].split(',').map(s => s.trim())
     isArrayDestructure = valueExp[0] === '['
   }
 
@@ -70,7 +70,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
       }
     }
 
-    const ctxs: Context[] = dataArr.map((data) => {
+    const ctxs: Context[] = dataArr.map(data => {
       // const key = keyExp ? evaluate(keyExp, data) : index
 
       const ctx: Context = ctxRoot.scope(el, data)

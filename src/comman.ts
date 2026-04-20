@@ -23,9 +23,9 @@ export default (pluginsRaw: Plugin[]) => {
   const idents: Record<string, ReturnType<typeof defineComponent>> = {}
   const lazy: Record<string, ComponentIdentity> = {}
 
-  const defineActual = (name: string, resolved: string, tpl: HTMLTemplateElement) => {
+  const defineActual = (name: string, path: string, tpl: HTMLTemplateElement) => {
     delete lazy?.[name]
-    return defineComponent(man, plugins, {name, path: resolved, tpl})
+    return defineComponent(man, plugins, {name, path, tpl})
   }
 
   const man: ComponentManager = {
@@ -55,10 +55,10 @@ export default (pluginsRaw: Plugin[]) => {
     // for inlining components on the server (with a plugin providing this functionality).  The URL is useful in
     // this case for allowing relative imports according to the public web path of the component.
     async import(url: string, tpl?: HTMLTemplateElement) {
-      const {name, path: resolved} = resolve(url)
+      const {name, path} = resolve(url)
       try {
-        tpl ??= await fetchTemplate(resolved)
-        return idents[name] ??= defineActual(name, resolved, tpl)
+        tpl ??= await fetchTemplate(path)
+        return idents[name] ??= defineActual(name, path, tpl)
       } catch (e) {
         if (e instanceof ComponentFetchError) {
           console.error(`Fetching component '${e.resolved}', ${e.reason}`)

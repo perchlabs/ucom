@@ -38,12 +38,11 @@ async function loadSheets(): Promise<CSSStyleSheet[]> {
         el.addEventListener('error', () => reject(new Error('theme loading')), false)
       })
     })
-    .filter(v => Boolean(v))
 
   return (await Promise.allSettled(loading))
     .filter(v => v?.status === 'fulfilled')
     .map(v => v.value as CSSStyleSheet)
-    .map((domSheet) => {
+    .map(domSheet => {
       // Shadowdom can only use constructable style sheets.
       const sheet = new CSSStyleSheet()
       sheet.replaceSync(ArrayFrom(domSheet.cssRules).map(v => v.cssText).join(' '))

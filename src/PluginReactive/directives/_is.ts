@@ -41,14 +41,14 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
       tag.remove()
     }
 
-    let tagNameNew = ''
+    let tagNameNew: string | undefined
     const ref = evaluate(expr, ctx)
     if (isValidComponentPath(ref)) {
       try {
-        const {name, path: resolved} = man.resolve(ref)
+        const {name, path} = man.resolve(ref)
         tagNameNew = name
         if (!man.has(tagNameNew)) {
-          man.import(resolved)
+          man.import(path)
         }
       } catch (e) {
         return

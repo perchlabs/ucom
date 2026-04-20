@@ -5,9 +5,11 @@ import type {
 import {
   isObject,
   isString,
+  isBoolean,
   ArrayFrom,
   ObjectEntriesEach,
   kebabize,
+  split,
 } from '../../common.ts'
 import { evaluate } from '../expression.ts'
 
@@ -36,7 +38,7 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
       const value = evaluate(exprReal, ctx)
 
       // Handle boolean attributes (disabled, checked, readonly, etc.)
-      if (typeof value === 'boolean') {
+      if (isBoolean(value)) {
         if (value) {
           el.setAttribute(attrName, '')
         } else {
@@ -59,15 +61,15 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
 
 export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefined {
   // Store original classes from HTML
-  const originalClasses = el.className.split(' ').filter(c => c)
+  const originalClasses = split(el.className)
 
   ctx.effect(() => {
     try {
       const value = evaluate(expr, ctx)
-      
+
       // Start with original classes
       const classes = new Set(originalClasses)
-      
+
       if (isObject(value)) {
         ObjectEntriesEach(value, ([cls, condition]) => {
           if (condition) {
@@ -77,9 +79,9 @@ export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefine
 
       } else if (isString(value)) {
         // String (from ternary or direct expression): "bg-blue text-white"
-        value.split(' ').filter(c => c).forEach(c => classes.add(c))
+        split(value).forEach(c => classes.add(c))
       }
-      
+
       // Apply the final class list
       el.className = ArrayFrom(classes).join(' ')
     } catch (e) {

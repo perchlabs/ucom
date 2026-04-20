@@ -34,10 +34,8 @@ export default (plugins: Plugin[]): PluginManager  => {
   const provide = <T extends PluginCallbackType>(
     key: PluginCallbackKey,
     builderParams: PluginCallbackBuilderParams,
-  ) =>
-    plugins.
-    map((p: PluginCallbacks) => (p[key] as PluginCallbackBuilder<T>)?.(builderParams)).
-    filter(v => !!v)
+  ) => plugins.flatMap((p: PluginCallbacks) =>
+    (p[key] as PluginCallbackBuilder<T>)?.(builderParams) ?? [])
 
   return {
     async start(man: ComponentManager) {

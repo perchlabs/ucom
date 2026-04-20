@@ -29,6 +29,7 @@ import {
 } from './constants.ts'
 
 import {
+  ArrayFrom,
   ObjectFromEntries,
   attributeEntries,
   paramsAttrEach,
@@ -54,17 +55,17 @@ export function resolveImport(url: string): ComponentIdentity {
   }
 }
 
-export async function fetchTemplate(resolved: string): Promise<HTMLTemplateElement> {
-  const res = await fetch(resolved)
+export async function fetchTemplate(path: string): Promise<HTMLTemplateElement> {
+  const res = await fetch(path)
   if (!res.ok) {
-    throw new ComponentFetchError(resolved, `Status ${res.status}`)
+    throw new ComponentFetchError(path, `Status ${res.status}`)
   }
   if (!res.headers.get('Content-Type')?.startsWith('text/html')) {
-    throw new ComponentFetchError(resolved, 'Content-Type is not text/html')
+    throw new ComponentFetchError(path, 'Content-Type is not text/html')
   }
   const text = await res.text()
   if (text.startsWith('<!DOCTYPE')) {
-    throw new ComponentFetchError(resolved, 'Content started with <!DOCTYPE')
+    throw new ComponentFetchError(path, 'Content started with <!DOCTYPE')
   }
 
   const tpl = document.createElement('template')
@@ -153,13 +154,11 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> 
   return [Raw, exports, params]
 }
 
-export function hashContent(tpl: HTMLTemplateElement): string {
+export function hashContent(tpl: HTMLTemplateElement): number {
   const div = document.createElement('div')
   div.appendChild(cloneTemplateContent(tpl))
-  return div.innerHTML
-    .split('')
+  return ArrayFrom(div.innerHTML)
     .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)
-    .toString()
 }
 
 function createComponentConstructor(

@@ -7,12 +7,13 @@ import type {
   QueryableRoot,
 } from './types.ts'
 
+export const isBoolean = (v: unknown): v is boolean => typeof v === 'boolean'
+export const isNumber = (v: unknown): v is number => typeof v === 'number'
+export const isString = (v: unknown): v is string => typeof v === 'string'
+export const isFunction = (v: unknown) => typeof v === 'function'
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
-export const isNumber = (v: unknown): v is number => typeof v === 'number'
-export const isFunction = (v: unknown) => typeof v === 'function'
-export const isString = (v: unknown): v is string => typeof v === 'string'
 
 export const ObjectAssign = Object.assign
 export const ObjectKeys = Object.keys
@@ -31,12 +32,7 @@ export function ObjectEntriesEach<T>(
 
 export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
-export const isValidComponentName = (v: string, toLowerCase = false) => {
-  if (toLowerCase) {
-    v = v.toLowerCase()
-  }
-  return /^[a-z]+\-[a-z0-9]+$/.test(v)
-}
+export const isValidComponentName = (v: string) => /^[a-z]+\-[a-z0-9]+$/.test(v.toLowerCase())
 
 export function isSystemKey(k: string) {
   if (k === CONSTRUCTOR) return true
@@ -44,8 +40,8 @@ export function isSystemKey(k: string) {
   return false
 }
 
-export const attrToggled = (el: HTMLElement | null, name: string): boolean =>
-  el?.hasAttribute(name) ?? false
+export const attrToggled = (el: Element, name: string): boolean =>
+  el.hasAttribute(name) ?? false
 
 export const pullKey = <T>(obj: Record<string, T>, k: string): (T | undefined) => {
   const v = obj[k]
@@ -102,3 +98,5 @@ export const getTopLevelChildren = <T extends HTMLElement>(
 export const kebabize = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
 
 export const kebabToCamel = (v: string) => v.replace(/-./g, m => m.toUpperCase()[1])
+
+export const split = (v: string, s: string = ' ') => v.split(s).filter(c => c)

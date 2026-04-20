@@ -63,7 +63,6 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
       ? el as HTMLTemplateElement
       : queryForTemplates(el)
     )
-    .filter(v => !!v)
 }
 
 const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${SYS_PREFIX}]`)

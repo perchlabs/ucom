@@ -24,15 +24,15 @@ export default {
 
   construct({man, el, root}: PluginConstructParams): void {
     (el as UpgradeComponent).$import = async (ref: unknown) => {
-      if ((ref instanceof HTMLElement)) {
+      if (isString(ref)) {
+        return man.import(ref)
+      }
+      if (ref instanceof HTMLElement) {
         const dataArr = importTopLevelElements(man,
           (ref as HTMLSlotElement).assignedElements?.() ?? ref.children
         )
         processUndefinedElements(man, queryForUndefined(man, root))
         return dataArr
-      }
-      if (isString(ref)) {
-        return man.import(ref)
       }
     }
 
@@ -67,7 +67,7 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = queryAll(root, ':not(:defined)')
-  if ('tagName' in root && man.isName(root.tagName, true) && !man.has(root.tagName)) {
+  if ('tagName' in root && man.isName(root.tagName) && !man.has(root.tagName)) {
     arr.push(root)
   }
   return arr
@@ -77,7 +77,7 @@ async function importTopLevelElements(man: ComponentManager, elArr: Element[]): 
   let urlPrefix = ''
   let lazy = false
 
-  return elArr.map(el => {
+  return elArr.flatMap(el => {
     if (el instanceof HTMLBaseElement) {
       el.remove()
       urlPrefix = el.getAttribute('href') ?? ''
@@ -88,13 +88,13 @@ async function importTopLevelElements(man: ComponentManager, elArr: Element[]): 
       const src = el.getAttribute('src')
       if (src) {
         const ident = man.resolve(urlPrefix + src)
-        const {name, path: resolved} = ident
+        const {name, path} = ident
 
         if (!man.has(name)) {
           if (lazy || attrToggled(el, 'lazy')) {
             man.lazy[name] = ident
           } else {
-            man.import(resolved)
+            man.import(path)
           }
         }
 
@@ -104,8 +104,9 @@ async function importTopLevelElements(man: ComponentManager, elArr: Element[]): 
         }
       }
     }
+
+    return []
   })
-  .filter(v => !!v)
 }
 
 type ImportComponentData = {

@@ -1,13 +1,16 @@
 import type {
   DirectiveDef,
 } from './types.ts'
-import { attributeEntries, pullAttr } from '../common.ts'
+import {
+  attributeEntries,
+  pullAttr,
+  split,
+} from '../common.ts'
 
 export const getDirectives = (el: Element, reFilter: RegExp) =>
   attributeEntries(el).
   filter(([k]) => reFilter.test(k)).
-  map(item => createDirectiveDefinition(...item)).
-  filter(v => !!v)
+  flatMap(item => createDirectiveDefinition(...item) ?? [])
 
 export const reDirDef = /^(u-[a-z]+|[^a-z]{1,2})(:?[a-z0-9]+[a-z0-9\-]*)?(\..+)*$/
 
@@ -19,16 +22,12 @@ export function createDirectiveDefinition(full: string, expr: string): Directive
 
     ref = ref?.charAt(0) === ':' ? ref.substring(1) : ref
 
-    const modList = mods
-      .split('.')
-      .filter(v => !!v)
-
     return {
       full,
       key,
       ref,
       expr,
-      mods: new Set<string>(modList),
+      mods: new Set<string>(split(mods, '.')),
     }
   }
 }
