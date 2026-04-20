@@ -10,6 +10,7 @@ import type {
 } from './types.ts'
 import {
   isString,
+  isElement,
   ArrayFrom,
   ObjectFromEntries,
   queryAll,
@@ -62,13 +63,14 @@ const observeMutations = (
 const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
   [...muts].
   flatMap(v => [...v.addedNodes]).
-  filter(el => el.nodeType === 1).
+  filter(isElement).
   flatMap(el => queryForUndefined(man, el as Element))
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = queryAll(root, ':not(:defined)')
-  if ('tagName' in root && man.isName(root.tagName) && !man.has(root.tagName)) {
-    arr.push(root)
+  const {tagName} = (root as Element)
+  if (tagName && man.isName(tagName) && !man.has(tagName)) {
+    arr.push(root as Element)
   }
   return arr
 }

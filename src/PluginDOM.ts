@@ -9,6 +9,7 @@ import {
 } from './constants.ts'
 import {
   isValidComponentName,
+  isElement,
   queryAll,
 } from './common.ts'
 
@@ -54,11 +55,9 @@ const observeMutations = (
 })
 
 const getMutationTemplates = (muts: MutationRecord[]) => {
-  const elements = [...muts]
+  return [...muts]
     .flatMap(v => [...v.addedNodes])
-    .filter(el => el.nodeType === 1) as Element[]
-
-  return elements
+    .filter(isElement)
     .flatMap(el => el.tagName == 'TEMPLATE' && el.hasAttribute(SYS_PREFIX)
       ? el as HTMLTemplateElement
       : queryForTemplates(el)

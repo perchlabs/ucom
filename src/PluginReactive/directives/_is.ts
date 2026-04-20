@@ -12,11 +12,9 @@ import { walk } from '../walk.ts'
 
 export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
   const {man} = ctx
-  let {expr} = dir
+  const {expr} = dir
 
-  expr = expr.trim()
   if (!expr) {
-    console.warn(`[u-is] empty expression.`)
     return
   }
 

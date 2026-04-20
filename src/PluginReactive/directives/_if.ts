@@ -17,7 +17,6 @@ export const _if = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
 
   const [parent, anchor] = parentAndAnchor(dir, el)
   if (!parent) {
-    console.log('warn #if no parent')
     return
   }
 
