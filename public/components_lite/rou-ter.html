@@ -14,7 +14,7 @@
       const slot = this.$querySelector('slot')
       this.#main = this.$querySelector('main')
 
-      this.#routes = makeRoutes(await this.$importSlot(slot))
+      this.#routes = makeRoutes(await this.$import(slot))
       this.dispatchEvent(new CustomEvent('routes', {
         detail: structuredClone(this.#routes),
       }))

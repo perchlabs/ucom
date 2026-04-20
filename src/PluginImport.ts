@@ -2,16 +2,15 @@ import type {
   WebComponent,
   Plugin,
   PluginParseParams,
-  PluginDefineParams,
   PluginConstructParams,
   QueryableRoot,
   ComponentIdentity,
   ComponentManager,
-  ComponentImporter,
+  ComponentDef,
 } from './types.ts'
 import {
+  isString,
   ArrayFrom,
-  ObjectAssign,
   ObjectFromEntries,
   queryAll,
   attrToggled,
@@ -20,27 +19,23 @@ import {
 
 export default {
   async parse({man, frag}: PluginParseParams) {
-    await importElements(man, ArrayFrom(frag.children))
-  },
-
-  async define({man, Com}: PluginDefineParams) {
-    ObjectAssign(Com.prototype, {
-      $import: man.import
-    })
+    await importTopLevelElements(man, ArrayFrom(frag.children))
   },
 
   construct({man, el, root}: PluginConstructParams): void {
-    (el as UpgradeComponent).$importSlot = async (ref: unknown): Promise<ImportComponentData[]> => {
-      if (!(ref instanceof HTMLSlotElement)) {
-        throw 'Import must be an HTMLSlotElement.'
+    (el as UpgradeComponent).$import = async (ref: unknown) => {
+      if ((ref instanceof HTMLElement)) {
+        const dataArr = importTopLevelElements(man,
+          (ref as HTMLSlotElement).assignedElements?.() ?? ref.children
+        )
+        processUndefinedElements(man, queryForUndefined(man, root))
+        return dataArr
       }
-
-      const dataArr = importElements(man, ref.assignedElements())
-      processUndefinedElements(man, queryForUndefined(man, root))
-      return dataArr
+      if (isString(ref)) {
+        return man.import(ref)
+      }
     }
 
-    // processUndefinedElements(man, queryForUndefined(man, root))
     observeMutations(man, root)
   },
 } as Plugin
@@ -78,7 +73,7 @@ const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   return arr
 }
 
-async function importElements(man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> {
+async function importTopLevelElements(man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> {
   let urlPrefix = ''
   let lazy = false
 
@@ -119,6 +114,5 @@ type ImportComponentData = {
 }
 
 interface UpgradeComponent extends WebComponent {
-  $import: ComponentImporter,
-  $importSlot: (ref: unknown) => Promise<ImportComponentData[]>
+  $import(ref: unknown): Promise<ImportComponentData[] | ComponentDef | undefined | void>
 }
