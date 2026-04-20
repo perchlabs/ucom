@@ -37,7 +37,7 @@ export default (pluginsRaw: Plugin[]) => {
       if (document.readyState === 'loading') {
         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve))
       }
-      plugins.start(man)
+      return plugins.start(man)
     },
 
     has(name: string): boolean {

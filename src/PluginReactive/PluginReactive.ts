@@ -127,13 +127,12 @@ export default {
   },
 
   [CONNECTED](params: PluginCallbackBuilderParams) {
-    const {Com, el, root, man} = (params as UpgradedPluginCallbackBuilderParams)
+    const {Com, man, el, root} = (params as UpgradedPluginCallbackBuilderParams)
     return () => {
       const ctx = createContext(man, el, root, makeContextData(Com, el))
-      const {data} = ctx
       ObjectAssign(el, {
         [ContextIndex]: ctx,
-        get [DataIndex]() { return data },
+        get [DataIndex]() { return ctx.data },
       })
 
       walkChildren(ctx)

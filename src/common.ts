@@ -35,9 +35,8 @@ export const isValidComponentPath = (path: string) => reComponentPath.test(path)
 export const isValidComponentName = (v: string) => /^[a-z]+\-[a-z0-9]+$/.test(v.toLowerCase())
 
 export function isSystemKey(k: string) {
-  if (k === CONSTRUCTOR) return true
-  if (k.startsWith('$')) return true
-  return false
+  return k === CONSTRUCTOR ||
+    k.startsWith('$')
 }
 
 export const attrToggled = (el: Element, name: string): boolean =>
@@ -85,8 +84,7 @@ export function cloneTemplateContent(tpl: HTMLTemplateElement) {
 }
 
 export function queryAll<T extends Element>(root: QueryableRoot, selector: string): T[] {
-  const nodeList = root.querySelectorAll(selector)
-  return nodeList ? ArrayFrom(nodeList) as T[] : []
+  return ArrayFrom(root.querySelectorAll(selector) ?? []) as T[]
 }
 
 export const getTopLevelChildren = <T extends HTMLElement>(
