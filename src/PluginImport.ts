@@ -18,8 +18,6 @@ import {
   attributeEntries,
 } from './common.ts'
 
-// const ATTR_SRC = 'u-src'
-
 export default {
   async parse({man, frag}: PluginParseParams) {
     await importElements(man, ArrayFrom(frag.children))
@@ -66,12 +64,11 @@ const observeMutations = (
   subtree: true,
 })
 
-const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => {
-  return[...muts].
-    flatMap(v => [...v.addedNodes]).
-    filter(el => el.nodeType === 1).
-    flatMap(el => queryForUndefined(man, el as Element))
-}
+const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
+  [...muts].
+  flatMap(v => [...v.addedNodes]).
+  filter(el => el.nodeType === 1).
+  flatMap(el => queryForUndefined(man, el as Element))
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = queryAll(root, ':not(:defined)')
@@ -82,56 +79,44 @@ const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
 }
 
 async function importElements(man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> {
-  let base: ImportBase = ['', false]
+  let urlPrefix = ''
+  let lazy = false
 
   return elArr.map(el => {
     if (el instanceof HTMLBaseElement) {
       el.remove()
-      base = [
-        el.getAttribute('href') ?? '',
-        attrToggled(el, 'lazy'),
-      ]
+      urlPrefix = el.getAttribute('href') ?? ''
+      lazy = attrToggled(el, 'lazy')
     } else if (el instanceof HTMLSourceElement) {
-      return handleSourceElement(man, el, base)
+      el.remove()
+
+      const src = el.getAttribute('src')
+      if (src) {
+        const ident = man.resolve(urlPrefix + src)
+        const {name, path: resolved} = ident
+
+        if (!man.has(name)) {
+          if (lazy || attrToggled(el, 'lazy')) {
+            man.lazy[name] = ident
+          } else {
+            man.import(resolved)
+          }
+        }
+
+        return {
+          ident,
+          attributes: ObjectFromEntries(attributeEntries(el))
+        }
+      }
     }
   })
   .filter(v => !!v)
-}
-
-function handleSourceElement(man: ComponentManager, el: HTMLSourceElement, [urlPrefix, lazy]: ImportBase): ImportComponentData | undefined {
-  el.remove()
-
-  const src = el.getAttribute('src')
-  if (src) {
-    const ident = man.resolve(urlPrefix + src)
-    const {name, path: resolved} = ident
-
-    if (!man.has(name)) {
-      if (lazy || attrToggled(el, 'lazy')) {
-        man.lazy[name] = ident
-      } else {
-        man.import(resolved)
-      }
-    }
-
-    return {
-      ident,
-      attributes: ObjectFromEntries(attributeEntries(el))
-    }
-  } else {
-    console.error("SOURCE must have a 'src'")
-  }
 }
 
 type ImportComponentData = {
   attributes: Record<string, string>,
   ident: ComponentIdentity,
 }
-
-type ImportBase = [
-  urlPrefix: string,
-  lazy: boolean,
-]
 
 interface UpgradeComponent extends WebComponent {
   $import: ComponentImporter,
