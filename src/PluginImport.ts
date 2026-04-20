@@ -67,14 +67,10 @@ const observeMutations = (
 })
 
 const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) => {
-  const elements = [...muts]
-    .map(v => [...v.addedNodes])
-    .flat()
-    .filter(el => el.nodeType === 1) as Element[]
-
-  return elements
-    .map(el => queryForUndefined(man, el))
-    .flat()
+  return[...muts].
+    flatMap(v => [...v.addedNodes]).
+    filter(el => el.nodeType === 1).
+    flatMap(el => queryForUndefined(man, el as Element))
 }
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {

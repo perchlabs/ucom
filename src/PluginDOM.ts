@@ -55,17 +55,15 @@ const observeMutations = (
 
 const getMutationTemplates = (muts: MutationRecord[]) => {
   const elements = [...muts]
-    .map(v => [...v.addedNodes])
-    .flat()
+    .flatMap(v => [...v.addedNodes])
     .filter(el => el.nodeType === 1) as Element[]
 
   return elements
-    .map(el => el.tagName == 'TEMPLATE' && el.hasAttribute(SYS_PREFIX)
+    .flatMap(el => el.tagName == 'TEMPLATE' && el.hasAttribute(SYS_PREFIX)
       ? el as HTMLTemplateElement
       : queryForTemplates(el)
     )
     .filter(v => !!v)
-    .flat()
 }
 
 const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${SYS_PREFIX}]`)

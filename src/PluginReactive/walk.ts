@@ -54,6 +54,7 @@ export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable)
   }
 }
 
+// These directives don't support references or modifiers. (Must match exact string)
 const ctrlDirs: [string, DirectiveHandler][] = [
   ['#if', _if],
   ['#each', _for],

@@ -96,9 +96,8 @@ export function queryAll<T extends Element>(root: QueryableRoot, selector: strin
 export const getTopLevelChildren = <T extends HTMLElement>(
   container: DocumentFragment | HTMLElement,
   ...tags: string[]
-) => {
-  return ArrayFrom(container.children).filter(el => tags.includes(el.tagName)) as T[]
-}
+) => 
+  ArrayFrom(container.children).filter(el => tags.includes(el.tagName)) as T[]
 
 export const kebabize = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
 
