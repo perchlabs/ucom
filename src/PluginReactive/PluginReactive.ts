@@ -211,9 +211,9 @@ interface UpgradeComponentConstructor extends WebComponentConstructor {
 }
 
 type UpgradedPluginCallbackBuilderParams = {
-  Com: UpgradeComponentConstructor;
-  Raw: RawComponentConstructor;
-  el: UpgradeComponent;
-  root: ShadowRoot;
-  man: ComponentManager,
+  Com: UpgradeComponentConstructor
+  Raw: RawComponentConstructor
+  el: UpgradeComponent
+  root: ShadowRoot
+  man: ComponentManager
 }
