@@ -2,7 +2,10 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
-import { isValidComponentPath } from '../../common.ts'
+import {
+  isValidComponentPath,
+  isTemplateElement,
+} from '../../common.ts'
 import { makeElementAs, nextWalkable, parentAndAnchor } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
@@ -17,7 +20,7 @@ export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
     return
   }
 
-  if (!(el instanceof HTMLTemplateElement)) {
+  if (!isTemplateElement(el)) {
     console.warn(`[u-is] not a template.`)
     return
   }

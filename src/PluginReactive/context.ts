@@ -22,6 +22,7 @@ import {
 } from './alien-signals'
 import {
   isFunction,
+  isTemplateElement,
   ObjectKeys,
   ObjectEntriesEach,
   ObjectDefineProperty,
@@ -57,12 +58,13 @@ export function createContext(
 
   refs: RefRecord = {},
 ): Context {
-  const frag: Frag | null = ptr instanceof HTMLTemplateElement
+  const frag: Frag | null = isTemplateElement(ptr)
     ? {start: new Text, end: new Text}
     : null
-  const walkable: ContextableNode = frag ? cloneTemplateContent(ptr as HTMLTemplateElement)
-    : ptr instanceof ShadowRoot ? ptr
-    : ptr.cloneNode(true) as Element
+  const walkable: ContextableNode =
+    frag ? cloneTemplateContent(ptr as HTMLTemplateElement) :
+    ptr instanceof ShadowRoot ? ptr :
+    ptr.cloneNode(true) as Element
 
   let initialized = false
   const children = new Set<Context>()

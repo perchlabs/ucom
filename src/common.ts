@@ -14,6 +14,7 @@ export const isFunction = (v: unknown) => typeof v === 'function'
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
+export const isTemplateElement = (v: unknown) => v instanceof HTMLTemplateElement
 
 export const ObjectAssign = Object.assign
 export const ObjectKeys = Object.keys

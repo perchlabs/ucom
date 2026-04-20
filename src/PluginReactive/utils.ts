@@ -3,7 +3,10 @@ import type {
   DirectiveDef,
   WalkableReturnType,
 } from './types.ts'
-import { attributeEntries } from '../common.ts'
+import {
+  attributeEntries,
+  isTemplateElement,
+} from '../common.ts'
 
 export function getParent(el: Node): ContextableNode | undefined {
   const parent = el.parentElement
@@ -44,7 +47,7 @@ export function makeElementAs(el: Element, tagName: string) {
   const tag = document.createElement(tagName)
   attributeEntries(el).forEach(e => tag.setAttribute(...e))
 
-  if (el instanceof HTMLTemplateElement) {
+  if (isTemplateElement(el)) {
     tag.append(el.content)
   } else {
     tag.innerHTML = el.innerHTML

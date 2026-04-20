@@ -78,31 +78,32 @@ async function importTopLevelElements(man: ComponentManager, elArr: Element[]): 
   let lazy = false
 
   return elArr.flatMap(el => {
-    if (el instanceof HTMLBaseElement) {
-      el.remove()
-      urlPrefix = el.getAttribute('href') ?? ''
-      lazy = attrToggled(el, 'lazy')
-    } else if (el instanceof HTMLSourceElement) {
-      el.remove()
+    switch (el.tagName) {
+      case 'BASE':
+        el.remove()
+        urlPrefix = el.getAttribute('href') ?? ''
+        lazy = attrToggled(el, 'lazy')
+        break
+      case 'SOURCE':
+        el.remove()
+        const src = el.getAttribute('src')
+        if (src) {
+          const ident = man.resolve(urlPrefix + src)
+          const {name, path} = ident
 
-      const src = el.getAttribute('src')
-      if (src) {
-        const ident = man.resolve(urlPrefix + src)
-        const {name, path} = ident
+          if (!man.has(name)) {
+            if (lazy || attrToggled(el, 'lazy')) {
+              man.lazy[name] = ident
+            } else {
+              man.import(path)
+            }
+          }
 
-        if (!man.has(name)) {
-          if (lazy || attrToggled(el, 'lazy')) {
-            man.lazy[name] = ident
-          } else {
-            man.import(path)
+          return {
+            ident,
+            attributes: ObjectFromEntries(attributeEntries(el))
           }
         }
-
-        return {
-          ident,
-          attributes: ObjectFromEntries(attributeEntries(el))
-        }
-      }
     }
 
     return []
