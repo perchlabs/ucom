@@ -61,7 +61,7 @@ export function createContext(
     : null
   const walkable: ContextableNode = frag ? cloneTemplateContent(ptr as HTMLTemplateElement)
     : ptr instanceof ShadowRoot ? ptr
-    : ptr.cloneNode(true) as HTMLElement
+    : ptr.cloneNode(true) as Element
 
   let initialized = false
   const children = new Set<Context>()
@@ -130,7 +130,7 @@ export function createContext(
         }
       } else {
         if (!initialized) {
-          walk(ctx, walkable as HTMLElement)
+          walk(ctx, walkable as Element)
         }
 
         parent.insertBefore(walkable, anchor)
@@ -157,7 +157,7 @@ export function createContext(
           }
         }
       } else {
-        (walkable as HTMLElement).remove?.()
+        (walkable as Element).remove?.()
       }
     },
 
