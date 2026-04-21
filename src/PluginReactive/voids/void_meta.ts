@@ -3,7 +3,7 @@ import type {
   DirectiveDef,
 } from '../types.ts'
 import { getDirectives } from '../directive.ts'
-import { nextWalkable, getParent } from '../utils.ts'
+import { nextWalkable, contextableParent } from '../utils.ts'
 import { _data } from '../directives/_data.ts'
 import { _text } from '../directives/_text.ts'
 
@@ -15,7 +15,7 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
     '%'(def: DirectiveDef) {
       const span = document.createElement('span')
       _text(ctx, def, span)
-      const parent = getParent(el)!
+      const parent = contextableParent(el)!
       parent.insertBefore(span, el)
     },
   }

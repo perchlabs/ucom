@@ -5,7 +5,7 @@ import type {
 } from '../types.ts'
 import { isNumber, isObject, isArray } from '../../common.ts'
 import { evaluate } from '../expression.ts'
-import { parentAndAnchor, getParent, nextWalkable } from '../utils.ts'
+import { parentAndAnchor, contextableParent, nextWalkable } from '../utils.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
@@ -120,7 +120,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
   ctxRoot.effect(() => {
     try {
       cleanSaved()
-      parent = getParent(anchor)
+      parent = contextableParent(anchor)
       // Evaluate the array expression
       let source = evaluate(sourceExp, ctxRoot)
 

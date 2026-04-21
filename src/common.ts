@@ -36,10 +36,9 @@ export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
 export const isValidComponentName = (v: string) => /^[a-z]+\-[a-z0-9]+$/.test(v.toLowerCase())
 
-export function isSystemKey(k: string) {
-  return k === CONSTRUCTOR ||
-    k.startsWith('$')
-}
+export const isSystemKey = (k: string) =>
+  k === CONSTRUCTOR ||
+  k.startsWith('$')
 
 export const attrToggled = (el: Element, name: string): boolean =>
   el.hasAttribute(name) ?? false

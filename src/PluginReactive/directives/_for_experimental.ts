@@ -10,7 +10,7 @@ import {
   pullAttr,
 } from '../../common.ts'
 import { evaluate } from '../expression.ts'
-import { nextWalkable, getParent, parentAndAnchor } from '../utils.ts'
+import { nextWalkable, contextableParent, parentAndAnchor } from '../utils.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
@@ -175,7 +175,7 @@ export const _for = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
       mounted = true
     } else {
       // Update parent in case of document fragment.
-      parent = getParent(anchor)!
+      parent = contextableParent(anchor)!
   if (!parent) {
     console.log('warn #each no parent')
     return

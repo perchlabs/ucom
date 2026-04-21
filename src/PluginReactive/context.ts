@@ -30,7 +30,7 @@ import {
   cloneTemplateContent,
 } from '../common.ts'
 import { walk, walkChildren } from './walk.ts'
-import { getParent } from './utils.ts'
+import { contextableParent } from './utils.ts'
 
 interface Frag {
   start: Text
@@ -143,7 +143,7 @@ export function createContext(
     remove() {
       if (frag) {
         if (ctx.start) {
-          const parent = getParent(ctx.start)
+          const parent = contextableParent(ctx.start)
           if (!parent) {
             return
           }

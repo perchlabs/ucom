@@ -8,19 +8,9 @@ import {
   isTemplateElement,
 } from '../common.ts'
 
-export function getParent(el: Node): ContextableNode | undefined {
-  const parent = el.parentElement
-  if (parent) { 
-    return parent
-  }
+export const contextableParent = (el: Node) => el.parentNode as ContextableNode | null
 
-  const root = el.getRootNode() as DocumentFragment | undefined
-  return root && root !== el ? root : undefined
-}
-
-export function nextWalkable(el: Element): WalkableReturnType {
-  return el.nextElementSibling as HTMLElement
-}
+export const nextWalkable = (el: Element): WalkableReturnType => el.nextElementSibling
 
 // export function createAnchor({key}: DirectiveDef, parent: ContextableNode, el: HTMLElement): Comment {
 //   const anchor = new Comment(key)
@@ -32,8 +22,8 @@ export function parentAndAnchor(
   dir: DirectiveDef, 
   el: Element,
   anchorText: string = '',
-): [ContextableNode | undefined, Comment] {
-  const parent = getParent(el)
+): [ContextableNode | null, Comment] {
+  const parent = contextableParent(el)
   const anchor = new Comment(`${dir.key} ${anchorText}`)
 
   if (parent) {
