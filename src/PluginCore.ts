@@ -10,11 +10,14 @@ import {
 } from './common.ts'
 
 export default {
-  async define({Raw, exports}: PluginDefineParams): Promise<void> {
-    const rawProto = Raw.prototype
+  async define({
+    Raw: {prototype: rawProto},
+    exports,
+  }: PluginDefineParams): Promise<void> {
     for (const k in exports) {
-      if (isSystemKey(k)) { continue }
-      if (k in rawProto) { continue }
+      if (isSystemKey(k) || k in rawProto) {
+        continue
+      }
       rawProto[k] = exports[k]
     }
   },

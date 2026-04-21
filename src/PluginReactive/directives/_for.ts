@@ -120,7 +120,7 @@ export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
   ctxRoot.effect(() => {
     try {
       cleanSaved()
-      parent = getParent(anchor)!
+      parent = getParent(anchor)
       // Evaluate the array expression
       let source = evaluate(sourceExp, ctxRoot)
 
