@@ -15,7 +15,7 @@ export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
 export const isElement = (v: Node): v is Element => v?.nodeType === 1
-export const isTemplateElement = (v: unknown) => v instanceof HTMLTemplateElement
+export const isTemplateElement = (v: Node): v is HTMLTemplateElement => v?.nodeName === 'TEMPLATE'
 
 export const ObjectAssign = Object.assign
 export const ObjectKeys = Object.keys
@@ -24,6 +24,8 @@ export const ObjectEntries = Object.entries
 export const ObjectFromEntries = Object.fromEntries
 export const ObjectDefineProperty = Object.defineProperty
 export const ArrayFrom = Array.from
+
+export const safeNodeName = (node: Node) => node.nodeName.toLowerCase()
 
 export function ObjectEntriesEach<T>(
   obj: Record<string, T>,
@@ -92,7 +94,7 @@ export const getTopLevelChildren = <T extends HTMLElement>(
   container: DocumentFragment | HTMLElement,
   ...tags: string[]
 ) => 
-  ArrayFrom(container.children).filter(el => tags.includes(el.tagName)) as T[]
+  ArrayFrom(container.children).filter(el => tags.includes(el.nodeName)) as T[]
 
 export const kebabize = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
 

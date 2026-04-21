@@ -5,6 +5,7 @@ import type {
   DirectiveHandler,
   WalkableReturnType,
 } from './types.ts'
+import { safeNodeName } from '../common.ts'
 import { getDirectives, pullDir } from './directive.ts'
 import { nextWalkable } from './utils.ts'
 import { void_meta } from './voids/void_meta.ts'
@@ -24,8 +25,8 @@ import { _cssprop } from './directives/_cssprop.ts'
 import { _ref } from './directives/_ref.ts'
 
 export function walk(ctx: Context, el: Element): WalkableReturnType {
-  switch (el.tagName) {
-    case 'META':
+  switch (safeNodeName(el)) {
+    case 'meta':
       return void_meta(ctx, el as HTMLMetaElement)
   }
 

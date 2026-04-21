@@ -13,6 +13,7 @@ import {
   isElement,
   ArrayFrom,
   ObjectFromEntries,
+  safeNodeName,
   queryAll,
   attrToggled,
   attributeEntries,
@@ -43,7 +44,7 @@ export default {
 
 async function processUndefinedElements(man: ComponentManager, undefArr: Element[]) {
   undefArr.forEach(el => {
-    const item = man.lazy[el.tagName.toLowerCase()]
+    const item = man.lazy[safeNodeName(el)]
     if (item) {
       man.import(item.path)
     }
@@ -68,8 +69,8 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
 
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = queryAll(root, ':not(:defined)')
-  const {tagName} = (root as Element)
-  if (tagName && man.isName(tagName) && !man.has(tagName)) {
+  const nodeName = safeNodeName(root)
+  if (man.isName(nodeName) && !man.has(nodeName)) {
     arr.push(root as Element)
   }
   return arr
@@ -80,13 +81,13 @@ async function importTopLevelElements(man: ComponentManager, elArr: Element[]): 
   let lazy = false
 
   return elArr.flatMap(el => {
-    switch (el.tagName) {
-      case 'BASE':
+    switch (safeNodeName(el)) {
+      case 'base':
         el.remove()
         urlPrefix = el.getAttribute('href') ?? ''
         lazy = attrToggled(el, 'lazy')
         break
-      case 'SOURCE':
+      case 'source':
         el.remove()
         const src = el.getAttribute('src')
         if (src) {

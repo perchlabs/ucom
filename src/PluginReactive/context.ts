@@ -26,6 +26,7 @@ import {
   ObjectKeys,
   ObjectEntriesEach,
   ObjectDefineProperty,
+  safeNodeName,
   uniqueArr,
   cloneTemplateContent,
 } from '../common.ts'
@@ -69,7 +70,7 @@ export function createContext(
   let initialized = false
   const children = new Set<Context>()
 
-  const storeName = SYS_PREFIX + customEl.tagName
+  const storeName = SYS_PREFIX + safeNodeName(customEl)
   const data: DataRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
 

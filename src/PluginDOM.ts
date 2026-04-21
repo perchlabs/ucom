@@ -11,6 +11,7 @@ import {
   isValidComponentName,
   isElement,
   queryAll,
+  isTemplateElement,
 } from './common.ts'
 
 export default {
@@ -58,7 +59,7 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
   return [...muts]
     .flatMap(v => [...v.addedNodes])
     .filter(isElement)
-    .flatMap(el => el.tagName == 'TEMPLATE' && el.hasAttribute(SYS_PREFIX)
+    .flatMap(el => isTemplateElement(el) && el.hasAttribute(SYS_PREFIX)
       ? el as HTMLTemplateElement
       : queryForTemplates(el)
     )
