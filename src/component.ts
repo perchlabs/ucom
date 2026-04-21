@@ -145,7 +145,7 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> 
     ...exports
   } = module as {default: RawComponentConstructor} & ModuleExports
 
-  const params: Record<string, string>[] = getTopLevelChildren<HTMLParamElement>(frag, 'PARAM')
+  const params: Record<string, string>[] = getTopLevelChildren<HTMLParamElement>(frag, 'param')
     .map(el => {
       el.remove()
       return ObjectFromEntries(attributeEntries(el))

@@ -60,7 +60,7 @@ const getMutationTemplates = (muts: MutationRecord[]) => {
     .flatMap(v => [...v.addedNodes])
     .filter(isElement)
     .flatMap(el => isTemplateElement(el) && el.hasAttribute(SYS_PREFIX)
-      ? el as HTMLTemplateElement
+      ? el
       : queryForTemplates(el)
     )
 }

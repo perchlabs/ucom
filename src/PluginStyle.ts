@@ -29,8 +29,7 @@ export default {
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
 async function loadSheets(): Promise<CSSStyleSheet[]> {
   const loading = queryForStyles(document.head)
-    .map(async el => el.sheet ?
-      el.sheet :
+    .map(async el => el.sheet ??
       new Promise((resolve, reject) => {
         el.addEventListener('load', () => resolve(el.sheet), false)
         el.addEventListener('error', () => reject(new Error('theme loading')), false)

@@ -94,7 +94,7 @@ export const getTopLevelChildren = <T extends HTMLElement>(
   container: DocumentFragment | HTMLElement,
   ...tags: string[]
 ) => 
-  ArrayFrom(container.children).filter(el => tags.includes(el.nodeName)) as T[]
+  ArrayFrom(container.children).filter(el => tags.includes(safeNodeName(el))) as T[]
 
 export const kebabize = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
 
