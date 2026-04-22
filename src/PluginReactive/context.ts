@@ -31,7 +31,6 @@ import {
   cloneTemplateContent,
 } from '../common.ts'
 import { walk, walkChildren } from './walk.ts'
-import { contextableParent } from './utils.ts'
 
 interface Frag {
   start: Text
@@ -116,7 +115,7 @@ export function createContext(
         const {start, end} = frag
 
         if (initialized) {
-          let node: Node | null = start!
+          let node: Node | null = start
           let next: Node | null
           while (node) {
             next = node.nextSibling
@@ -128,7 +127,7 @@ export function createContext(
           }
         } else {
           walkChildren(ctx)
-          parent.insertBefore(end, anchor!)
+          parent.insertBefore(end, anchor)
           parent.insertBefore(start, end)
           parent.insertBefore(walkable, end)
         }
@@ -143,23 +142,10 @@ export function createContext(
 
     remove() {
       if (frag) {
-        if (ctx.start) {
-          const parent = contextableParent(ctx.start)
-          if (!parent) {
-            return
-          }
-
-          let node: Node | null = ctx.start
-          let next: Node | null
-          while (node) {
-            next = node.nextSibling
-            parent.removeChild(node)
-            if (node === frag.end) {
-              break
-            }
-            node = next
-          }
-        }
+        const range = new Range
+        range.setStartBefore(frag.start)
+        range.setEndAfter(frag.end)
+        range.deleteContents()
       } else {
         (walkable as Element).remove?.()
       }

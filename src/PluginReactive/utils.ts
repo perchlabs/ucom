@@ -8,7 +8,7 @@ import {
   isTemplateElement,
 } from '../common.ts'
 
-export const contextableParent = (el: Node) => el.parentNode as ContextableNode | null
+export const contextableParent = (el: Node) => el?.parentNode as ContextableNode | null
 
 export const nextWalkable = (el: Element): WalkableReturnType => el.nextElementSibling
 
