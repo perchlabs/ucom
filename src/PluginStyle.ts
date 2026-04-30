@@ -3,14 +3,14 @@ import type {
   ComponentManager,
   PluginConstructParams,
   Plugin,
-} from './types.ts'
+} from './reference.ts'
 import {
   queryAll,
   ArrayFrom,
 } from './common.ts'
 import {
   SYS_PREFIX,
-} from './constants.ts'
+} from './reference.ts'
 
 let sheets: CSSStyleSheet[]
 

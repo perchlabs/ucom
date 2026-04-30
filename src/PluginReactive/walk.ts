@@ -4,7 +4,7 @@ import type {
   DirectiveDef,
   DirectiveHandler,
   WalkableReturnType,
-} from './types.ts'
+} from './reference.ts'
 import { safeNodeName } from '../common.ts'
 import { getDirectives, pullDir } from './directive.ts'
 import { nextWalkable } from './utils.ts'
@@ -32,13 +32,13 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
 
   for (const [key, handler] of ctrlDirs) {
     if (def = pullDir(el, key)) {
-      return handler(ctx, def, el)
+      return handler(ctx, el, def)
     }
   }
 
   let next: WalkableReturnType
   for (def of getDirectives(el, reDir)) {
-    if (next = dirMap[def.key]?.(ctx, def, el)) {
+    if (next = dirMap[def.key]?.(ctx, el, def)) {
       return next
     }
   }

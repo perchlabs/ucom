@@ -2,7 +2,7 @@ import type {
   Plugin,
   PluginDefineParams,
   PluginConstructParams,
-} from './types.ts'
+} from './reference.ts'
 import {
   ObjectAssign,
   isSystemKey,

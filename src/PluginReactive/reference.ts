@@ -1,4 +1,4 @@
-import type { ComponentManager } from '../types.ts'
+import type { ComponentManager } from '../reference.ts'
 
 export type DataRecord = Record<string, any>
 export type ComputedFunction = () => any
@@ -34,9 +34,9 @@ export type DirectiveDef = {
   key: string
   kebab?: string
   camel?: string
-  expr: string
+  expr?: string
   mods: Set<string>
 }
-export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: Element)
+export type DirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
   => WalkableReturnType
 export type WalkableReturnType = Element | undefined | null | void

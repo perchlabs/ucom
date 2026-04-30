@@ -1,10 +1,14 @@
 import type {
   DataRecord,
   Context,
-} from './types.ts'
+} from './reference.ts'
 import { ObjectKeys, ObjectValues } from '../common.ts'
 
-export function evaluate(expr: string, ctxThis: Context | null, other: DataRecord = {}) {
+export function evaluate(
+  expr: string,
+  ctxThis: Context | null,
+  other: DataRecord = {},
+) {
   return run(
     `with($data) { return ${expr}; }`,
     ctxThis?.data ?? {},
@@ -12,7 +16,11 @@ export function evaluate(expr: string, ctxThis: Context | null, other: DataRecor
   )
 }
 
-export function execute(expr: string, ctxThis: Context | null, other: DataRecord = {}) {
+export function execute(
+  expr: string,
+  ctxThis: Context | null,
+  other: DataRecord = {},
+) {
   run(
     `with($data) { ${expr}; }`,
     ctxThis?.data ?? {},

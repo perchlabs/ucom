@@ -1,11 +1,16 @@
 import type {
-  Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
 import { evaluate } from '../expression.ts'
 
-export function _html(ctx: Context, dir: DirectiveDef, el: Element): undefined {
-  const {expr} = dir
+export const _html: DirectiveHandler = (
+  ctx,
+  el,
+  {expr},
+) => {
+  if (!expr) {
+    return
+  }
 
   // Create an effect that automatically re-runs when signals change
   ctx.effect(() => {

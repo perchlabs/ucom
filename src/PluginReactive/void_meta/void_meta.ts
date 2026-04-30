@@ -1,7 +1,7 @@
 import type {
   Context,
   DirectiveDef,
-} from '../types.ts'
+} from '../reference.ts'
 import {
   createElement,
 } from '../../common.ts'
@@ -16,27 +16,27 @@ import { _text } from '../directives/_text.ts'
 export function void_meta(ctx: Context, el: HTMLMetaElement) {
   const dirMap: Record<string, (def: DirectiveDef) => void> = {
     $(def: DirectiveDef) {
-      _data(ctx, def, el)
+      _data(ctx, el, def)
     },
     '--'(def: DirectiveDef) {
-      _cssprop(ctx, def, el)
+      _cssprop(ctx, el, def)
     },
     '$--'(def: DirectiveDef) {
-      _data(ctx, def, el)
-      _cssprop(ctx, {
+      _data(ctx, el, def)
+      _cssprop(ctx, el, {
         ...def,
         expr: '',
-      }, el)
+      })
     },
     '%'(def: DirectiveDef) {
       const span = createElement('span')
-      _text(ctx, def, span)
+      _text(ctx, span, def)
       const parent = contextableParent(el)!
       parent.insertBefore(span, el)
     },
   }
 
-  for (const def of getDirectives(el, /^\$|\$--|--|%/)) {
+  for (const def of getDirectives(el, /^\$|--|\$--|%/)) {
     dirMap[def.key]?.(def)
   }
 

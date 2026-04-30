@@ -3,10 +3,10 @@ import type {
   PluginParseParams,
   QueryableRoot,
   ComponentManager,
-} from './types.ts'
+} from './reference.ts'
 import {
   SYS_PREFIX,
-} from './constants.ts'
+} from './reference.ts'
 import {
   isElement,
   createElement,

@@ -7,7 +7,7 @@ import type {
   ComponentIdentity,
   ComponentManager,
   ComponentDef,
-} from './types.ts'
+} from './reference.ts'
 import {
   isString,
   isElement,

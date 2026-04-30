@@ -1,8 +1,8 @@
 import type {
   Context,
-  DirectiveDef,
+  DirectiveHandler,
   WalkableReturnType as WalkableType,
-} from '../types.ts'
+} from '../reference.ts'
 import { evaluate } from '../expression.ts'
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
@@ -12,7 +12,11 @@ type Branch = [
   expr?: string | null
 ]
 
-export const _if = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
+export const _if: DirectiveHandler = (
+  ctxRoot,
+  el,
+  dir,
+) => {
   const {expr} = dir
 
   const [parent, anchor] = parentAndAnchor(dir, el)

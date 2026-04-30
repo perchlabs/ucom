@@ -10,17 +10,17 @@ import type {
   // AttributeChangedCallback,
   // ConnectedCallback,
   // DisconnectedCallback,
-} from '../types.ts'
+} from '../reference.ts'
 import type {
   Context,
   DataRecord,
-} from './types.ts'
+} from './reference.ts'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
   STATIC_OBSERVED_ATTRIBUTES,
-} from '../constants.ts'
+} from '../reference.ts'
 import {
   isFunction,
   ObjectAssign,
@@ -41,7 +41,6 @@ import {
 import {
   ObjectDefineProperty,
   paramsAttrEach,
-  camelToKebab,
 } from '../common.ts'
 import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'

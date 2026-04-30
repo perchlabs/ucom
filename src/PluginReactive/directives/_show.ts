@@ -1,16 +1,24 @@
 import type {
-  Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
+import {
+  isHTMLElement,
+} from '../../common.ts'
 import { evaluate } from '../expression.ts'
 
-export function _show(ctx: Context, dir: DirectiveDef, el: Element) {
-  const {expr} = dir
+export const _show: DirectiveHandler = (
+  ctx,
+  el,
+  {expr},
+) => {
+  if (!expr || !isHTMLElement(el)) {
+    return
+  }
 
-  const initialDisplay = (el as HTMLElement).style.display
+  const initialDisplay = el.style.display
 
   ctx.effect(() => {
-    const show = evaluate(expr, ctx) as boolean
-    (el as HTMLElement).style.display = show ? initialDisplay : 'none'
+    const show = !!evaluate(expr, ctx)
+    el.style.display = show ? initialDisplay : 'none'
   })
 }

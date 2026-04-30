@@ -1,7 +1,6 @@
 import type {
-  Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
 import {
   isValidComponentPath,
   isTemplateElement,
@@ -10,7 +9,11 @@ import { makeElementAs, nextWalkable, parentAndAnchor } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
-export function _is(ctx: Context, dir: DirectiveDef, el: Element) {
+export const _is: DirectiveHandler = (
+  ctx,
+  el,
+  dir,
+) => {
   const {man} = ctx
   const {expr} = dir
 

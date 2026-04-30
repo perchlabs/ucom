@@ -2,10 +2,10 @@ import {
   FILE_POSTFIX,
   DIR_POSTFIX,
   CONSTRUCTOR,
-} from './constants.ts'
+} from './reference.ts'
 import type {
   QueryableRoot,
-} from './types.ts'
+} from './reference.ts'
 
 export const isBoolean = (v: unknown): v is boolean => typeof v === 'boolean'
 export const isNumber = (v: unknown): v is number => typeof v === 'number'
@@ -14,9 +14,10 @@ export const isFunction = (v: unknown) => typeof v === 'function'
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
+export const isHTMLElement = (v: unknown): v is HTMLElement => v instanceof HTMLElement
+export const isShadowRoot = (v: unknown): v is ShadowRoot => v instanceof ShadowRoot
 export const isElement = (v: Node): v is Element => v?.nodeType === 1
 export const isTemplateElement = (v: Node): v is HTMLTemplateElement => v?.nodeName === 'TEMPLATE'
-export const isShadowRoot = (v: unknown): v is ShadowRoot => v instanceof ShadowRoot
 
 export const ObjectAssign = Object.assign
 export const ObjectKeys = Object.keys

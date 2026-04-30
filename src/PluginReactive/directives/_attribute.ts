@@ -1,7 +1,7 @@
 import type {
   Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
 import {
   isObject,
   isString,
@@ -13,13 +13,17 @@ import {
 } from '../../common.ts'
 import { evaluate } from '../expression.ts'
 
-export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
-  const {
-    kebab: attrName,
+export const _attribute: DirectiveHandler = (
+  ctx,
+  el,
+  {
     expr,
-  } = dir
-
-  if (!attrName) return
+    kebab: attrName,
+  },
+) => {
+  if (!attrName) {
+    return
+  }
 
   // Special handling for 'class' attribute
   if (attrName === 'class') {
@@ -32,7 +36,7 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
   }
 
   // General attribute binding
-  const exprReal = expr ? expr : attrName
+  const exprReal = expr ?? attrName
   ctx.effect(() => {
     try {
       const value = evaluate(exprReal, ctx)
@@ -59,7 +63,11 @@ export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
   })
 }
 
-export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefined {
+export function bindClass(ctx: Context, el: HTMLElement, expr: string | undefined): undefined {
+  if (!expr) {
+    return
+  }
+
   // Store original classes from HTML
   const originalClasses = split(el.className)
 
@@ -90,7 +98,11 @@ export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefine
   })
 }
 
-function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
+function bindStyle(ctx: Context, el: HTMLElement, expr: string | undefined): undefined {
+  if (!expr) {
+    return
+  }
+
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''
 

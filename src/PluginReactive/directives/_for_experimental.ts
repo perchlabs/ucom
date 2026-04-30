@@ -1,8 +1,8 @@
 import type {
   DataRecord,
   Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
 import {
   isNumber,
   isObject,
@@ -20,10 +20,14 @@ const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 type KeyToIndexMap = Map<any, number>
 type ContextToIndexMap = WeakMap<Context, number>
 
-export const _for = (ctxRoot: Context, dir: DirectiveDef, el: Element) => {
+export const _for: DirectiveHandler = (
+  ctxRoot,
+  el,
+  dir,
+) => {
   const {expr} = dir
 
-  const inMatch = expr.match(forAliasRE)
+  const inMatch = expr?.match(forAliasRE)
   if (!inMatch) {
     console.warn(`[#each] invalid expression: ${expr}`)
     return

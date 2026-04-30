@@ -1,20 +1,20 @@
 import type {
   ComponentManager,
-} from '../types.ts'
-import type {
-  Context,
-  ContextableNode,
-  RefRecord,
-  DataRecord,
-  ComputedFunction,
-} from './types.ts'
+} from '../reference.ts'
 import {
   SYS_PREFIX,
   STORE_MOD_VAR,
   STORE_MOD_CALC,
   STORE_MOD_SYNC,
   STORE_MOD_SAVE,
-} from '../constants.ts'
+} from '../reference.ts'
+import type {
+  Context,
+  ContextableNode,
+  RefRecord,
+  DataRecord,
+  ComputedFunction,
+} from './reference.ts'
 import {
   computed as createComputed,
   effect as createEffect,
@@ -32,6 +32,7 @@ import {
   cloneTemplateContent,
 } from '../common.ts'
 import { walk, walkChildren } from './walk.ts'
+import { contextableParent } from './utils.ts'
 
 interface Frag {
   start: Text
@@ -143,6 +144,11 @@ export function createContext(
 
     remove() {
       if (frag) {
+        if (!contextableParent(frag.start)) {
+          // console.warn('DEBUG frag.start does not have a parent')
+          return
+        }
+
         const range = new Range
         range.setStartBefore(frag.start)
         range.setEndAfter(frag.end)

@@ -9,14 +9,14 @@ import type {
   AttributeChangedCallback,
   ConnectedCallback,
   DisconnectedCallback,
-} from '../types.ts'
+} from '../reference.ts'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
   // CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
-} from '../constants.ts'
+} from '../reference.ts'
 import { ObjectEntriesEach, isSystemKey } from '../common.ts'
 import {createApp, ref, reactive, effect, stop, nextTick} from './petite-shadow-vue'
 

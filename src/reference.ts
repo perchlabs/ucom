@@ -173,3 +173,41 @@ export type QueryableRoot = Document | DocumentFragment | Element
 
 export type ArrayElement<ArrayType extends readonly unknown[]> = 
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never
+
+//////////////////////////
+// CONSTANTS
+//////////////////////////
+
+export const SYS_PREFIX = 'u-com'
+export const FILE_POSTFIX = '.html'
+export const DIR_POSTFIX = '.ucom'
+
+export const CONSTRUCTOR = 'constructor'
+export const ATTRIBUTE_CHANGED = 'attributeChangedCallback'
+export const CONNECTED = 'connectedCallback'
+export const DISCONNECTED = 'disconnectedCallback'
+export const FORM_ASSOCIATED = 'formAssociatedCallback'
+export const FORM_DISABLED = 'formDisabledCallback'
+export const FORM_RESET = 'formResetCallback'
+export const FORM_STATE_RESTORE = 'formStateRestoreCallback'
+
+// export const CUSTOM_CALLBACKS = [
+//   ATTRIBUTE_CHANGED,
+//   CONNECTED,
+//   DISCONNECTED,
+//   FORM_ASSOCIATED,
+//   FORM_DISABLED,
+//   FORM_RESET,
+//   FORM_STATE_RESTORE,
+// ]
+// export const CUSTOM_CALLBACKS_SET = new Set(CUSTOM_CALLBACKS)
+
+export const STATIC_FORM_ASSOCIATED = 'formAssociated'
+export const STATIC_OBSERVED_ATTRIBUTES = 'observedAttributes'
+
+export const STORE_MOD_VAR = 'var'
+export const STORE_MOD_CALC = 'calc'
+export const STORE_MOD_SYNC = 'sync'
+export const STORE_MOD_SAVE = 'save'
+export type STORE_TYPE = typeof STORE_MOD_VAR | typeof STORE_MOD_CALC | typeof STORE_MOD_SYNC | typeof STORE_MOD_SAVE
+export const storeMods = new Set<STORE_TYPE>([STORE_MOD_VAR, STORE_MOD_CALC, STORE_MOD_SYNC, STORE_MOD_SAVE])

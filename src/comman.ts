@@ -2,7 +2,7 @@ import type {
   ComponentManager,
   ComponentIdentity,
   Plugin,
-} from './types.ts'
+} from './reference.ts'
 import {
   isValidComponentName as isName,
 } from './common.ts'

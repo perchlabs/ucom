@@ -13,7 +13,7 @@ import type {
   // FormAssociatedCallback,
   // FormDisabledCallback,
   // FormStateRestoreCallback,
-} from './types.ts'
+} from './reference.ts'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
@@ -26,7 +26,7 @@ import {
   STATIC_OBSERVED_ATTRIBUTES,
   FILE_POSTFIX,
   DIR_POSTFIX,
-} from './constants.ts'
+} from './reference.ts'
 
 import {
   ArrayFrom,

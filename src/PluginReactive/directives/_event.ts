@@ -1,16 +1,19 @@
 import type {
-  Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
 import { execute } from '../expression.ts'
 
-export function _event(ctx: Context, dir: DirectiveDef, el: Element) {
-  const {
-    camel: eventName,
+export const _event: DirectiveHandler = (
+  ctx,
+  el,
+  {
     expr,
-  } = dir
-
-  if (!eventName) return
+    camel: eventName,
+  },
+) => {
+  if (!eventName || !expr) {
+    return
+  }
 
   // Create event handler function with access to:
   // - $event: the native event object

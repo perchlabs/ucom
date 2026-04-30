@@ -2,7 +2,7 @@ import type {
   ContextableNode,
   DirectiveDef,
   WalkableReturnType,
-} from './types.ts'
+} from './reference.ts'
 import {
   createElement,
   isTemplateElement,

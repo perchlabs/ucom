@@ -1,8 +1,8 @@
 import type {
   Context,
-  DirectiveDef,
+  DirectiveHandler,
   DataRecord,
-} from '../types.ts'
+} from '../reference.ts'
 import { isNumber, isObject, isArray } from '../../common.ts'
 import { evaluate } from '../expression.ts'
 import { parentAndAnchor, contextableParent, nextWalkable } from '../utils.ts'
@@ -12,12 +12,16 @@ const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
-export function _for(ctxRoot: Context, dir: DirectiveDef, el: Element) {
+export const _for: DirectiveHandler = (
+  ctxRoot,
+  el,
+  dir,
+) => {
   const {expr} = dir
 
   const next = nextWalkable(el)
 
-  const inMatch = expr.match(forAliasRE)
+  const inMatch = expr?.match(forAliasRE)
   if (!inMatch) {
     console.warn(`[#each] expression: ${expr}`)
     return next

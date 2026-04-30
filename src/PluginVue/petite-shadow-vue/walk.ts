@@ -11,7 +11,7 @@ import { evaluate } from './eval'
 import { checkAttr } from './utils'
 import { ref } from './directives/ref'
 import { createScopedContext } from './context'
-import { SYS_PREFIX } from '../../constants.ts'
+import { SYS_PREFIX } from '../../reference.ts'
 
 const dirRE = /^(?:u-|:|@)/
 const dirBasicRE = /^(u-[a-z]+)$/

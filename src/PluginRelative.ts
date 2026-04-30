@@ -1,7 +1,7 @@
 import type {
   PluginParseParams,
   Plugin,
-} from './types.ts'
+} from './reference.ts'
 import { queryAll } from './common.ts'
 
 export default {

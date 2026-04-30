@@ -1,6 +1,6 @@
 import type {
   DirectiveDef,
-} from './types.ts'
+} from './reference.ts'
 import {
   attributeEntries,
   pullAttr,
@@ -20,14 +20,13 @@ export function createDirectiveDefinition(full: string, expr: string): Directive
 
   if (match) {
     let [, key, kebab, mods = ''] = match
-
     kebab = kebab?.charAt(0) === ':' ? kebab.substring(1) : kebab
 
     return {
       key,
       kebab,
       camel: kebab ? kebabToCamel(kebab) : undefined,
-      expr,
+      expr: expr ? expr : undefined,
       mods: new Set<string>(split(mods, '.')),
     }
   }

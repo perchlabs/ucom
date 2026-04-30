@@ -1,16 +1,22 @@
 import type {
-  Context,
-  DirectiveDef,
-} from '../types.ts'
+  DirectiveHandler,
+} from '../reference.ts'
 import { evaluate } from '../expression.ts'
 
-export function _text(ctx: Context, dir: DirectiveDef, el: Element) {
-  const expr = dir.camel ? dir.camel : dir.expr
+export const _text: DirectiveHandler = (
+  ctx,
+  el,
+  {camel, expr},
+) => {
+  const exprReal = camel ?? expr
+  if (!exprReal) {
+    return
+  }
 
   // Create an effect that automatically re-runs when signals change
   ctx.effect(() => {
     try {
-      el.textContent = evaluate(expr, ctx) ?? ''
+      el.textContent = evaluate(exprReal, ctx) ?? ''
     } catch (e) {
       console.error('[u-text] ', e)
     }

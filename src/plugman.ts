@@ -19,7 +19,7 @@ import type {
   // FormDisabledCallback,
   // FormResetCallback,
   // FormStateRestoreCallback,
-} from './types.ts'
+} from './reference.ts'
 import {
   ATTRIBUTE_CHANGED,
   CONNECTED,
@@ -28,7 +28,7 @@ import {
   // FORM_DISABLED,
   // FORM_RESET,
   // FORM_STATE_RESTORE,
-} from './constants.ts'
+} from './reference.ts'
 
 export default (plugins: Plugin[]): PluginManager  => {
   const provide = <T extends PluginCallbackType>(
