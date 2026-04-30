@@ -14,14 +14,10 @@ export const _data: DirectiveHandler = (
   _el,
   {
     camel,
-    expr,
     mods,
+    expr = '',
   },
 ) => {
-  if (!expr) {
-    return
-  }
-
   const [mod = STORE_MOD_VAR] = storeMods.intersection(mods)
 
   // Create an effect that automatically re-runs when signals change

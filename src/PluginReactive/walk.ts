@@ -17,7 +17,6 @@ import { _for } from './directives/_for.ts'
 import { _is } from './directives/_is.ts'
 
 import { _text } from './directives/_text.ts'
-import { _html } from './directives/_html.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
@@ -64,7 +63,6 @@ const ctrlDirs: [string, DirectiveHandler][] = [
 const reDir = /^u-|%|@|:/
 const dirMap: Record<string, DirectiveHandler> = {
   'u-ref': _ref,
-  'u-html': _html,
   '%': _text,
   ':': _attribute,
   '@': _event,

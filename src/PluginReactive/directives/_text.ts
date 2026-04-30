@@ -6,19 +6,17 @@ import { evaluate } from '../expression.ts'
 export const _text: DirectiveHandler = (
   ctx,
   el,
-  {camel, expr},
+  {camel, expr, mods},
 ) => {
-  const exprReal = camel ?? expr
-  if (!exprReal) {
-    return
-  }
+  const exprReal = camel ?? expr ?? ''
+  const prop = mods.has('html') ? 'innerHTML' : 'textContent'
 
   // Create an effect that automatically re-runs when signals change
   ctx.effect(() => {
     try {
-      el.textContent = evaluate(exprReal, ctx) ?? ''
+      el[prop] = evaluate(exprReal, ctx) ?? ''
     } catch (e) {
-      console.error('[u-text] ', e)
+      console.error('[text] ', e)
     }
   })
 }
