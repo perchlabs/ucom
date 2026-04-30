@@ -6,28 +6,26 @@ export type ComputedFunction = () => any
 export interface Context {
   man: ComponentManager
   walkable: ContextableNode
-  start: Node
-  refs: RefRecord
-  cleanup: (() => void)[]
+  start: Text | ContextableNode
 
-  effect: (fn: () => void) => void
-
-  teardownCallback?(): void
   mount(root: ContextableNode, anchor: Node): void
   scope(el: Element, data?: DataRecord): Context
-  remove(): void
   teardown(): void
+
+  push: (fn: () => void) => void
+  effect: (fn: () => void) => void
 
   data: DataRecord
   var: StoreAdder
   calc: StoreAdder
   sync: StoreAdder
   save: StoreAdder
-}
-export type StoreAdder = (key: string, val: any) => void
 
+  refs: RefRecord
+}
 // ContextableNode should use Element so that SVGElement is considered.
 export type ContextableNode = DocumentFragment | Element
+export type StoreAdder = (key: string, val: any) => void
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export type DirectiveDef = {
@@ -37,6 +35,6 @@ export type DirectiveDef = {
   expr?: string
   mods: Set<string>
 }
+export type WalkableReturnType = Element | undefined | null | void
 export type DirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
   => WalkableReturnType
-export type WalkableReturnType = Element | undefined | null | void

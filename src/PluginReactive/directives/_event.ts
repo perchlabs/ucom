@@ -30,5 +30,5 @@ export const _event: DirectiveHandler = (
   el.addEventListener(eventName, handler)
 
   // Add cleanup to context
-  ctx.cleanup.push(() => el.removeEventListener(eventName, handler))
+  ctx.push(() => el.removeEventListener(eventName, handler))
 }

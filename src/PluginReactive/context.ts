@@ -24,6 +24,7 @@ import {
   isFunction,
   isShadowRoot,
   isTemplateElement,
+  ArrayFrom,
   ObjectKeys,
   ObjectEntriesEach,
   ObjectDefineProperty,
@@ -32,7 +33,6 @@ import {
   cloneTemplateContent,
 } from '../common.ts'
 import { walk, walkChildren } from './walk.ts'
-import { contextableParent } from './utils.ts'
 
 interface Frag {
   start: Text
@@ -57,16 +57,18 @@ export function createContext(
 
   dataRaw: DataRecord = {},
   dataParent: DataRecord = {},
+  teardownCallback: () => void = () => {},
 
   refs: RefRecord = {},
 ): Context {
   const frag: Frag | null = isTemplateElement(ptr)
     ? {start: new Text, end: new Text}
     : null
-  const walkable: ContextableNode =
-    frag ? cloneTemplateContent(ptr as HTMLTemplateElement) :
-    isShadowRoot(ptr) ? ptr :
-    ptr.cloneNode(true) as Element
+  const walkable: ContextableNode = frag
+    ? cloneTemplateContent(ptr as HTMLTemplateElement)
+    : isShadowRoot(ptr)
+      ? ptr
+      : ptr.cloneNode(true) as Element
 
   let initialized = false
   const children = new Set<Context>()
@@ -74,11 +76,11 @@ export function createContext(
   const storeName = SYS_PREFIX + safeNodeName(customEl)
   const data: DataRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
+  const cleanup: (() => void)[] = []
 
   const ctx: Context = {
     man,
     refs,
-    cleanup: [],
 
     get start() {
       return frag?.start ?? walkable
@@ -92,10 +94,6 @@ export function createContext(
       return proxy
     },
 
-    effect(fn: () => void) {
-      ctx.cleanup.push(createEffect(fn))
-    },
-
     scope(ptr: Element, dataNew: DataRecord = {}) {
       const scoped = createContext(
         man,
@@ -104,6 +102,7 @@ export function createContext(
 
         dataNew,
         proxy,
+        () => children.delete(scoped),
 
         {...refs},
       )
@@ -142,12 +141,16 @@ export function createContext(
       }
     },
 
-    remove() {
+    teardown() {
+      ArrayFrom(children).forEach(child => child.teardown())
+      cleanup.forEach(fn => fn())
+      teardownCallback()
+
       if (frag) {
-        if (!contextableParent(frag.start)) {
-          // console.warn('DEBUG frag.start does not have a parent')
-          return
-        }
+        // if (!contextableParent(frag.start)) {
+        //   console.warn('DEBUG frag.start does not have a parent')
+        //   return
+        // }
 
         const range = new Range
         range.setStartBefore(frag.start)
@@ -158,10 +161,12 @@ export function createContext(
       }
     },
 
-    teardown() {
-      children.forEach(child => child.teardown())
-      ctx.remove()
-      ctx.cleanup.forEach(fn => fn())
+    effect(fn: () => void) {
+      ctx.push(createEffect(fn))
+    },
+
+    push(fn: () => void) {
+      cleanup.push(fn)
     },
 
     [STORE_MOD_VAR](camel: string, val: any) {
