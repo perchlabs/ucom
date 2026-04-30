@@ -3,13 +3,15 @@
   $cols=2
   cast="parseInt"
 >
+<!-- Set the CSS Custom Properties -->
+<meta --rows --cols>
 
 <div>
   <!-- SLOT GAME <meta %rows> x <meta %cols> -->
   SLOT GAME <meta %="`${rows} x ${cols}`">
 </div>
 
-<main --rows --cols>
+<main>
   <template #each="i in rows">
     <section #each="j in cols">
       <meta $name="`${i}:${j}`">

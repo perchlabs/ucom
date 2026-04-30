@@ -16,6 +16,7 @@ export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
 export const isElement = (v: Node): v is Element => v?.nodeType === 1
 export const isTemplateElement = (v: Node): v is HTMLTemplateElement => v?.nodeName === 'TEMPLATE'
+export const isShadowRoot = (v: unknown): v is ShadowRoot => v instanceof ShadowRoot
 
 export const ObjectAssign = Object.assign
 export const ObjectKeys = Object.keys
@@ -24,6 +25,8 @@ export const ObjectEntries = Object.entries
 export const ObjectFromEntries = Object.fromEntries
 export const ObjectDefineProperty = Object.defineProperty
 export const ArrayFrom = Array.from
+
+export const createElement = document.createElement.bind(document)
 
 export const safeNodeName = (node: Node) => node.nodeName.toLowerCase()
 
@@ -96,8 +99,9 @@ export const getTopLevelChildren = <T extends HTMLElement>(
 ) => 
   ArrayFrom(container.children).filter(el => tags.includes(safeNodeName(el))) as T[]
 
-export const kebabize = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
+export const camelToKebab = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerCase()
 
-export const kebabToCamel = (v: string) => v.replace(/-./g, m => m.toUpperCase()[1])
+// export const kebabToCamel = (v: string) => v.replace(/-./g, m => m.toUpperCase()[1])
+export const kebabToCamel = (v: string) => v.replace(/-./g, m => m[1].toUpperCase())
 
 export const split = (v: string, s: string = ' ') => v.split(s).filter(c => c)

@@ -4,8 +4,9 @@ import type {
   WalkableReturnType,
 } from './types.ts'
 import {
-  attributeEntries,
+  createElement,
   isTemplateElement,
+  attributeEntries,
 } from '../common.ts'
 
 export const contextableParent = (el: Node) => el?.parentNode as ContextableNode | null
@@ -34,7 +35,7 @@ export function parentAndAnchor(
 }
 
 export function makeElementAs(el: Element, tagName: string) {
-  const tag = document.createElement(tagName)
+  const tag = createElement(tagName)
   attributeEntries(el).forEach(e => tag.setAttribute(...e))
 
   if (isTemplateElement(el)) {

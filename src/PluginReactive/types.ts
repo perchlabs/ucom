@@ -31,10 +31,10 @@ export type ContextableNode = DocumentFragment | Element
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export type DirectiveDef = {
-  full: string
   key: string
+  kebab?: string
+  camel?: string
   expr: string
-  ref?: string
   mods: Set<string>
 }
 export type DirectiveHandler = (ctx: Context, dir: DirectiveDef, el: Element)

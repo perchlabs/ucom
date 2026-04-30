@@ -5,6 +5,7 @@ import {
   attributeEntries,
   pullAttr,
   split,
+  kebabToCamel,
 } from '../common.ts'
 
 export const getDirectives = (el: Element, reFilter: RegExp) =>
@@ -12,20 +13,20 @@ export const getDirectives = (el: Element, reFilter: RegExp) =>
   filter(([k]) => reFilter.test(k)).
   flatMap(item => createDirectiveDefinition(...item) ?? [])
 
-export const reDirDef = /^(u-[a-z]+|[^a-z]{1,2})(:?[a-z0-9]+[a-z0-9\-]*)?(\..+)*$/
+export const reDirDef = /^(u-[a-z]+|[^a-z]{1,3})(:?[a-z0-9]+[a-z0-9\-]*)?(\..+)*$/
 
 export function createDirectiveDefinition(full: string, expr: string): DirectiveDef | undefined {
   const match = full.match(reDirDef)
 
   if (match) {
-    let [, key, ref, mods = ''] = match
+    let [, key, kebab, mods = ''] = match
 
-    ref = ref?.charAt(0) === ':' ? ref.substring(1) : ref
+    kebab = kebab?.charAt(0) === ':' ? kebab.substring(1) : kebab
 
     return {
-      full,
       key,
-      ref,
+      kebab,
+      camel: kebab ? kebabToCamel(kebab) : undefined,
       expr,
       mods: new Set<string>(split(mods, '.')),
     }

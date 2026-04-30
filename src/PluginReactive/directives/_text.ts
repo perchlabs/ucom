@@ -5,7 +5,7 @@ import type {
 import { evaluate } from '../expression.ts'
 
 export function _text(ctx: Context, dir: DirectiveDef, el: Element) {
-  const expr = dir.ref ? dir.ref : dir.expr
+  const expr = dir.camel ? dir.camel : dir.expr
 
   // Create an effect that automatically re-runs when signals change
   ctx.effect(() => {

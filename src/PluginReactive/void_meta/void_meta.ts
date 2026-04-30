@@ -2,9 +2,15 @@ import type {
   Context,
   DirectiveDef,
 } from '../types.ts'
+import {
+  createElement,
+} from '../../common.ts'
+import {
+  nextWalkable, contextableParent,
+} from '../utils.ts'
 import { getDirectives } from '../directive.ts'
-import { nextWalkable, contextableParent } from '../utils.ts'
-import { _data } from '../directives/_data.ts'
+import { _data } from './_data.ts'
+import { _cssprop } from './_cssprop.ts'
 import { _text } from '../directives/_text.ts'
 
 export function void_meta(ctx: Context, el: HTMLMetaElement) {
@@ -12,15 +18,25 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
     $(def: DirectiveDef) {
       _data(ctx, def, el)
     },
+    '--'(def: DirectiveDef) {
+      _cssprop(ctx, def, el)
+    },
+    '$--'(def: DirectiveDef) {
+      _data(ctx, def, el)
+      _cssprop(ctx, {
+        ...def,
+        expr: '',
+      }, el)
+    },
     '%'(def: DirectiveDef) {
-      const span = document.createElement('span')
+      const span = createElement('span')
       _text(ctx, def, span)
       const parent = contextableParent(el)!
       parent.insertBefore(span, el)
     },
   }
 
-  for (const def of getDirectives(el, /^\$|%/)) {
+  for (const def of getDirectives(el, /^\$|\$--|--|%/)) {
     dirMap[def.key]?.(def)
   }
 

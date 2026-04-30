@@ -6,7 +6,7 @@ import { execute } from '../expression.ts'
 
 export function _event(ctx: Context, dir: DirectiveDef, el: Element) {
   const {
-    ref: eventName,
+    camel: eventName,
     expr,
   } = dir
 

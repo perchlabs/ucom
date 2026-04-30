@@ -8,14 +8,14 @@ import {
   isBoolean,
   ArrayFrom,
   ObjectEntriesEach,
-  kebabize,
+  camelToKebab,
   split,
 } from '../../common.ts'
 import { evaluate } from '../expression.ts'
 
 export function _attribute(ctx: Context, dir: DirectiveDef, el: Element) {
   const {
-    ref: attrName,
+    kebab: attrName,
     expr,
   } = dir
 
@@ -109,7 +109,7 @@ function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
         ObjectEntriesEach(value, ([prop, val]) => {
           if (val != null) {
             // Convert camelCase to kebab-case (fontSize -> font-size)
-            el.style.setProperty(kebabize(prop), `${val}`)
+            el.style.setProperty(camelToKebab(prop), `${val}`)
           }
         })
       }

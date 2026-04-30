@@ -22,7 +22,6 @@ export function execute(expr: string, ctxThis: Context | null, other: DataRecord
 
 function run(code: string, $data: DataRecord, other: DataRecord) {
   const params: DataRecord = {...other, $data}
-
   try {
     const fn = new Function(...ObjectKeys(params), code)
     return fn(...ObjectValues(params))

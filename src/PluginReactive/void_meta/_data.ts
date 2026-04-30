@@ -13,7 +13,7 @@ import { evaluate } from '../expression.ts'
 
 export function _data(ctx: Context, dir: DirectiveDef, _el: Element) {
   const {
-    ref,
+    camel,
     expr,
     mods,
   } = dir
@@ -26,27 +26,27 @@ export function _data(ctx: Context, dir: DirectiveDef, _el: Element) {
     try {
       const v = evaluate(expr, ctx) ?? {}
 
-      if (ref) {
-        addItem(ctx, ref, v)
+      if (camel) {
+        addItem(ctx, camel, v)
       } else if (isObject(v)) {
         for (const k in v) {
           addItem(ctx, k, v[k])
         }
       } else {
-        console.warn(`[$${ref}] invalid type`)
+        console.warn(`[$${camel}] invalid type`)
       }
     } catch (e) {
-      console.error(`[$${ref}] `, e)
+      console.error(`[$${camel}] `, e)
     }
   })
 
-  function addItem(ctx: Context, ref: string, v: any) {
+  function addItem(ctx: Context, camel: string, v: any) {
     switch (mod) {
       case STORE_MOD_VAR:
       case STORE_MOD_CALC:
       case STORE_MOD_SYNC:
       case STORE_MOD_SAVE:
-        ctx[mod](ref, v)
+        ctx[mod](camel, v)
     }
   }
 }

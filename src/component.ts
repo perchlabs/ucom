@@ -31,6 +31,7 @@ import {
 import {
   ArrayFrom,
   ObjectFromEntries,
+  createElement,
   attributeEntries,
   paramsAttrEach,
   cloneTemplateContent,
@@ -68,7 +69,7 @@ export async function fetchTemplate(path: string): Promise<HTMLTemplateElement> 
     throw new ComponentFetchError(path, 'Content started with <!DOCTYPE')
   }
 
-  const tpl = document.createElement('template')
+  const tpl = createElement('template')
   tpl.innerHTML = text
 
   return tpl
@@ -95,6 +96,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
   await plugins.parse({man, def, frag})
 
   const [Raw, exports, params] = await processFragment(frag)
+
 
   const modes: Record<string, string> = {}
   params.forEach(attrMap => {
@@ -155,7 +157,7 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> 
 }
 
 export function hashContent(tpl: HTMLTemplateElement): number {
-  const div = document.createElement('div')
+  const div = createElement('div')
   div.appendChild(cloneTemplateContent(tpl))
   return ArrayFrom(div.innerHTML)
     .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)

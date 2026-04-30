@@ -22,6 +22,7 @@ import {
 } from './alien-signals'
 import {
   isFunction,
+  isShadowRoot,
   isTemplateElement,
   ObjectKeys,
   ObjectEntriesEach,
@@ -38,7 +39,7 @@ interface Frag {
 }
 
 type StoreItem = [
-  key: string,
+  camel: string,
   value: (...args: any[]) => any,
   isFunc?: boolean,
 ]
@@ -63,7 +64,7 @@ export function createContext(
     : null
   const walkable: ContextableNode =
     frag ? cloneTemplateContent(ptr as HTMLTemplateElement) :
-    ptr instanceof ShadowRoot ? ptr :
+    isShadowRoot(ptr) ? ptr :
     ptr.cloneNode(true) as Element
 
   let initialized = false
@@ -157,28 +158,28 @@ export function createContext(
       ctx.cleanup.forEach(fn => fn())
     },
 
-    [STORE_MOD_VAR](key: string, val: any) {
-      addItem(simpleItem(key, val))
+    [STORE_MOD_VAR](camel: string, val: any) {
+      addItem(simpleItem(camel, val))
     },
 
-    [STORE_MOD_CALC](key: string, value: ComputedFunction) {
-      addItem([key, createComputed(value)])
+    [STORE_MOD_CALC](camel: string, value: ComputedFunction) {
+      addItem([camel, createComputed(value)])
     },
 
-    [STORE_MOD_SYNC](key: string, value: any) {
-      const keyId = `${storeName}-${key}`
-      syncMap[keyId] ??= simpleItem(key, value)
+    [STORE_MOD_SYNC](camel: string, value: any) {
+      const keyId = `${storeName}-${camel}`
+      syncMap[keyId] ??= simpleItem(camel, value)
       addItem(syncMap[keyId])
     },
 
-    [STORE_MOD_SAVE](key: string, value: any) {
-      const keyId = `${storeName}-${key}`
-      syncMap[keyId] ??= persistItem(key, value)
+    [STORE_MOD_SAVE](camel: string, value: any) {
+      const keyId = `${storeName}-${camel}`
+      syncMap[keyId] ??= persistItem(camel, value)
       addItem(syncMap[keyId])
 
-      function persistItem(key: string, value: any): StoreItem {
+      function persistItem(camel: string, value: any): StoreItem {
         if (isFunction(value)) {
-          return [key, value, true]
+          return [camel, value, true]
         }
 
         const json = localStorage.getItem(keyId)
@@ -188,16 +189,16 @@ export function createContext(
           localStorage.setItem(keyId, JSON.stringify(signal()))
         )
 
-        return [key, signal]
+        return [camel, signal]
       }
     },
   }
 
-  function addItem([key, value, isFunc = false]: StoreItem) {
+  function addItem([camel, value, isFunc = false]: StoreItem) {
     if (isFunc) {
-      data[key] = value.bind(customEl)
+      data[camel] = value.bind(customEl)
     } else {
-      ObjectDefineProperty(data, key, {
+      ObjectDefineProperty(data, camel, {
         get() { return value() },
         set(val) { value(val) },
         enumerable: true,
@@ -212,33 +213,33 @@ export function createContext(
 
 function createFallbackProxy(data: DataRecord, parent: DataRecord = {}) {
   return new Proxy(data, {
-    has(_target, key) {
-      return key in data || key in parent
+    has(_target, camel) {
+      return camel in data || camel in parent
     },
     ownKeys(_target) {
       return uniqueArr(ObjectKeys(data), ObjectKeys(parent))
     },
-    get(_target, key) {
-      if (key === Symbol.unscopables) {
+    get(_target, camel) {
+      if (camel === Symbol.unscopables) {
         return
       }
 
-      return Reflect.get(data, key) ?? Reflect.get(parent, key)
+      return Reflect.get(data, camel) ?? Reflect.get(parent, camel)
     },
-    // set(target, key, val) {
-    //   if (!(key in target)) {
-    //     console.warn(`Property '${key}' must be set on the store before updating it.`)
+    // set(target, camel, val) {
+    //   if (!(camel in target)) {
+    //     console.warn(`Property '${camel}' must be set on the store before updating it.`)
     //   }
 
-    //   return Reflect.set(data, key, val)
+    //   return Reflect.set(data, camel, val)
     // },
   })
 }
 
-function simpleItem(key: string, value: any): StoreItem {
+function simpleItem(camel: string, value: any): StoreItem {
   const isFunc = isFunction(value)
   return [
-    key,
+    camel,
     isFunc ? value : createSignal(value),
     isFunc,
   ]

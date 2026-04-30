@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`18.5k` minified) (`7.7k` gzipped)
+* ucom (`18.6k` minified) (`7.7k` gzipped)
 * ucom_vue (`27.9k` minified) (`11.6k` gzipped)
 * ucom_lite (`6.2k` minified) (`2.8k` gzipped)
 
@@ -20,10 +20,10 @@ Create a template with a `u-com` attribute. It will be registered as a custom el
 
 ```html
 <template u-com="my-component">
-  Now we're starting to get serious.
+  This is a component.
 </template>
 
-<!-- Use the custom element normally anywhere, even within another framework. -->
+<!-- Use the custom element normally anywhere, even from within another framework. -->
 <my-component><my-component>
 ```
 
@@ -52,12 +52,7 @@ Create an immediately executed component app with an empty `u-com` attribute.
 
 ```html
 <template u-com>
-  <source src="/components/my-component.ucom">
-
-  This is an inline, self-instantiated app.
-  You can use this to bootstrap, to create layouts, or to write quick one-offs.
-
-  <my-component></my-component>
+  <script>alert('popup component')</script>
 </template>
 ```
 
@@ -181,41 +176,6 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 </style>
 ```
 
-### Theming
-
-Element IDs are sandboxed via shadow dom.
-
-```html
-<template u-com>
-  <header id="header">Stylized Component</header>
-  <main>Component Body</main>
-
-  <style>
-    #header {
-      color: green;
-    }
-    main {
-      color: blue;
-    }
-  </style>
-</template>
-```
-
-You can "pierce" the shadow dom of a component with themes by adding the `u-com` attribute to the `style` or `link` element.  Ucom will add this styling to all custom elements by adding it to its  `adoptedStyleSheets`.
-
-You may also use a dynamic CSS `@import` within the `style` tag of each of your components.
-
-```html
-<!DOCTYPE html>
-  <head>
-    <!-- u-com on a link or style will cause it to be attached to all components "piercing" it. -->
-    <link u-com rel="stylesheet" href="/style/bootstrap-5.3.2.min.css">
-    <style u-com>
-      @import url("/style/test.css");
-    </style>
-  </head>
-```
-
 ### Template Directives
 
 #### Directives that create a subscope ####
@@ -231,11 +191,12 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 - `@` handler
 - `%` text
 - `:` bind (supports :class and :style)
-- `--` CSS custom property shorthand
 
 `meta` void element specific options.
 
 - `$` data
+- `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
+- `$--` combined data with CSS Custom Property
 - `%` text
 
 ```html
@@ -334,6 +295,102 @@ It's easy to add js properties and html attributes to your components using the 
   <button @click="count++"><meta %count> times</button>
 </template>
 ```
+
+### Theming
+
+Element IDs are sandboxed via shadow dom.
+
+```html
+<template u-com>
+  <header id="header">Stylized Component</header>
+  <main>Component Body</main>
+
+  <style>
+    #header {
+      color: green;
+    }
+    main {
+      color: blue;
+    }
+  </style>
+</template>
+```
+
+[CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties) can be added using `--` prefix on the meta element.  You may choose a different store variable name to use by specifying a value.
+
+```html
+<template u-com>
+  <meta $color="'red'">
+  <meta --color>
+
+  <main>
+    Main color
+  </main>
+
+  <button @click="color = 'red'">red</button>
+  <button @click="color = 'green'">green</button>
+  <button @click="color = 'blue'">blue</button>
+
+  <style>
+    main {
+      color: var(--color);
+    }
+  </style>
+</template>
+```
+
+```html
+<template u-com>
+  <!-- Combine '$' and '--' directives -->
+  <meta $--color="'green'">
+
+  green color component
+
+  <style>
+    :host {
+      color: var(--color);
+    }
+  </style>
+</template>
+```
+
+```html
+<my-color></my-color>
+<my-color color="purple"></my-color>
+
+<template u-com="my-color">
+  <!-- Create element attribute and property defaulting to green. -->
+  <param $color="'green'">
+  <!-- Have the CSS custom property track the element attribute -->
+  <meta --color>
+
+  <!-- Print the current color of the component -->
+  <meta %color> color component
+
+  <!-- Define the Shadow Root Host color using the CSS custom property -->
+  <style>
+    :host {
+      color: var(--color);
+    }
+  </style>
+</template>
+```
+
+You can "pierce" the shadow dom of a component with themes by adding the `u-com` attribute to the `style` or `link` element.  Ucom will add this styling to all custom elements by adding it to its `adoptedStyleSheets`.
+
+You may also use a dynamic CSS `@import` within the `style` tag of each of your components.
+
+```html
+<!DOCTYPE html>
+  <head>
+    <!-- u-com on a link or style will cause it to be attached to all components "piercing" it. -->
+    <link u-com rel="stylesheet" href="/style/bootstrap-5.3.2.min.css">
+    <style u-com>
+      @import url("/style/test.css");
+    </style>
+  </head>
+```
+
 
 #### Dynamic Element Creation
 

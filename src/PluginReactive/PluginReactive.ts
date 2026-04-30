@@ -29,6 +29,7 @@ import {
   pullKey,
   isSystemKey,
   uniqueArr,
+  kebabToCamel,
 } from '../common.ts'
 import {
   computed as $computed,
@@ -40,6 +41,7 @@ import {
 import {
   ObjectDefineProperty,
   paramsAttrEach,
+  camelToKebab,
 } from '../common.ts'
 import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'
@@ -82,13 +84,13 @@ export default {
       ObjectKeys(propDefs),
     )
 
-    for (const k in propDefs) {
-      ObjectDefineProperty(proto, k, {
+    ObjectEntriesEach(propDefs, ([_kebab, [camel, cast]]) => {
+      ObjectDefineProperty(proto, camel, {
         get() {
-          return this[DataIndex][k]
+          return this[DataIndex][camel]
         },
         set(newValue) {
-          this[DataIndex][k] = propDefs[k].cast?.(newValue) ?? newValue
+          this[DataIndex][camel] = cast?.(newValue) ?? newValue
         },
         // set(newValue) {
         //   if (propDefs[k].reflect) {
@@ -98,7 +100,8 @@ export default {
         //   }
         // },
       })
-    }
+
+    })
 
     ObjectAssign(proto, {
       $computed,
@@ -112,16 +115,16 @@ export default {
   [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
     const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
 
-    return (k: string, _oldValue: string | null, newValue: string | null) => {
+    return (kebab: string, _oldValue: string | null, newValue: string | null) => {
       const data = (el as UpgradeComponent)[DataIndex]
-      const propDef = propDefs[k]
-      if (!data || !propDef) {
-        return
-      }
+      const propDef = propDefs[kebab]
 
-      const val = propDef.cast?.(newValue) ?? newValue
-      if (val !== data[k]) {
-        data[k] = val
+      if (data && propDef) {
+        const [camel, cast] = propDef
+        const val = cast?.(newValue) ?? newValue
+        if (val !== data[camel]) {
+          data[camel] = val
+        }
       }
     }
   },
@@ -144,7 +147,7 @@ export default {
   },
 } as Plugin
 
-const reParamKey = /^\$([a-z]+)$/
+const reParamKey = /^\$([a-z0-9]+[a-z0-9\-]*)$/
 
 function parseParams(funcs: FunctionRecord, params: Record<string, string>[]) {
   const propDefs: PropDefs = {}
@@ -155,11 +158,12 @@ function parseParams(funcs: FunctionRecord, params: Record<string, string>[]) {
       ? evaluate(castVal, null, funcs) as (value: string) => any
       : undefined
 
-    paramsAttrEach(attrMap, reParamKey, (k, expr) => {
-      propDefs[k] = {
+    paramsAttrEach(attrMap, reParamKey, (kebab, expr) => {
+      propDefs[kebab] = [
+        kebabToCamel(kebab),
         cast,
-        default: evaluate(expr, null, funcs),
-      }
+        evaluate(expr, null, funcs),
+      ]
     })
   })
 
@@ -176,9 +180,9 @@ function makeContextData(
   const data: DataRecord = {...funcs}
 
   // From property definition.
-  ObjectEntriesEach(propDefs, ([k, def]) => {
-    const raw = el.getAttribute(k) ?? def.default
-    data[k] = def.cast?.(raw) ?? raw
+  ObjectEntriesEach(propDefs, ([k, [camel, cast, defaultVal]]) => {
+    const raw = el.getAttribute(k) ?? defaultVal
+    data[camel] = cast?.(raw) ?? raw
   })
 
   return data
@@ -186,12 +190,12 @@ function makeContextData(
 
 type FunctionRecord = Record<string, (...args: any[]) => any>
 
-type PropDef = {
-  default: any
-  // TODO: Investigate ways to control reflective attributes/properties
-  // reflect: boolean,
-  cast?: (value: any) => any
-}
+type PropDef = [
+  camel: string,
+  cast: ((value: any) => any) | undefined,
+  defaultValue: any,
+]
+
 type PropDefs = Record<string, PropDef>
 
 interface UpgradeComponent extends WebComponent {

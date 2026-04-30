@@ -8,8 +8,9 @@ import {
   SYS_PREFIX,
 } from './constants.ts'
 import {
-  isValidComponentName,
   isElement,
+  createElement,
+  isValidComponentName,
   queryAll,
   isTemplateElement,
 } from './common.ts'
@@ -40,7 +41,7 @@ const processTemplates = async (
     // Annonymous bootstrap app
     const ident = await man.define(null, tpl)
     if (ident) {
-      tpl.replaceWith(document.createElement(ident.name))
+      tpl.replaceWith(createElement(ident.name))
     }
   }
 })
