@@ -11,6 +11,7 @@ import {
 import { getDirectives } from '../directive.ts'
 import { _data } from './_data.ts'
 import { _cssprop } from './_cssprop.ts'
+import { _effect } from './_effect.ts'
 import { _text } from '../directives/_text.ts'
 
 export function void_meta(ctx: Context, el: HTMLMetaElement) {
@@ -28,6 +29,9 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
         expr: '',
       })
     },
+    '()'(def: DirectiveDef) {
+      _effect(ctx, el, def)
+    },
     '%'(def: DirectiveDef) {
       const span = createElement('span')
       _text(ctx, span, def)
@@ -36,7 +40,7 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
     },
   }
 
-  for (const def of getDirectives(el, /^\$|--|\$--|%/)) {
+  for (const def of getDirectives(el, /^\$|--|\$--|%|\(\)/)) {
     dirMap[def.key]?.(def)
   }
 

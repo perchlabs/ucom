@@ -197,6 +197,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
 - `$--` combined data with CSS Custom Property
 - `%` text (unescaped HTML with .html modifier)
+- `()` effect runner.
 
 ```html
 <template u-com>
