@@ -52,7 +52,7 @@ export const globalRefs: RefRecord = {}
 
 export function createContext(
   man: ComponentManager,
-  customEl: HTMLElement,
+  host: HTMLElement,
   ptr: ContextableNode,
 
   dataRaw: DataRecord = {},
@@ -73,7 +73,7 @@ export function createContext(
   let initialized = false
   const children = new Set<Context>()
 
-  const storeName = SYS_PREFIX + safeNodeName(customEl)
+  const storeName = `${SYS_PREFIX}-${safeNodeName(host)}`
   const data: DataRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
   const cleanup: (() => void)[] = []
@@ -97,7 +97,7 @@ export function createContext(
     scope(ptr: Element, dataNew: DataRecord = {}) {
       const scoped = createContext(
         man,
-        customEl,
+        host,
         ptr,
 
         dataNew,
@@ -207,7 +207,7 @@ export function createContext(
 
   function addItem([camel, value, isFunc = false]: StoreItem) {
     if (isFunc) {
-      data[camel] = value.bind(customEl)
+      data[camel] = value.bind(host)
     } else {
       ObjectDefineProperty(data, camel, {
         get() { return value() },
