@@ -50,7 +50,7 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
 export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable) {
   let child: WalkableReturnType = node.firstElementChild
   while (child) {
-    child = walk(ctx, child as HTMLElement) ?? nextWalkable(child)
+    child = walk(ctx, child) ?? nextWalkable(child)
   }
 }
 
