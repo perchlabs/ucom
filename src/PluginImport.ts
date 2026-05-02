@@ -14,6 +14,7 @@ import {
   ArrayFrom,
   ObjectFromEntries,
   safeNodeName,
+  isValidComponentName,
   queryAll,
   attrToggled,
   attributeEntries,
@@ -70,7 +71,7 @@ const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
 const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   const arr = queryAll(root, ':not(:defined)')
   const nodeName = safeNodeName(root)
-  if (man.isName(nodeName) && !man.has(nodeName)) {
+  if (isValidComponentName(nodeName) && !man.has(nodeName)) {
     arr.push(root as Element)
   }
   return arr

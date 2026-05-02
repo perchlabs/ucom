@@ -2,76 +2,62 @@ import type {
   DirectiveHandler,
 } from '../reference.ts'
 import {
-  isValidComponentPath,
+  isString,
   isTemplateElement,
+  isValidComponentName,
+  isValidComponentPath,
 } from '../../common.ts'
-import { makeElementAs, nextWalkable, parentAndAnchor } from '../utils.ts'
+import { makeElementAs } from '../utils.ts'
 import { evaluate } from '../expression.ts'
 import { walk } from '../walk.ts'
 
 export const _is: DirectiveHandler = (
   ctx,
   el,
-  dir,
+  {expr},
 ) => {
   const {man} = ctx
-  const {expr} = dir
+
+console.log('expr: ', expr)
 
   if (!expr) {
+    console.warn(`[u-is] empty expression`)
     return
   }
-
   if (!isTemplateElement(el)) {
-    console.warn(`[u-is] not a template.`)
+    console.warn(`[u-is] not a template`)
     return
   }
 
-  const [parent, anchor] = parentAndAnchor(dir, el)
-  if (!parent) {
-    console.warn('[u-is] no parent')
-    return
-  }
-
-  const next = nextWalkable(el)
-  el.remove()
-
-  let tagName = ''
-  let tag: HTMLElement | undefined
+  let is: HTMLElement | undefined
 
   ctx.effect(() => {
-    if (tag) {
-      parent.insertBefore(anchor, tag)
-      tag.remove()
+    is?.remove()
+
+    const value = evaluate(expr, ctx)
+    if (!isString(value)) {
+      return
     }
 
-    let tagNameNew: string | undefined
-    const ref = evaluate(expr, ctx)
-    if (isValidComponentPath(ref)) {
+    let tagName: string
+    if (isValidComponentName(value)) {
+      tagName = value
+    } else if (isValidComponentPath(value)) {
       try {
-        const {name, path} = man.resolve(ref)
-        tagNameNew = name
-        if (!man.has(tagNameNew)) {
+        const {name, path} = man.resolve(value)
+        tagName = name
+        if (!man.has(tagName)) {
           man.import(path)
         }
       } catch (e) {
         return
       }
     } else {
-      tagNameNew = evaluate(expr, ctx)
-    }
-
-    if (!tagNameNew || tagNameNew === tagName) {
       return
     }
 
-    tagName = tagNameNew
-    tag = makeElementAs(el, tagName)
-
-    parent.insertBefore(tag, anchor)
-    anchor.remove()
-
-    walk(ctx, tag)
+    is = makeElementAs(el, tagName)
+    el.before(is)
+    walk(ctx, is)
   })
-
-  return next
 }

@@ -4,9 +4,6 @@ import type {
   Plugin,
 } from './reference.ts'
 import {
-  isValidComponentName as isName,
-} from './common.ts'
-import {
   resolveImport as resolve,
   fetchTemplate,
   ComponentFetchError,
@@ -31,7 +28,6 @@ export default (pluginsRaw: Plugin[]) => {
   const man: ComponentManager = {
     lazy,
     resolve,
-    isName,
 
     async start() {
       if (document.readyState === 'loading') {

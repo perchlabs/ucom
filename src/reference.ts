@@ -104,7 +104,6 @@ export interface ComponentManager {
   import: ComponentImporter,
   resolve: ComponentResolver,
   has: (name: string) => boolean
-  isName: (name: string) => boolean
 }
 export type ComponentDefiner = (name: string | null, tpl: HTMLTemplateElement) => Promise<ComponentDef | undefined>
 export type ComponentImporter = (url: string, tpl?: HTMLTemplateElement) => Promise<ComponentDef | undefined> 
