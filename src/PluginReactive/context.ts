@@ -185,20 +185,20 @@ export function createContext(
 
     [STORE_MOD_SAVE](camel: string, value: any) {
       const keyId = `${storeName}-${camel}`
-      syncMap[keyId] ??= persistItem(camel, value)
+      syncMap[keyId] ??= persistItem()
       addItem(syncMap[keyId])
 
-      function persistItem(camel: string, value: any): StoreItem {
+      function persistItem(): StoreItem {
         if (isFunction(value)) {
           return [camel, value, true]
         }
 
         const json = localStorage.getItem(keyId)
         const signal = createSignal(json ? JSON.parse(json) : value)
-
-        ctx.effect(() =>
+        // This effect should not be cleaned up with the context.
+        createEffect(() => {
           localStorage.setItem(keyId, JSON.stringify(signal()))
-        )
+        })
 
         return [camel, signal]
       }
