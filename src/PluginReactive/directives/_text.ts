@@ -8,13 +8,13 @@ export const _text: DirectiveHandler = (
   el,
   {camel, expr, mods},
 ) => {
-  const exprReal = (camel ?? expr) || ''
+  const exprReal = camel ?? expr
   const prop = mods.has('html') ? 'innerHTML' : 'textContent'
 
-  // Create an effect that automatically re-runs when signals change
+  // Create an effect that automatically re-runs when signals change.
   ctx.effect(() => {
     try {
-      el[prop] = evaluate(exprReal, ctx) ?? ''
+      el[prop] = evaluate(exprReal, ctx) as string | undefined ?? ''
     } catch (e) {
       console.error('[text] ', e)
     }

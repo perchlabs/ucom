@@ -28,7 +28,7 @@ export function execute(
   )
 }
 
-function run(code: string, $data: DataRecord, other: DataRecord) {
+function run(code: string, $data: DataRecord, other: DataRecord): unknown {
   const params: DataRecord = {...other, $data}
   try {
     const fn = new Function(...ObjectKeys(params), code)

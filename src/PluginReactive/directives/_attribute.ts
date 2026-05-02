@@ -54,7 +54,7 @@ export const _attribute: DirectiveHandler = (
         el.removeAttribute(attrName)
       }
       // Normal attribute value
-      else {
+      else if (isString(value)) {
         el.setAttribute(attrName, value)
       }
     } catch (e) {
