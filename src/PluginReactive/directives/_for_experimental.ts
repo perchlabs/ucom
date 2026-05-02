@@ -40,8 +40,7 @@ export const _for: DirectiveHandler = (
   }
 
   const next = nextWalkable(el)
-
-  parent.removeChild(el)
+  el.remove()
 
   const sourceExp = inMatch[2].trim()
   let valueExp = inMatch[1].trim().replace(stripParensRE, '').trim()

@@ -33,8 +33,7 @@ export const _is: DirectiveHandler = (
   }
 
   const next = nextWalkable(el)
-
-  parent.removeChild(el)
+  el.remove()
 
   let tagName = ''
   let tag: HTMLElement | undefined
@@ -69,7 +68,7 @@ export const _is: DirectiveHandler = (
     tag = makeElementAs(el, tagName)
 
     parent.insertBefore(tag, anchor)
-    parent.removeChild(anchor)
+    anchor.remove()
 
     walk(ctx, tag)
   })

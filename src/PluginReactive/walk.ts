@@ -29,7 +29,7 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
       return void_meta(ctx, el as HTMLMetaElement)
   }
 
-  let def: DirectiveDef | undefined 
+  let def: DirectiveDef | undefined
 
   for (const [key, handler] of ctrlDirs) {
     if (def = pullDir(el, key)) {
@@ -54,7 +54,7 @@ export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable)
   }
 }
 
-// These directives don't support references or modifiers. (Must match exact string)
+// These directives must match exact string
 const ctrlDirs: [string, DirectiveHandler][] = [
   ['#if', _if],
   ['#each', _for],

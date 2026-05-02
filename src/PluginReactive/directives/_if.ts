@@ -35,7 +35,7 @@ export const _if: DirectiveHandler = (
       pullAttr(elseEl, '#else') === '' ||
       (elseExp = pullAttr(elseEl, '#else-if'))
     ) {
-      parent.removeChild(elseEl)
+      elseEl.remove()
       branches.push([elseEl, elseExp])
     } else {
       break
@@ -43,7 +43,7 @@ export const _if: DirectiveHandler = (
   }
 
   const next = nextWalkable(el)
-  parent.removeChild(el)
+  el.remove()
 
   let ctx: Context | undefined
   let activeBranchIndex: number = -1
@@ -65,7 +65,7 @@ export const _if: DirectiveHandler = (
           ctx = ctxRoot.scope(el)
           ctx.mount(parent, anchor)
 
-          parent.removeChild(anchor)
+          anchor.remove()
           activeBranchIndex = i
         }
         return
