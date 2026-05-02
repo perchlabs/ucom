@@ -18,8 +18,6 @@ export const _is: DirectiveHandler = (
 ) => {
   const {man} = ctx
 
-console.log('expr: ', expr)
-
   if (!expr) {
     console.warn(`[u-is] empty expression`)
     return
