@@ -1,12 +1,14 @@
 import type {
+  DirectiveDef,
+} from '../reference.ts'
+import type {
   Context,
   ContextableNode,
-  DirectiveDef,
   DirectiveHandler,
   WalkableReturnType,
 } from './reference.ts'
 import { safeNodeName } from '../common.ts'
-import { getDirectives, pullDir } from './directive.ts'
+import { getDirectives, pullDir } from '../directive.ts'
 import { nextWalkable } from './utils.ts'
 import void_meta from './void_meta'
 
@@ -37,7 +39,7 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
 
   let next: WalkableReturnType
   for (def of getDirectives(el, reDir)) {
-    if (next = dirMap[def.key]?.(ctx, el, def)) {
+    if (next = dirMap[def.op]?.(ctx, el, def)) {
       return next
     }
   }

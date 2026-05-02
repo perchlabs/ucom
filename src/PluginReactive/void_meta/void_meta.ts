@@ -1,14 +1,8 @@
-import type {
-  Context,
-  DirectiveDef,
-} from '../reference.ts'
-import {
-  createElement,
-} from '../../common.ts'
-import {
-  nextWalkable, contextableParent,
-} from '../utils.ts'
-import { getDirectives } from '../directive.ts'
+import type { DirectiveDef } from '../../reference.ts'
+import type { Context } from '../reference.ts'
+import { createElement } from '../../common.ts'
+import { getDirectives } from '../../directive.ts'
+import { nextWalkable, contextableParent } from '../utils.ts'
 import { _data } from './_data.ts'
 import { _cssprop } from './_cssprop.ts'
 import { _effect } from './_effect.ts'
@@ -41,7 +35,7 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
   }
 
   for (const def of getDirectives(el, /^\$|--|\$--|%|\(\)/)) {
-    dirMap[def.key]?.(def)
+    dirMap[def.op]?.(def)
   }
 
   const next = nextWalkable(el)

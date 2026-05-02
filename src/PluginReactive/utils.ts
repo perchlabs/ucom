@@ -1,6 +1,8 @@
 import type {
-  ContextableNode,
   DirectiveDef,
+} from '../reference.ts'
+import type {
+  ContextableNode,
   WalkableReturnType,
 } from './reference.ts'
 import {
@@ -20,12 +22,11 @@ export const nextWalkable = (el: Element): WalkableReturnType => el.nextElementS
 // }
 
 export function parentAndAnchor(
-  dir: DirectiveDef, 
+  {op}: DirectiveDef, 
   el: Element,
-  anchorText: string = '',
 ): [ContextableNode | null, Comment] {
   const parent = contextableParent(el)
-  const anchor = new Comment(`${dir.key} ${anchorText}`)
+  const anchor = new Comment(op)
 
   if (parent) {
     parent.insertBefore(anchor, el)
@@ -36,7 +37,7 @@ export function parentAndAnchor(
 
 export function makeElementAs(el: Element, tagName: string) {
   const tag = createElement(tagName)
-  attributeEntries(el).forEach(e => tag.setAttribute(...e))
+  attributeEntries(el).forEach(([k, v]) => tag.setAttribute(k, v ?? ''))
 
   if (isTemplateElement(el)) {
     tag.append(el.content)

@@ -49,33 +49,12 @@ export const isSystemKey = (k: string) =>
 export const attrToggled = (el: Element, name: string): boolean =>
   el.hasAttribute(name) ?? false
 
-export const pullKey = <T>(obj: Record<string, T>, k: string): (T | undefined) => {
-  const v = obj[k]
-  if (v != null) {
-    delete obj[k]
-  }
-  return v
-}
-
 export const pullAttr = (el: Element, name: string): string | null => {
   const val = el.getAttribute(name)
   if (val != null) {
     el.removeAttribute(name)
   }
   return val
-}
-
-export function paramsAttrEach(
-  obj: Record<string, string>,
-  re: RegExp,
-  func: (k: string, v: string) => void,
-) {
-  for (const k in obj) {
-    const kk = k.match(re)?.[1]
-    if (kk) {
-      func(kk, pullKey(obj, k)!)
-    }
-  }
 }
 
 export function attributeEntries(el: Element): [k: string, v: string][] {

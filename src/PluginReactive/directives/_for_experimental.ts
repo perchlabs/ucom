@@ -27,13 +27,13 @@ export const _for: DirectiveHandler = (
 ) => {
   const {expr} = dir
 
-  const inMatch = expr?.match(forAliasRE)
+  const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
     console.warn(`[#each] invalid expression: ${expr}`)
     return
   }
 
-  let [parent, anchor] = parentAndAnchor(dir, el, expr)
+  let [parent, anchor] = parentAndAnchor(dir, el)
   if (!parent) {
     console.warn('[#each] no parent')
     return

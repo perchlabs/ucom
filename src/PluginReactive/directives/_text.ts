@@ -8,7 +8,7 @@ export const _text: DirectiveHandler = (
   el,
   {camel, expr, mods},
 ) => {
-  const exprReal = camel ?? expr ?? ''
+  const exprReal = (camel ?? expr) || ''
   const prop = mods.has('html') ? 'innerHTML' : 'textContent'
 
   // Create an effect that automatically re-runs when signals change

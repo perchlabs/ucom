@@ -2,6 +2,7 @@ import type {
   RawComponentConstructor,
   WebComponent,
   ModuleExports,
+  ComponentParams,
   ComponentIdentity,
   WebComponentConstructor,
   PluginManager,
@@ -30,14 +31,12 @@ import {
 
 import {
   ArrayFrom,
-  ObjectFromEntries,
   createElement,
-  attributeEntries,
-  paramsAttrEach,
   cloneTemplateContent,
   getTopLevelChildren,
   reComponentPath,
 } from './common.ts'
+import { getDirectives } from './directive.ts'
 
 export function resolveImport(url: string): ComponentIdentity {
   const matches = reComponentPath.exec(url)
@@ -97,13 +96,15 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
 
   const [Raw, exports, params] = await processFragment(frag)
 
+  const modes: Record<string, string | null> = {}
+  for (const dir of ArrayFrom(params)) {
+    const {op, camel, expr} = dir
 
-  const modes: Record<string, string> = {}
-  params.forEach(attrMap => {
-    paramsAttrEach(attrMap, /^\+([a-z]+)/, (k, mode) => {
-      modes[k] = mode
-    })
-  })
+    if (op === '+' && camel) {
+      params.delete(dir)
+      modes[camel] = expr
+    }
+  }
 
   const Com = createComponentConstructor(
     man,
@@ -123,7 +124,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
 
   await plugins.define({man, Com, Raw, frag, exports, params})
   customElements.define(name, Com, {
-    extends: modes?.extends,
+    extends: modes?.extends ?? undefined,
   })
 
   return def
@@ -147,13 +148,13 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> 
     ...exports
   } = module as {default: RawComponentConstructor} & ModuleExports
 
-  const params: Record<string, string>[] = getTopLevelChildren<HTMLParamElement>(frag, 'param')
-    .map(el => {
+  const paramArr = getTopLevelChildren<HTMLParamElement>(frag, 'param')
+    .flatMap(el => {
       el.remove()
-      return ObjectFromEntries(attributeEntries(el))
+      return getDirectives(el)
     })
 
-  return [Raw, exports, params]
+  return [Raw, exports, new Set(paramArr)]
 }
 
 export function hashContent(tpl: HTMLTemplateElement): number {
@@ -245,7 +246,7 @@ function createComponentConstructor(
 type ParsedFragment = [
   Raw: RawComponentConstructor,
   exports: ModuleExports,
-  params: Record<string, string>[],
+  params: ComponentParams,
 ]
 
 type WebComponentOpts = {

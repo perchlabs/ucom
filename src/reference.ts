@@ -131,7 +131,7 @@ export type PluginDefineParams = {
   Raw: RawComponentConstructor,
   frag: DocumentFragment,
   exports: ModuleExports,
-  params: Record<string, string>[]
+  params: ComponentParams
 }
 
 export type PluginConstructParams = {
@@ -143,6 +143,16 @@ export type PluginConstructParams = {
 }
 
 export type ModuleExports = Record<string, any>
+export type ComponentParams = Set<DirectiveDef>
+
+export type DirectiveDef = {
+  full: string
+  op: string
+  kebab?: string
+  camel?: string
+  expr: string
+  mods: Set<string>
+}
 
 export interface RawComponent extends HTMLElement {
   attributeChangedCallback?(...args: Parameters<AttributeChangedCallback>): CustomElementCallbackReturn

@@ -36,7 +36,7 @@ export const _attribute: DirectiveHandler = (
   }
 
   // General attribute binding
-  const exprReal = expr ?? attrName
+  const exprReal = expr || attrName
   ctx.effect(() => {
     try {
       const value = evaluate(exprReal, ctx)
@@ -63,7 +63,7 @@ export const _attribute: DirectiveHandler = (
   })
 }
 
-export function bindClass(ctx: Context, el: HTMLElement, expr: string | undefined): undefined {
+export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefined {
   if (!expr) {
     return
   }
@@ -98,7 +98,7 @@ export function bindClass(ctx: Context, el: HTMLElement, expr: string | undefine
   })
 }
 
-function bindStyle(ctx: Context, el: HTMLElement, expr: string | undefined): undefined {
+function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
   if (!expr) {
     return
   }

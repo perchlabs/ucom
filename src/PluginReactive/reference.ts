@@ -1,4 +1,7 @@
-import type { ComponentManager } from '../reference.ts'
+import type {
+  ComponentManager,
+  DirectiveDef,
+} from '../reference.ts'
 
 export type DataRecord = Record<string, any>
 export type ComputedFunction = () => any
@@ -28,13 +31,6 @@ export type ContextableNode = DocumentFragment | Element
 export type StoreAdder = (key: string, val: any) => void
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
-export type DirectiveDef = {
-  key: string
-  kebab?: string
-  camel?: string
-  expr?: string
-  mods: Set<string>
-}
 export type WalkableReturnType = Element | undefined | null | void
 export type DirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
   => WalkableReturnType

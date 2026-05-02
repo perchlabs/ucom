@@ -20,7 +20,7 @@ export const _cssprop: DirectiveHandler = (
     mods,
   },
 ) => {
-  const exprReal = expr ?? camel
+  const exprReal = expr || camel
   if (!exprReal) {
     return
   }

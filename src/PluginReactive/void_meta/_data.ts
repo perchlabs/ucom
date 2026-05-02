@@ -15,7 +15,7 @@ export const _data: DirectiveHandler = (
   {
     camel,
     mods,
-    expr = '',
+    expr,
   },
 ) => {
   const [mod = STORE_MOD_VAR] = storeMods.intersection(mods)

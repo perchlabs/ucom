@@ -114,7 +114,7 @@ async function importTopLevelElements(man: ComponentManager, elArr: Element[]): 
 }
 
 type ImportComponentData = {
-  attributes: Record<string, string>,
+  attributes: Record<string, string | null>,
   ident: ComponentIdentity,
 }
 

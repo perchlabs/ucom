@@ -6,7 +6,7 @@ import type {
   Plugin,
   PluginDefineParams,
   PluginCallbackBuilderParams,
-  // ModuleExports,
+  ComponentParams,
   // AttributeChangedCallback,
   // ConnectedCallback,
   // DisconnectedCallback,
@@ -23,13 +23,12 @@ import {
 } from '../reference.ts'
 import {
   isFunction,
+  ArrayFrom,
   ObjectAssign,
   ObjectKeys,
   ObjectEntriesEach,
-  pullKey,
   isSystemKey,
   uniqueArr,
-  kebabToCamel,
 } from '../common.ts'
 import {
   computed as $computed,
@@ -40,7 +39,6 @@ import {
 } from './alien-signals'
 import {
   ObjectDefineProperty,
-  paramsAttrEach,
 } from '../common.ts'
 import { createContext } from './context.ts'
 import { evaluate } from './expression.ts'
@@ -83,19 +81,19 @@ export default {
       ObjectKeys(propDefs),
     )
 
-    ObjectEntriesEach(propDefs, ([_kebab, [camel, cast]]) => {
+    ObjectEntriesEach(propDefs, ([_kebab, [camel, pipe]]) => {
       ObjectDefineProperty(proto, camel, {
         get() {
           return this[DataIndex][camel]
         },
         set(newValue) {
-          this[DataIndex][camel] = cast?.(newValue) ?? newValue
+          this[DataIndex][camel] = pipe(newValue)
         },
         // set(newValue) {
         //   if (propDefs[k].reflect) {
         //     this.setAttribute(k, newValue)
         //   } else {
-        //     this[DataIndex][k] = propDefs[k].cast?.(newValue) ?? newValue
+        //     this[DataIndex][k] = pipe(newValue)
         //   }
         // },
       })
@@ -116,14 +114,10 @@ export default {
 
     return (kebab: string, _oldValue: string | null, newValue: string | null) => {
       const data = (el as UpgradeComponent)[DataIndex]
-      const propDef = propDefs[kebab]
+      const [camel, pipe] = propDefs[kebab]
 
-      if (data && propDef) {
-        const [camel, cast] = propDef
-        const val = cast?.(newValue) ?? newValue
-        if (val !== data[camel]) {
-          data[camel] = val
-        }
+      if (data && camel) {
+        data[camel] = pipe(newValue)
       }
     }
   },
@@ -146,25 +140,32 @@ export default {
   },
 } as Plugin
 
-const reParamKey = /^\$([a-z0-9]+[a-z0-9\-]*)$/
-
-function parseParams(funcs: FunctionRecord, params: Record<string, string>[]) {
+function parseParams(funcs: FunctionRecord, params: ComponentParams): PropDefs {
   const propDefs: PropDefs = {}
 
-  params.forEach(attrMap => {
-    const castVal = pullKey(attrMap, 'cast')
-    const cast = castVal
-      ? evaluate(castVal, null, funcs) as (value: string) => any
-      : undefined
+  for (const dir of ArrayFrom(params)) {
+    const {op, camel, kebab, expr, mods} = dir
 
-    paramsAttrEach(attrMap, reParamKey, (kebab, expr) => {
-      propDefs[kebab] = [
-        kebabToCamel(kebab),
-        cast,
-        evaluate(expr, null, funcs),
-      ]
-    })
-  })
+    if (op === '$' && kebab && camel) {
+      params.delete(dir)
+
+      const eVal = expr ? evaluate(expr, null, funcs) : undefined
+      let pipe: (v: any) => any
+
+      if (mods.has('int')) {
+        pipe = v => Math.round(Number(v ?? eVal) || 0)
+      } else if (mods.has('bool')) {
+        if (expr) {
+          console.warn(`bool parameter '${camel}' cannot have default value`)
+        }
+        pipe = v => v != null
+      } else {
+        pipe = isFunction(eVal) ? eVal : v => v ?? eVal
+      }
+
+      propDefs[kebab] = [camel, pipe]
+    }
+  }
 
   return propDefs
 }
@@ -177,25 +178,20 @@ function makeContextData(
   el: UpgradeComponent,
 ) {
   const data: DataRecord = {...funcs}
-
-  // From property definition.
-  ObjectEntriesEach(propDefs, ([k, [camel, cast, defaultVal]]) => {
-    const raw = el.getAttribute(k) ?? defaultVal
-    data[camel] = cast?.(raw) ?? raw
+  ObjectEntriesEach(propDefs, ([kebab, [camel, pipe]]) => {
+    data[camel] = pipe(el.getAttribute(kebab))
   })
-
   return data
 }
 
 type FunctionRecord = Record<string, (...args: any[]) => any>
 
+type PropDefs = Record<string, PropDef>
 type PropDef = [
   camel: string,
-  cast: ((value: any) => any) | undefined,
-  defaultValue: any,
-]
+  pipe: (v: string | null) => any,
 
-type PropDefs = Record<string, PropDef>
+]
 
 interface UpgradeComponent extends WebComponent {
   [ContextIndex]: Context

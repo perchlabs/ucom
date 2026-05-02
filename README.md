@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`18.7k` minified) (`7.8k` gzipped)
+* ucom (`18.7k` minified) (`8.0k` gzipped)
 * ucom_vue (`27.9k` minified) (`11.6k` gzipped)
 * ucom_lite (`6.2k` minified) (`2.8k` gzipped)
 
@@ -290,7 +290,7 @@ It's easy to add js properties and html attributes to your components using the 
 <my-counter count="5"></my-counter>
 
 <template u-com="my-counter">
-  <param $count=0 cast="parseInt">
+  <param $count.int=0>
 
   <button @click="count++"><meta %count> times</button>
 </template>

@@ -21,7 +21,7 @@ export const _for: DirectiveHandler = (
 
   const next = nextWalkable(el)
 
-  const inMatch = expr?.match(forAliasRE)
+  const inMatch = expr.match(forAliasRE)
   if (!inMatch) {
     console.warn(`[#each] expression: ${expr}`)
     return next
@@ -50,7 +50,7 @@ export const _for: DirectiveHandler = (
     isArrayDestructure = valueExp[0] === '['
   }
 
-  let [parent, anchor] = parentAndAnchor(dir, el, expr)
+  let [parent, anchor] = parentAndAnchor(dir, el)
   el.remove()
 
 
