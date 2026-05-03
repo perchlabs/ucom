@@ -1,4 +1,4 @@
-import comman from './comman.ts'
+import compman from './component_manager.ts'
 import pluginCore from './PluginCore.ts'
 import pluginDOM from './PluginDOM.ts'
 import pluginRelative from './PluginRelative.ts'
@@ -6,7 +6,7 @@ import pluginImport from './PluginImport.ts'
 import pluginStyle from './PluginStyle.ts'
 import pluginVue from './PluginVue'
 
-const ucom = comman([
+const ucom = compman([
   pluginCore,
   pluginDOM,
   pluginRelative,

@@ -1,4 +1,6 @@
 import type {
+  Plugin,
+
   RawComponentConstructor,
   WebComponent,
   ModuleExports,
@@ -14,8 +16,12 @@ import type {
   // FormAssociatedCallback,
   // FormDisabledCallback,
   // FormStateRestoreCallback,
+
 } from './reference.ts'
 import {
+  FILE_POSTFIX,
+  DIR_POSTFIX,
+
   ATTRIBUTE_CHANGED,
   CONNECTED,
   DISCONNECTED,
@@ -25,37 +31,89 @@ import {
   // FORM_STATE_RESTORE,
   STATIC_FORM_ASSOCIATED,
   STATIC_OBSERVED_ATTRIBUTES,
-  FILE_POSTFIX,
-  DIR_POSTFIX,
 } from './reference.ts'
-
 import {
   ArrayFrom,
   createElement,
   cloneTemplateContent,
   getTopLevelChildren,
   reComponentPath,
+  hashContent,
 } from './common.ts'
 import { getDirectives } from './directive.ts'
+import plugMan from './plugin_manager.ts'
 
-export const resolveImport = (url: string): ComponentIdentity => {
-  const matches = reComponentPath.exec(url)
-  if (!matches) {
-    throw Error(`resolving '${url}'`)
+const AUTO_NAME_PREFIX = 'ucom'
+
+export default (pluginsRaw: Plugin[]) => {
+  const plugins = plugMan(pluginsRaw)
+
+  const idents: Record<string, Promise<ComponentDef>> = {}
+  const lazy: Record<string, ComponentIdentity> = {}
+
+  const defineActual = (name: string, path: string, tpl: HTMLTemplateElement) => {
+    delete lazy?.[name]
+    return defineComponent(man, plugins, {name, path, tpl})
   }
 
-  const [,name, postfix] = matches
-  if (postfix === DIR_POSTFIX) {
-    url += `/${name}${FILE_POSTFIX}`
+  const man: ComponentManager = {
+    lazy,
+
+    async start() {
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve))
+      }
+      return plugins.start(man)
+    },
+
+    has(name: string): boolean {
+      name = name.toLowerCase()
+      return name in idents || !!customElements.get(name)
+    },
+
+    resolve(url: string): ComponentIdentity {
+      const matches = reComponentPath.exec(url)
+      if (!matches) {
+        throw Error(`resolving '${url}'`)
+      }
+
+      const [,name, postfix] = matches
+      if (postfix === DIR_POSTFIX) {
+        url += `/${name}${FILE_POSTFIX}`
+      }
+
+      return {
+        name,
+        path: import.meta.resolve(url),
+      }
+    },
+
+    // Define a component by name.  If name is null then create a name based upon the hash of the template contents.
+    async define(name: string | null, tpl: HTMLTemplateElement) {
+      name = name ? name.toLowerCase() : `${AUTO_NAME_PREFIX}-${hashContent(tpl)}`
+      return idents[name] ??= defineActual(name, '', tpl )
+    },
+
+    // Import a component.  Providing the optional template argument prevents a fetch operation.  This is useful
+    // for inlining components on the server (with a plugin providing this functionality).  The URL is useful in
+    // this case for allowing relative imports according to the public web path of the component.
+    async import(url: string, tpl?: HTMLTemplateElement) {
+      const {name, path} = man.resolve(url)
+      try {
+        tpl ??= await fetchTemplate(path)
+        return idents[name] ??= defineActual(name, path, tpl)
+      } catch (e) {
+        if (e instanceof ComponentFetchError) {
+          console.error(`Fetching component '${e.resolved}', ${e.reason}`)
+        }
+      }
+    },
   }
 
-  return {
-    name,
-    path: import.meta.resolve(url),
-  }
+  return man
 }
 
-export const fetchTemplate = async (path: string): Promise<HTMLTemplateElement> => {
+const fetchTemplate = async (path: string): Promise<HTMLTemplateElement> => {
   const res = await fetch(path)
   if (!res.ok) {
     throw new ComponentFetchError(path, `Status ${res.status}`)
@@ -86,7 +144,7 @@ export class ComponentFetchError extends Error {
   }
 }
 
-export const defineComponent = async (man: ComponentManager, plugins: PluginManager, def: ComponentDef) => {
+const defineComponent = async (man: ComponentManager, plugins: PluginManager, def: ComponentDef) => {
   const {name, tpl} = def
 
   // Copy the fragment so that the original version will be available for printing.
