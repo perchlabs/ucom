@@ -37,7 +37,7 @@ export function parentAndAnchor(
 
 export function makeElementAs(el: Element, tagName: string) {
   const tag = createElement(tagName)
-  attributeEntries(el).forEach(([k, v]) => tag.setAttribute(k, v ?? ''))
+  attributeEntries(el).forEach(e => tag.setAttribute(...e))
 
   if (isTemplateElement(el)) {
     tag.append(el.content)

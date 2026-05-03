@@ -27,7 +27,7 @@ import {
   ObjectAssign,
   ObjectKeys,
   ObjectEntriesEach,
-  isSystemKey,
+  isUserKey,
   uniqueArr,
 } from '../common.ts'
 import {
@@ -62,7 +62,7 @@ export default {
     // From user custom prototype.
     const funcs: FunctionRecord = {}
     Object.getOwnPropertyNames(rawProto)
-      .filter(k => !isSystemKey(k))
+      .filter(isUserKey)
       .forEach(k => {
         const v = rawProto[k]
         if (isFunction(v)) {

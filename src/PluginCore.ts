@@ -5,7 +5,7 @@ import type {
 } from './reference.ts'
 import {
   ObjectAssign,
-  isSystemKey,
+  isUserKey,
   queryAll,
 } from './common.ts'
 
@@ -15,10 +15,9 @@ export default {
     exports,
   }: PluginDefineParams): Promise<void> {
     for (const k in exports) {
-      if (isSystemKey(k) || k in rawProto) {
-        continue
+      if (isUserKey(k)) {
+        rawProto[k] = exports[k]
       }
-      rawProto[k] = exports[k]
     }
   },
 

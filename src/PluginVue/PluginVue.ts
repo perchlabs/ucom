@@ -17,7 +17,7 @@ import {
   // CUSTOM_CALLBACKS,
   STATIC_OBSERVED_ATTRIBUTES,
 } from '../reference.ts'
-import { ObjectEntriesEach, isSystemKey } from '../common.ts'
+import { ObjectEntriesEach, isUserKey } from '../common.ts'
 import {createApp, ref, reactive, effect, stop, nextTick} from './petite-shadow-vue'
 
 // Proto and constructor constants.
@@ -167,7 +167,7 @@ function makeReactive(
     synced: (v: any) => new Synced(v),
   }) ?? {}
   Object.getOwnPropertyNames(rawProto)
-    .filter(k => !isSystemKey(k))
+    .filter(isUserKey)
     .forEach(k => {
       const v = rawProto[k]
       if (typeof v === 'function') {
