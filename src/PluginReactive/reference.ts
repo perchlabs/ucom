@@ -31,6 +31,6 @@ export type ContextableNode = DocumentFragment | Element
 export type StoreAdder = (key: string, val: any) => void
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
-export type WalkableReturnType = Element | undefined | null | void
+export type WalkableReturn = Element | undefined | null
 export type DirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
-  => WalkableReturnType
+  => WalkableReturn

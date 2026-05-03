@@ -5,7 +5,7 @@ import type {
   Context,
   ContextableNode,
   DirectiveHandler,
-  WalkableReturnType,
+  WalkableReturn,
 } from './reference.ts'
 import { safeNodeName } from '../common.ts'
 import { getDirectives, pullDir } from '../directive.ts'
@@ -23,7 +23,7 @@ import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 
-export function walk(ctx: Context, el: Element): WalkableReturnType {
+export function walk(ctx: Context, el: Element): WalkableReturn {
   switch (safeNodeName(el)) {
     case 'meta':
       return void_meta(ctx, el as HTMLMetaElement)
@@ -37,7 +37,7 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
     }
   }
 
-  let next: WalkableReturnType
+  let next: WalkableReturn
   for (def of getDirectives(el, reDir)) {
     if (next = dirMap[def.op]?.(ctx, el, def)) {
       return next
@@ -48,7 +48,7 @@ export function walk(ctx: Context, el: Element): WalkableReturnType {
 }
 
 export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable) {
-  let child: WalkableReturnType = node.firstElementChild
+  let child: WalkableReturn = node.firstElementChild
   while (child) {
     child = walk(ctx, child) ?? nextWalkable(child)
   }

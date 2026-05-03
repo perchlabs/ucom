@@ -9,10 +9,6 @@ export type ComponentDef = {
   readonly tpl: HTMLTemplateElement,
 }
 
-export interface PluginConstructor {
-  new (...args: any[]): Plugin
-}
-
 type PluginStart = (man: ComponentManager) => Promise<void>
 type PluginParse = (params: PluginParseParams) => Promise<void>
 type PluginDefine = (params: PluginDefineParams) => Promise<void>
@@ -109,21 +105,11 @@ export type ComponentDefiner = (name: string | null, tpl: HTMLTemplateElement) =
 export type ComponentImporter = (url: string, tpl?: HTMLTemplateElement) => Promise<ComponentDef | undefined> 
 export type ComponentResolver = (url: string) => ComponentIdentity
 
-// export type PluginStartParams = {
-//   man: ComponentManager,
-// }
 export type PluginParseParams = {
   man: ComponentManager,
   def: ComponentDef
   frag: DocumentFragment,
 }
-export type PluginPredefineParams = {
-  man: ComponentManager,
-  def: ComponentDef
-  frag: DocumentFragment,
-  exports: ModuleExports,
-}
-
 export type PluginDefineParams = {
   man: ComponentManager,
   Com: WebComponentConstructor,
@@ -132,7 +118,6 @@ export type PluginDefineParams = {
   exports: ModuleExports,
   params: ComponentParams
 }
-
 export type PluginConstructParams = {
   man: ComponentManager,
   Com: WebComponentConstructor
@@ -179,9 +164,6 @@ export interface WebComponentConstructor extends RawComponentConstructor {
 }
 
 export type QueryableRoot = Document | DocumentFragment | Element 
-
-export type ArrayElement<ArrayType extends readonly unknown[]> = 
-  ArrayType extends readonly (infer ElementType)[] ? ElementType : never
 
 //////////////////////////
 // CONSTANTS

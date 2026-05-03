@@ -3,7 +3,7 @@ import type {
 } from '../reference.ts'
 import type {
   ContextableNode,
-  WalkableReturnType,
+  WalkableReturn,
 } from './reference.ts'
 import {
   createElement,
@@ -13,7 +13,7 @@ import {
 
 export const contextableParent = (el: Node) => el?.parentNode as ContextableNode | null
 
-export const nextWalkable = (el: Element): WalkableReturnType => el.nextElementSibling
+export const nextWalkable = (el: Element): WalkableReturn => el.nextElementSibling
 
 // export function createAnchor({key}: DirectiveDef, parent: ContextableNode, el: HTMLElement): Comment {
 //   const anchor = new Comment(key)
