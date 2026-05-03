@@ -4,31 +4,29 @@ import type {
 } from './reference.ts'
 import { ObjectKeys, ObjectValues } from '../common.ts'
 
-export function evaluate(
+export const evaluate = (
   expr: string,
   ctxThis: Context | null,
   other: DataRecord = {},
-) {
-  return run(
+) =>
+  run(
     `with($data) { return ${expr}; }`,
     ctxThis?.data ?? {},
     other,
   )
-}
 
-export function execute(
+export const execute = (
   expr: string,
   ctxThis: Context | null,
   other: DataRecord = {},
-) {
+): void => 
   run(
     `with($data) { ${expr}; }`,
     ctxThis?.data ?? {},
     other,
-  )
-}
+  ) as void
 
-function run(code: string, $data: DataRecord, other: DataRecord): unknown {
+const run = (code: string, $data: DataRecord, other: DataRecord): unknown => {
   const params: DataRecord = {...other, $data}
   try {
     const fn = new Function(...ObjectKeys(params), code)

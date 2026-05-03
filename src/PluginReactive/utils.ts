@@ -21,10 +21,10 @@ export const nextWalkable = (el: Element): WalkableReturn => el.nextElementSibli
 //   return anchor
 // }
 
-export function parentAndAnchor(
+export const parentAndAnchor = (
   {op}: DirectiveDef, 
   el: Element,
-): [ContextableNode | null, Comment] {
+): [ContextableNode | null, Comment] => {
   const parent = contextableParent(el)
   const anchor = new Comment(op)
 
@@ -35,7 +35,7 @@ export function parentAndAnchor(
   return [parent, anchor]
 }
 
-export function makeElementAs(el: Element, tagName: string) {
+export const makeElementAs = (el: Element, tagName: string) => {
   const tag = createElement(tagName)
   attributeEntries(el).forEach(e => tag.setAttribute(...e))
 

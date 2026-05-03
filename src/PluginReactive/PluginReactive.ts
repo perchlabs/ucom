@@ -140,7 +140,7 @@ export default {
   },
 } as Plugin
 
-function parseParams(funcs: FunctionRecord, params: ComponentParams): PropDefs {
+const parseParams = (funcs: FunctionRecord, params: ComponentParams): PropDefs => {
   const propDefs: PropDefs = {}
 
   for (const dir of ArrayFrom(params)) {
@@ -170,13 +170,13 @@ function parseParams(funcs: FunctionRecord, params: ComponentParams): PropDefs {
   return propDefs
 }
 
-function makeContextData(
+const makeContextData = (
   {
     [FunctionsIndex]: funcs,
     [PropsIndex]: propDefs,
   }: UpgradeComponentConstructor,
   el: UpgradeComponent,
-) {
+) => {
   const data: DataRecord = {...funcs}
   ObjectEntriesEach(propDefs, ([kebab, [camel, pipe]]) => {
     data[camel] = pipe(el.getAttribute(kebab))

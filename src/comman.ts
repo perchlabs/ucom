@@ -3,12 +3,12 @@ import type {
   ComponentIdentity,
   Plugin,
 } from './reference.ts'
+import { hashContent } from './common.ts'
 import {
   resolveImport as resolve,
   fetchTemplate,
   ComponentFetchError,
   defineComponent,
-  hashContent,
 } from './component.ts'
 import plugMan from './plugman.ts'
 

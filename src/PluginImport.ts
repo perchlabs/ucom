@@ -43,14 +43,13 @@ export default {
   },
 } as Plugin
 
-async function processUndefinedElements(man: ComponentManager, undefArr: Element[]) {
+const processUndefinedElements = async (man: ComponentManager, undefArr: Element[]) =>
   undefArr.forEach(el => {
     const item = man.lazy[safeNodeName(el)]
     if (item) {
       man.import(item.path)
     }
   })
-}
 
 const observeMutations = (
   man: ComponentManager,
@@ -77,7 +76,7 @@ const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
   return arr
 }
 
-async function importTopLevelElements(man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> {
+const importTopLevelElements = async (man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> => {
   let urlPrefix = ''
   let lazy = false
 

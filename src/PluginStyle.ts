@@ -27,7 +27,7 @@ export default {
 // TODO: Revisit this when Safari and Firefox support CSS imports "with {type: 'css'}".
 // Note: Constructed stylesheet asynchronous replace method no longer handles CSS @import rules as 2025.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
-async function loadSheets(): Promise<CSSStyleSheet[]> {
+const loadSheets = async (): Promise<CSSStyleSheet[]> => {
   const loading = queryForStyles(document.head)
     .map(async el => el.sheet ??
       new Promise((resolve, reject) => {
@@ -47,7 +47,7 @@ async function loadSheets(): Promise<CSSStyleSheet[]> {
     })
 }
 
-function queryForStyles(root: QueryableRoot) {
+const queryForStyles = (root: QueryableRoot) => {
   const selector = ['STYLE', 'LINK'].map(k => `${k}[${SYS_PREFIX}]`).join(',')
   return queryAll<HTMLStyleElement | HTMLLinkElement>(root, selector)
 }

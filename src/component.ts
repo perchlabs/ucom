@@ -38,7 +38,7 @@ import {
 } from './common.ts'
 import { getDirectives } from './directive.ts'
 
-export function resolveImport(url: string): ComponentIdentity {
+export const resolveImport = (url: string): ComponentIdentity => {
   const matches = reComponentPath.exec(url)
   if (!matches) {
     throw Error(`resolving '${url}'`)
@@ -55,7 +55,7 @@ export function resolveImport(url: string): ComponentIdentity {
   }
 }
 
-export async function fetchTemplate(path: string): Promise<HTMLTemplateElement> {
+export const fetchTemplate = async (path: string): Promise<HTMLTemplateElement> => {
   const res = await fetch(path)
   if (!res.ok) {
     throw new ComponentFetchError(path, `Status ${res.status}`)
@@ -86,7 +86,7 @@ export class ComponentFetchError extends Error {
   }
 }
 
-export async function defineComponent(man: ComponentManager, plugins: PluginManager, def: ComponentDef) {
+export const defineComponent = async (man: ComponentManager, plugins: PluginManager, def: ComponentDef) => {
   const {name, tpl} = def
 
   // Copy the fragment so that the original version will be available for printing.
@@ -130,7 +130,7 @@ export async function defineComponent(man: ComponentManager, plugins: PluginMana
   return def
 }
 
-async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> {
+const processFragment = async (frag: DocumentFragment): Promise<ParsedFragment> => {
   const script = frag.querySelector('script')
   script?.remove()
 
@@ -157,14 +157,7 @@ async function processFragment(frag: DocumentFragment): Promise<ParsedFragment> 
   return [Raw, exports, new Set(paramArr)]
 }
 
-export function hashContent(tpl: HTMLTemplateElement): number {
-  const div = createElement('div')
-  div.appendChild(cloneTemplateContent(tpl))
-  return ArrayFrom(div.innerHTML)
-    .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)
-}
-
-function createComponentConstructor(
+const createComponentConstructor = (
   man: ComponentManager,
   plugins: PluginManager,
   def: ComponentDef,
@@ -172,7 +165,7 @@ function createComponentConstructor(
   frag: DocumentFragment,
   shadowRootOpts: ShadowRootInit,
   webComponentOpts: WebComponentOpts,
-): WebComponentConstructor {
+): WebComponentConstructor => {
   const Com = class extends Raw implements WebComponent {
     static [STATIC_FORM_ASSOCIATED] = Raw[STATIC_FORM_ASSOCIATED] ?? false
     static [STATIC_OBSERVED_ATTRIBUTES] = [...(Raw[STATIC_OBSERVED_ATTRIBUTES] ?? [])]

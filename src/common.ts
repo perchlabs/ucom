@@ -31,12 +31,10 @@ export const createElement = document.createElement.bind(document)
 
 export const safeNodeName = (node: Node) => node.nodeName.toLowerCase()
 
-export function ObjectEntriesEach<T>(
+export const ObjectEntriesEach = <T>(
   obj: Record<string, T>,
   each: (entry: [k: string, v: T]) => void,
-) {
-  ObjectEntries(obj).forEach(each)
-}
+): void => ObjectEntries(obj).forEach(each)
 
 export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
@@ -57,21 +55,17 @@ export const pullAttr = (el: Element, name: string) => {
   return val
 }
 
-export function attributeEntries(el: Element): [k: string, v: string][] {
-  return ArrayFrom(el.attributes).map(({name, value}) => [name, value])
-}
+export const attributeEntries = (el: Element): [k: string, v: string][] =>
+  ArrayFrom(el.attributes).map(({name, value}) => [name, value])
 
-export function uniqueArr(...arrArr: any[]) {
-  return [...new Set(arrArr.flat())]
-}
+export const uniqueArr = (...arrArr: any[]) =>
+  [...new Set(arrArr.flat())]
 
-export function cloneTemplateContent(tpl: HTMLTemplateElement) {
-  return tpl.content.cloneNode(true) as DocumentFragment
-}
+export const cloneTemplateContent = (tpl: HTMLTemplateElement) =>
+  tpl.content.cloneNode(true) as DocumentFragment
 
-export function queryAll<T extends Element>(root: QueryableRoot, selector: string) {
-  return ArrayFrom(root.querySelectorAll(selector) ?? []) as T[]
-}
+export const queryAll = <T extends Element>(root: QueryableRoot, selector: string) =>
+  ArrayFrom(root.querySelectorAll(selector) ?? []) as T[]
 
 export const getTopLevelChildren = <T extends HTMLElement>(
   container: DocumentFragment | HTMLElement,
@@ -85,3 +79,10 @@ export const camelToKebab = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerC
 export const kebabToCamel = (v: string) => v.replace(/-./g, m => m[1].toUpperCase())
 
 export const split = (v: string, s: string = ' ') => v.split(s).filter(c => c)
+
+export const hashContent = (tpl: HTMLTemplateElement): number => {
+  const div = createElement('div')
+  div.appendChild(cloneTemplateContent(tpl))
+  return ArrayFrom(div.innerHTML)
+    .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)
+}

@@ -51,7 +51,7 @@ const syncMap: StoreItemRecord = {}
 
 export const globalRefs: RefRecord = {}
 
-export function createContext(
+export const createContext = (
   man: ComponentManager,
   host: HTMLElement,
   ptr: ContextableNode,
@@ -61,7 +61,7 @@ export function createContext(
   teardownCallback: () => void = () => {},
 
   refs: RefRecord = {},
-): Context {
+): Context => {
   const frag: Frag | null = isTemplateElement(ptr)
     ? {start: new Text, end: new Text}
     : null
@@ -185,11 +185,7 @@ export function createContext(
     },
 
     [STORE_MOD_SAVE]([camel, value]) {
-      const keyId = `${storeName}-${camel}`
-      syncMap[keyId] ??= persistItem()
-      addItem(syncMap[keyId])
-
-      function persistItem(): StoreItem {
+      const persistItem = (): StoreItem => {
         if (isFunction(value)) {
           return [camel, value, true]
         }
@@ -203,10 +199,15 @@ export function createContext(
 
         return [camel, signal]
       }
+
+      const keyId = `${storeName}-${camel}`
+      syncMap[keyId] ??= persistItem()
+      addItem(syncMap[keyId])
+
     },
   }
 
-  function addItem([camel, value, isFunc = false]: StoreItem) {
+  const addItem = ([camel, value, isFunc = false]: StoreItem) => {
     if (isFunc) {
       data[camel] = value.bind(host)
     } else {
@@ -223,8 +224,8 @@ export function createContext(
   return ctx
 }
 
-function createFallbackProxy(data: DataRecord, parent: DataRecord = {}) {
-  return new Proxy(data, {
+const createFallbackProxy = (data: DataRecord, parent: DataRecord = {}) =>
+  new Proxy(data, {
     has(_target, camel) {
       return camel in data || camel in parent
     },
@@ -246,9 +247,8 @@ function createFallbackProxy(data: DataRecord, parent: DataRecord = {}) {
     //   return Reflect.set(data, camel, val)
     // },
   })
-}
 
-function simpleItem([camel, value]: StoreAdderEntry): StoreItem {
+const simpleItem = ([camel, value]: StoreAdderEntry): StoreItem => {
   const isFunc = isFunction(value)
   return [
     camel,

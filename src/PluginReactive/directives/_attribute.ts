@@ -63,7 +63,7 @@ export const _attribute: DirectiveHandler = (
   })
 }
 
-export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefined {
+export const bindClass = (ctx: Context, el: HTMLElement, expr: string): undefined => {
   // if (!expr) {
   //   return
   // }
@@ -97,7 +97,7 @@ export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefine
   })
 }
 
-function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
+const bindStyle = (ctx: Context, el: HTMLElement, expr: string): undefined => {
   // if (!expr) {
   //   return
   // }

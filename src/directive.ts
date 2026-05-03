@@ -13,7 +13,7 @@ export const getDirectives = (el: Element, reFilter?: RegExp) =>
   filter(([k]) => reFilter?.test(k) ?? true).
   flatMap(item => createDirectiveDefinition(...item) ?? [])
 
-export function pullDir(el: Element, key: string) {
+export const pullDir = (el: Element, key: string) => {
   const attr = pullAttr(el, key)
   if (attr) {
     return createDirectiveDefinition(key, attr)
@@ -22,7 +22,7 @@ export function pullDir(el: Element, key: string) {
 
 const reDirectiveExpand = /^(u-[a-z]+|[^a-z]{1,3})(:?[a-z0-9]+[a-z0-9\-]*)?(\..+)*$/
 
-function createDirectiveDefinition(full: string, expr: string): DirectiveDef | undefined {
+const createDirectiveDefinition = (full: string, expr: string): DirectiveDef | undefined => {
   const match = full.match(reDirectiveExpand)
   if (match) {
     let [, op, kebab, mods = ''] = match

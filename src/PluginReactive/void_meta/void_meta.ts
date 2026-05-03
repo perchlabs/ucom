@@ -8,7 +8,7 @@ import { _cssprop } from './_cssprop.ts'
 import { _effect } from './_effect.ts'
 import { _text } from '../directives/_text.ts'
 
-export function void_meta(ctx: Context, el: HTMLMetaElement) {
+export const void_meta = (ctx: Context, el: HTMLMetaElement) => {
   const dirMap: Record<string, (def: DirectiveDef) => void> = {
     $(def: DirectiveDef) {
       _data(ctx, el, def)
@@ -43,4 +43,3 @@ export function void_meta(ctx: Context, el: HTMLMetaElement) {
 
   return next
 }
-

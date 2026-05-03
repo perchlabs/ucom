@@ -23,7 +23,7 @@ import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 
-export function walk(ctx: Context, el: Element): WalkableReturn {
+export const walk = (ctx: Context, el: Element): WalkableReturn => {
   switch (safeNodeName(el)) {
     case 'meta':
       return void_meta(ctx, el as HTMLMetaElement)
@@ -47,7 +47,7 @@ export function walk(ctx: Context, el: Element): WalkableReturn {
   walkChildren(ctx, el)
 }
 
-export function walkChildren(ctx: Context, node: ContextableNode = ctx.walkable) {
+export const walkChildren = (ctx: Context, node: ContextableNode = ctx.walkable) => {
   let child: WalkableReturn = node.firstElementChild
   while (child) {
     child = walk(ctx, child) ?? nextWalkable(child)
