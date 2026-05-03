@@ -8,10 +8,10 @@ export const _event: DirectiveHandler = (
   el,
   {
     expr,
-    camel: eventName,
+    camel,
   },
 ) => {
-  if (!eventName || !expr) {
+  if (!camel || !expr) {
     return
   }
 
@@ -22,13 +22,13 @@ export const _event: DirectiveHandler = (
     try {
       execute(expr, ctx, {$event: e})
     } catch (err) {
-      console.error(`[@${eventName}] `, err)
+      console.error(`[@${camel}] `, err)
     }
   }
 
   // Attach the event listener
-  el.addEventListener(eventName, handler)
+  el.addEventListener(camel, handler)
 
   // Add cleanup to context
-  ctx.push(() => el.removeEventListener(eventName, handler))
+  ctx.push(() => el.removeEventListener(camel, handler))
 }

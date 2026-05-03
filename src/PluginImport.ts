@@ -39,7 +39,12 @@ export default {
       }
     }
 
-    observeMutations(man, root)
+    new MutationObserver(muts => {
+      processUndefinedElements(man, getMutationUndefined(man, muts))
+    }).observe(root, {
+      childList: true,
+      subtree: true,
+    })
   },
 } as Plugin
 
@@ -50,16 +55,6 @@ const processUndefinedElements = async (man: ComponentManager, undefArr: Element
       man.import(item.path)
     }
   })
-
-const observeMutations = (
-  man: ComponentManager,
-  root: QueryableRoot,
-) => new MutationObserver(muts => {
-  processUndefinedElements(man, getMutationUndefined(man, muts))
-}).observe(root, {
-  childList: true,
-  subtree: true,
-})
 
 const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
   [...muts].

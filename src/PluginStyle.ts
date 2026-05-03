@@ -24,9 +24,9 @@ export default {
   },
 } as Plugin
 
-// TODO: Revisit this when Safari and Firefox support CSS imports "with {type: 'css'}".
-// Note: Constructed stylesheet asynchronous replace method no longer handles CSS @import rules as 2025.
+// TODO: Revisit when Safari supports CSS imports "with {type: 'css'}".
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
+// Note: Constructed stylesheet asynchronous replace method no longer handles CSS @import rules as of 2025.
 const loadSheets = async (): Promise<CSSStyleSheet[]> => {
   const loading = queryForStyles(document.head)
     .map(async el => el.sheet ??
