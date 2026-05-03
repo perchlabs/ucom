@@ -64,9 +64,9 @@ export const _attribute: DirectiveHandler = (
 }
 
 export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefined {
-  if (!expr) {
-    return
-  }
+  // if (!expr) {
+  //   return
+  // }
 
   // Store original classes from HTML
   const originalClasses = split(el.className)
@@ -98,9 +98,9 @@ export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefine
 }
 
 function bindStyle(ctx: Context, el: HTMLElement, expr: string): undefined {
-  if (!expr) {
-    return
-  }
+  // if (!expr) {
+  //   return
+  // }
 
   // Store original inline styles
   const originalStyle = el.getAttribute('style') || ''

@@ -46,10 +46,10 @@ export const isUserKey = (k: string) =>
   k !== CONSTRUCTOR &&
   !k.startsWith('$')
 
-export const attrToggled = (el: Element, name: string): boolean =>
+export const attrToggled = (el: Element, name: string) =>
   el.hasAttribute(name) ?? false
 
-export const pullAttr = (el: Element, name: string): string | null => {
+export const pullAttr = (el: Element, name: string) => {
   const val = el.getAttribute(name)
   if (val != null) {
     el.removeAttribute(name)
@@ -69,7 +69,7 @@ export function cloneTemplateContent(tpl: HTMLTemplateElement) {
   return tpl.content.cloneNode(true) as DocumentFragment
 }
 
-export function queryAll<T extends Element>(root: QueryableRoot, selector: string): T[] {
+export function queryAll<T extends Element>(root: QueryableRoot, selector: string) {
   return ArrayFrom(root.querySelectorAll(selector) ?? []) as T[]
 }
 
