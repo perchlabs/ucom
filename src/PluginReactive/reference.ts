@@ -28,7 +28,9 @@ export interface Context {
 }
 // ContextableNode should use Element so that SVGElement is considered.
 export type ContextableNode = DocumentFragment | Element
-export type StoreAdder = (key: string, val: any) => void
+// export type StoreAdder = (key: string, val: any) => void
+export type StoreAdder = (entry: StoreAdderEntry) => void
+export type StoreAdderEntry = [key: string, val: any]
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export type WalkableReturn = Element | undefined | null

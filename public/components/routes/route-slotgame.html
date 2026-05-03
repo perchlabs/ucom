@@ -9,9 +9,9 @@
 
 <header>
   Game Size:
-  <input :value="rows" @input="rows = $event.target.value">
+  <input :value="rows" @input="rows = parseInt($event.target.value)">
   x
-  <input :value="cols" @input="cols = $event.target.value">
+  <input :value="cols" @input="cols = parseInt($event.target.value)">
   <meta %rows> x <meta %cols>
 </header>
 

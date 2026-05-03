@@ -1,10 +1,10 @@
-import type {
-  DirectiveHandler,
-} from '../reference.ts'
 import {
   STORE_MOD_VAR,
   storeMods,
 } from '../../reference.ts'
+import type {
+  DirectiveHandler,
+} from '../reference.ts'
 import {
   isObject,
   ObjectEntriesEach,
@@ -21,23 +21,18 @@ export const _data: DirectiveHandler = (
   },
 ) => {
   const [mod = STORE_MOD_VAR] = storeMods.intersection(mods)
+  const store = ctx[mod]
 
   try {
     const v = evaluate(expr, ctx)
     if (camel) {
-      addItem(camel, v)
+      store([camel, v])
     } else if (isObject(v)) {
-      ObjectEntriesEach(v, e => addItem(...e))
+      ObjectEntriesEach(v, store)
     } else {
       throw ''
     }
   } catch (e) {
     console.warn(`[$${camel}]`, e)
-  }
-
-  function addItem(k: string, v: any) {
-    if (storeMods.has(mod)) {
-      ctx[mod](k, v)
-    }
   }
 }

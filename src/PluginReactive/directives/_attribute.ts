@@ -54,8 +54,8 @@ export const _attribute: DirectiveHandler = (
         el.removeAttribute(attrName)
       }
       // Normal attribute value
-      else if (isString(value)) {
-        el.setAttribute(attrName, value)
+      else if (value) {
+        el.setAttribute(attrName, `${value}`)
       }
     } catch (e) {
       console.error(`[:${attrName}] `, e)
@@ -84,7 +84,6 @@ export function bindClass(ctx: Context, el: HTMLElement, expr: string): undefine
             classes.add(cls)
           }
         })
-
       } else if (isString(value)) {
         // String (from ternary or direct expression): "bg-blue text-white"
         split(value).forEach(c => classes.add(c))

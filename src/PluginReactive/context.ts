@@ -14,6 +14,7 @@ import type {
   RefRecord,
   DataRecord,
   ComputedFunction,
+  StoreAdderEntry,
 } from './reference.ts'
 import {
   computed as createComputed,
@@ -169,21 +170,21 @@ export function createContext(
       cleanup.push(fn)
     },
 
-    [STORE_MOD_VAR](camel: string, val: any) {
-      addItem(simpleItem(camel, val))
+    [STORE_MOD_VAR](entry) {
+      addItem(simpleItem(entry))
     },
 
-    [STORE_MOD_CALC](camel: string, value: ComputedFunction) {
+    [STORE_MOD_CALC]([camel, value]: [camel: string, value: ComputedFunction]) {
       addItem([camel, createComputed(value)])
     },
 
-    [STORE_MOD_SYNC](camel: string, value: any) {
-      const keyId = `${storeName}-${camel}`
-      syncMap[keyId] ??= simpleItem(camel, value)
+    [STORE_MOD_SYNC](entry) {
+      const keyId = `${storeName}-${entry[0]}`
+      syncMap[keyId] ??= simpleItem(entry)
       addItem(syncMap[keyId])
     },
 
-    [STORE_MOD_SAVE](camel: string, value: any) {
+    [STORE_MOD_SAVE]([camel, value]) {
       const keyId = `${storeName}-${camel}`
       syncMap[keyId] ??= persistItem()
       addItem(syncMap[keyId])
@@ -217,7 +218,7 @@ export function createContext(
     }
   }
 
-  ObjectEntriesEach(dataRaw, e => ctx.var(...e))
+  ObjectEntriesEach(dataRaw, ctx.var)
 
   return ctx
 }
@@ -247,7 +248,7 @@ function createFallbackProxy(data: DataRecord, parent: DataRecord = {}) {
   })
 }
 
-function simpleItem(camel: string, value: any): StoreItem {
+function simpleItem([camel, value]: StoreAdderEntry): StoreItem {
   const isFunc = isFunction(value)
   return [
     camel,
