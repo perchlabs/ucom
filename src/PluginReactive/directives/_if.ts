@@ -19,17 +19,12 @@ export const _if: DirectiveHandler = (
 ) => {
   const {exp} = dir
 
-  const [parent, anchor] = parentAndAnchor(dir, el)
-  if (!parent) {
-    return
-  }
-
   const branches: Branch[] = [[el, exp]]
 
   // locate else branch
   let elseEl: WalkableReturn
   let elseExp: string | null
-  while ((elseEl = nextWalkable(el))) {
+  while (elseEl = nextWalkable(el)) {
     elseExp = null
     if (
       pullAttr(elseEl, '#else') === '' ||
@@ -42,6 +37,10 @@ export const _if: DirectiveHandler = (
     }
   }
 
+  const [parent, anchor] = parentAndAnchor(el, dir)
+  if (!parent) {
+    return
+  }
   const next = nextWalkable(el)
   el.remove()
 

@@ -4,6 +4,10 @@ import type {
 } from './reference.ts'
 import { ObjectKeys, ObjectValues } from '../common.ts'
 
+// This can determine if an expression is a normal property accessor.
+export const simplePathRE =
+  /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
+
 export const evaluate = (
   exp: string,
   ctxThis: Context | null,

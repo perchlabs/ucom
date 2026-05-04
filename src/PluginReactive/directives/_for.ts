@@ -19,12 +19,10 @@ export const _for: DirectiveHandler = (
 ) => {
   const {exp} = dir
 
-  const next = nextWalkable(el)
-
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) {
     console.warn(`[#each] expression: ${exp}`)
-    return next
+    return
   }
 
   const sourceExp = inMatch[2].trim()
@@ -50,25 +48,26 @@ export const _for: DirectiveHandler = (
     isArrayDestructure = valueExp[0] === '['
   }
 
-  let [parent, anchor] = parentAndAnchor(dir, el)
+  let [parent, anchor] = parentAndAnchor(el, dir)
+  const next = nextWalkable(el)
   el.remove()
-
 
   const createChildContexts = (
     source: unknown,
   ): Context[] => {
     const dataArr: DataRecord[] = []
 
+    let i = 0
     if (isArray(source)) {
-      for (let i = 0; i < source.length; i++) {
+      for (;i < source.length; i++) {
         dataArr.push(createChildData(source[i], i))
       }
     } else if (isNumber(source)) {
-      for (let i = 0; i < source; i++) {
+      for (;i < source; i++) {
         dataArr.push(createChildData(i, i))
       }
     } else if (isObject(source)) {
-      let i = 0
+      // let i = 0
       for (const k in source) {
         dataArr.push(createChildData(source[k], i++, k))
       }

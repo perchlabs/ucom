@@ -22,11 +22,11 @@ export const nextWalkable = (el: Element): WalkableReturn => el.nextElementSibli
 // }
 
 export const parentAndAnchor = (
-  {op}: DirectiveDef, 
   el: Element,
+  dir?: DirectiveDef,
 ): [ContextableNode | null, Comment] => {
   const parent = contextableParent(el)
-  const anchor = new Comment(op)
+  const anchor = new Comment(dir?.op ?? '')
 
   if (parent) {
     parent.insertBefore(anchor, el)

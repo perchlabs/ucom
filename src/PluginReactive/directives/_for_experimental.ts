@@ -33,15 +33,6 @@ export const _for: DirectiveHandler = (
     return
   }
 
-  let [parent, anchor] = parentAndAnchor(dir, el)
-  if (!parent) {
-    console.warn('[#each] no parent')
-    return
-  }
-
-  const next = nextWalkable(el)
-  el.remove()
-
   const sourceExp = inMatch[2].trim()
   let valueExp = inMatch[1].trim().replace(stripParensRE, '').trim()
   let destructureBindings: string[] | undefined
@@ -67,6 +58,15 @@ export const _for: DirectiveHandler = (
     destructureBindings = match[1].split(',').map((s) => s.trim())
     isArrayDestructure = valueExp[0] === '['
   }
+
+  let [parent, anchor] = parentAndAnchor(el, dir)
+  if (!parent) {
+    console.warn('[#each] no parent')
+    return
+  }
+
+  const next = nextWalkable(el)
+  el.remove()
 
   const createChildContexts = (
     source: unknown,

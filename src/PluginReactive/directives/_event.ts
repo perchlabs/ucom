@@ -2,11 +2,9 @@ import type {
   DirectiveHandler,
 } from '../reference.ts'
 import { isFunction } from '../../common.ts'
-import { evaluate } from '../expression.ts'
+import { simplePathRE, evaluate } from '../expression.ts'
 
 type handlerFunc = ($event: Event) => any
-const simplePathRE =
-  /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
 export const _event: DirectiveHandler = (
   ctx,
