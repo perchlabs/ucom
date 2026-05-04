@@ -9,7 +9,7 @@ import { pullAttr } from '../../common.ts'
 
 type Branch = [
   el: Element,
-  exp: string | undefined | null
+  exp: string | null
 ]
 
 export const _if: DirectiveHandler = (
