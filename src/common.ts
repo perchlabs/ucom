@@ -86,3 +86,10 @@ export const hashContent = (tpl: HTMLTemplateElement): number => {
   return ArrayFrom(div.innerHTML)
     .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)
 }
+
+export const observeMutations = (target: Node, callback: MutationCallback) =>
+  new MutationObserver(callback)
+    .observe(target, {
+      childList: true,
+      subtree: true,
+    })

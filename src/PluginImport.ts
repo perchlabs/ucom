@@ -18,6 +18,7 @@ import {
   queryAll,
   attrToggled,
   attributeEntries,
+  observeMutations,
 } from './common.ts'
 
 export default {
@@ -26,50 +27,47 @@ export default {
   },
 
   construct({man, el, root}: PluginConstructParams): void {
-    (el as UpgradeComponent).$import = async (ref: unknown) => {
-      if (isString(ref)) {
-        return man.import(ref)
+    const processUndefinedElements = async (undefArr: Element[]) =>
+      undefArr.forEach(el => {
+        const item = man.lazy[safeNodeName(el)]
+        if (item) {
+          man.get(item.path)
+        }
+      })
+
+    const queryForUndefined = (root: QueryableRoot) => {
+      const arr = queryAll(root, ':not(:defined)')
+      const nodeName = safeNodeName(root)
+      if (isValidComponentName(nodeName) && !man.has(nodeName)) {
+        arr.push(root as Element)
       }
-      if (ref instanceof HTMLElement) {
-        const dataArr = importTopLevelElements(man,
+      return arr
+    }
+
+    ;(el as UpgradeComponent).$import = async (ref: unknown) => {
+      if (isString(ref)) {
+        return man.get(ref)
+      }
+      if (ref instanceof HTMLSlotElement) {
+        const dataArr = importTopLevelElements(
+          man,
           (ref as HTMLSlotElement).assignedElements?.() ?? ref.children
         )
-        processUndefinedElements(man, queryForUndefined(man, root))
+        processUndefinedElements(queryForUndefined(root))
         return dataArr
       }
     }
 
-    new MutationObserver(muts => {
-      processUndefinedElements(man, getMutationUndefined(man, muts))
-    }).observe(root, {
-      childList: true,
-      subtree: true,
-    })
+    observeMutations(root, muts =>
+      processUndefinedElements(
+        [...muts].
+        flatMap(v => [...v.addedNodes]).
+        filter(isElement).
+        flatMap(el => queryForUndefined(el))
+      )
+    )
   },
 } as Plugin
-
-const processUndefinedElements = async (man: ComponentManager, undefArr: Element[]) =>
-  undefArr.forEach(el => {
-    const item = man.lazy[safeNodeName(el)]
-    if (item) {
-      man.import(item.path)
-    }
-  })
-
-const getMutationUndefined = (man: ComponentManager, muts: MutationRecord[]) =>
-  [...muts].
-  flatMap(v => [...v.addedNodes]).
-  filter(isElement).
-  flatMap(el => queryForUndefined(man, el as Element))
-
-const queryForUndefined = (man: ComponentManager, root: QueryableRoot) => {
-  const arr = queryAll(root, ':not(:defined)')
-  const nodeName = safeNodeName(root)
-  if (isValidComponentName(nodeName) && !man.has(nodeName)) {
-    arr.push(root as Element)
-  }
-  return arr
-}
 
 const importTopLevelElements = async (man: ComponentManager, elArr: Element[]): Promise<ImportComponentData[]> => {
   let urlPrefix = ''
@@ -93,7 +91,7 @@ const importTopLevelElements = async (man: ComponentManager, elArr: Element[]): 
             if (lazy || attrToggled(el, 'lazy')) {
               man.lazy[name] = ident
             } else {
-              man.import(path)
+              man.get(path)
             }
           }
 

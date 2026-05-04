@@ -2,7 +2,7 @@ import type {
   ComponentManager,
 } from '../reference.ts'
 import {
-  SYS_PREFIX,
+  SYS_CODE,
   STORE_MOD_VAR,
   STORE_MOD_CALC,
   STORE_MOD_SYNC,
@@ -74,7 +74,7 @@ export const createContext = (
   let initialized = false
   const children = new Set<Context>()
 
-  const storeName = `${SYS_PREFIX}-${safeNodeName(host)}`
+  const storeName = `${SYS_CODE}-${safeNodeName(host)}`
   const data: DataRecord = {}
   const proxy = createFallbackProxy(data, dataParent)
   const cleanup: (() => void)[] = []

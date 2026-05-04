@@ -5,7 +5,7 @@ import type {
   ComponentManager,
 } from './reference.ts'
 import {
-  SYS_PREFIX,
+  SYS_CODE,
 } from './reference.ts'
 import {
   isElement,
@@ -13,13 +13,25 @@ import {
   isValidComponentName,
   queryAll,
   isTemplateElement,
+  observeMutations,
 } from './common.ts'
 
 export default {
   async start(man: ComponentManager) {
-    const root = document
-    await processTemplates(man, queryForTemplates(root))
-    observeMutations(man, root)
+    await processTemplates(man, queryForTemplates(document))
+
+    observeMutations(document, muts =>
+      processTemplates(man,
+        [...muts].
+        flatMap(v => [...v.addedNodes]).
+        filter(isElement).
+        flatMap(el =>
+          isTemplateElement(el) && el.hasAttribute(SYS_CODE)
+          ? el
+          : queryForTemplates(el)
+        )
+      )
+    )
   },
 
   async parse({man, frag}: PluginParseParams) {
@@ -31,11 +43,11 @@ const processTemplates = async (
   man: ComponentManager,
   tplArr: HTMLTemplateElement[],
 ) => templateHandler(tplArr, async (tpl) => {
-  const ref = tpl.getAttribute(SYS_PREFIX)
+  const ref = tpl.getAttribute(SYS_CODE)
 
   if (ref) {
     tpl.remove()
-    const method = isValidComponentName(ref) ? man.define : man.import
+    const method = isValidComponentName(ref) ? man.define : man.get
     await method(ref, tpl)
   } else {
     // Annonymous bootstrap app
@@ -46,27 +58,7 @@ const processTemplates = async (
   }
 })
 
-const observeMutations = (
-  man: ComponentManager,
-  root: QueryableRoot,
-) => new MutationObserver(muts => {
-  processTemplates(man, getMutationTemplates(muts))
-}).observe(root, {
-  childList: true,
-  subtree: true,
-})
-
-const getMutationTemplates = (muts: MutationRecord[]) => {
-  return [...muts]
-    .flatMap(v => [...v.addedNodes])
-    .filter(isElement)
-    .flatMap(el => isTemplateElement(el) && el.hasAttribute(SYS_PREFIX)
-      ? el
-      : queryForTemplates(el)
-    )
-}
-
-const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${SYS_PREFIX}]`)
+const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${SYS_CODE}]`)
 
 const templateHandler = (
   tplArr: HTMLTemplateElement[],

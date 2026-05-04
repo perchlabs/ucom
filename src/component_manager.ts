@@ -97,7 +97,7 @@ export default (pluginsRaw: Plugin[]) => {
     // Import a component.  Providing the optional template argument prevents a fetch operation.  This is useful
     // for inlining components on the server (with a plugin providing this functionality).  The URL is useful in
     // this case for allowing relative imports according to the public web path of the component.
-    async import(url: string, tpl?: HTMLTemplateElement) {
+    async get(url: string, tpl?: HTMLTemplateElement) {
       const {name, path} = man.resolve(url)
       try {
         tpl ??= await fetchTemplate(path)

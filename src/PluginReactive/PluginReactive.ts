@@ -109,8 +109,8 @@ export default {
     })
   },
 
-  [ATTRIBUTE_CHANGED]({Com, el}: PluginCallbackBuilderParams) {
-    const {[PropsIndex]: propDefs} = Com as UpgradeComponentConstructor
+  [ATTRIBUTE_CHANGED]({Com, el}: UpgradedPluginCallbackBuilderParams) {
+    const {[PropsIndex]: propDefs} = Com
 
     return (kebab: string, _oldValue: string | null, newValue: string | null) => {
       const data = (el as UpgradeComponent)[DataIndex]
@@ -122,8 +122,7 @@ export default {
     }
   },
 
-  [CONNECTED](params: PluginCallbackBuilderParams) {
-    const {Com, man, el, root} = (params as UpgradedPluginCallbackBuilderParams)
+  [CONNECTED]({Com, man, el, root}: UpgradedPluginCallbackBuilderParams) {
     return () => {
       const ctx = createContext(man, el, root, makeContextData(Com, el))
       ObjectAssign(el, {

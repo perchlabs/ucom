@@ -97,7 +97,7 @@ export interface ComponentManager {
   lazy: {[key: string]: ComponentIdentity},
   start: () => Promise<void>,
   define: ComponentDefiner,
-  import: ComponentImporter,
+  get: ComponentImporter,
   resolve: ComponentResolver,
   has: (name: string) => boolean
 }
@@ -169,7 +169,7 @@ export type QueryableRoot = Document | DocumentFragment | Element
 // CONSTANTS
 //////////////////////////
 
-export const SYS_PREFIX = 'u-com'
+export const SYS_CODE = 'u-com'
 export const FILE_POSTFIX = '.html'
 export const DIR_POSTFIX = '.ucom'
 

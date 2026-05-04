@@ -11,7 +11,7 @@ import { evaluate } from './eval'
 import { checkAttr } from './utils'
 import { ref } from './directives/ref'
 import { createScopedContext } from './context'
-import { SYS_PREFIX } from '../../reference.ts'
+import { SYS_CODE } from '../../reference.ts'
 
 const dirRE = /^(?:u-|:|@)/
 const dirBasicRE = /^(u-[a-z]+)$/
@@ -24,7 +24,7 @@ export const walk = (node: Node, ctx: Context): ChildNode | null | void => {
     // Element
     const el = node as Element
 
-    if (el.hasAttribute('u-pre') || el.hasAttribute(SYS_PREFIX)) {
+    if (el.hasAttribute('u-pre') || el.hasAttribute(SYS_CODE)) {
       return
     }
 

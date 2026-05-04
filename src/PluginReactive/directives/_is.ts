@@ -45,7 +45,7 @@ export const _is: DirectiveHandler = (
         const {name, path} = man.resolve(value)
         tagName = name
         if (!man.has(tagName)) {
-          man.import(path)
+          man.get(path)
         }
       } catch (e) {
         return
