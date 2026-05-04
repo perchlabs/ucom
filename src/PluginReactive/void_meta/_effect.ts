@@ -8,11 +8,11 @@ export const _effect: DirectiveHandler = (
   ctx,
   _el,
   {
-    expr,
+    exp,
     mods,
   },
 ) => {
-  const value = evaluate(expr, ctx)
+  const value = evaluate(exp, ctx)
   if (isFunction(value)) {
     if (mods.has('once')) {
       value()

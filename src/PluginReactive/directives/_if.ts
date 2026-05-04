@@ -9,7 +9,7 @@ import { pullAttr } from '../../common.ts'
 
 type Branch = [
   el: Element,
-  expr: string | undefined | null
+  exp: string | undefined | null
 ]
 
 export const _if: DirectiveHandler = (
@@ -17,14 +17,14 @@ export const _if: DirectiveHandler = (
   el,
   dir,
 ) => {
-  const {expr} = dir
+  const {exp} = dir
 
   const [parent, anchor] = parentAndAnchor(dir, el)
   if (!parent) {
     return
   }
 
-  const branches: Branch[] = [[el, expr]]
+  const branches: Branch[] = [[el, exp]]
 
   // locate else branch
   let elseEl: WalkableReturn
@@ -58,8 +58,8 @@ export const _if: DirectiveHandler = (
 
   ctxRoot.effect(() => {
     for (let i = 0; i < branches.length; i++) {
-      const [el, expr] = branches[i]
-      if (!expr || evaluate(expr, ctxRoot)) {
+      const [el, exp] = branches[i]
+      if (!exp || evaluate(exp, ctxRoot)) {
         if (i !== activeBranchIndex) {
           removeActiveContext()
           ctx = ctxRoot.scope(el)

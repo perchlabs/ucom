@@ -22,18 +22,17 @@ export const pullDir = (el: Element, key: string) => {
 
 const reDirectiveExpand = /^(u-[a-z]+|[^a-z]{1,3})(:?[a-z0-9]+[a-z0-9\-]*)?(\..+)*$/
 
-const createDirectiveDefinition = (full: string, expr: string): DirectiveDef | undefined => {
+const createDirectiveDefinition = (full: string, exp: string): DirectiveDef | undefined => {
   const match = full.match(reDirectiveExpand)
   if (match) {
     let [, op, kebab, mods = ''] = match
     kebab = kebab?.[0] === ':' ? kebab.substring(1) : kebab
 
     return {
-      full,
       op,
       kebab,
       camel: kebab ? kebabToCamel(kebab) : undefined,
-      expr,
+      exp,
       mods: new Set<string>(split(mods, '.')),
     }
   }

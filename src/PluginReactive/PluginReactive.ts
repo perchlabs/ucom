@@ -143,18 +143,18 @@ const parseParams = (funcs: FunctionRecord, params: ComponentParams): PropDefs =
   const propDefs: PropDefs = {}
 
   for (const dir of ArrayFrom(params)) {
-    const {op, camel, kebab, expr, mods} = dir
+    const {op, camel, kebab, exp, mods} = dir
 
     if (op === '$' && kebab && camel) {
       params.delete(dir)
 
-      const eVal = expr ? evaluate(expr, null, funcs) : undefined
+      const eVal = exp ? evaluate(exp, null, funcs) : undefined
       let pipe: (v: any) => any
 
       if (mods.has('int')) {
         pipe = v => Math.round(Number(v ?? eVal) || 0)
       } else if (mods.has('bool')) {
-        if (expr) {
+        if (exp) {
           console.warn(`bool parameter '${camel}' cannot have default value`)
         }
         pipe = v => v != null

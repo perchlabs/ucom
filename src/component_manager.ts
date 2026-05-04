@@ -74,7 +74,7 @@ export default (pluginsRaw: Plugin[]) => {
     resolve(url: string): ComponentIdentity {
       const matches = reComponentPath.exec(url)
       if (!matches) {
-        throw Error(`resolving '${url}'`)
+        throw Error(`Resolve '${url}'`)
       }
 
       const [,name, postfix] = matches
@@ -98,14 +98,12 @@ export default (pluginsRaw: Plugin[]) => {
     // for inlining components on the server (with a plugin providing this functionality).  The URL is useful in
     // this case for allowing relative imports according to the public web path of the component.
     async get(url: string, tpl?: HTMLTemplateElement) {
-      const {name, path} = man.resolve(url)
       try {
+        const {name, path} = man.resolve(url)
         tpl ??= await fetchTemplate(path)
         return idents[name] ??= defineActual(name, path, tpl)
       } catch (e) {
-        if (e instanceof ComponentFetchError) {
-          console.error(`Fetching component '${e.resolved}', ${e.reason}`)
-        }
+        console.error(e)
       }
     },
   }
@@ -116,14 +114,14 @@ export default (pluginsRaw: Plugin[]) => {
 const fetchTemplate = async (path: string): Promise<HTMLTemplateElement> => {
   const res = await fetch(path)
   if (!res.ok) {
-    throw new ComponentFetchError(path, `Status ${res.status}`)
+    throwFetchError(path, `Status ${res.status}`)
   }
   if (!res.headers.get('Content-Type')?.startsWith('text/html')) {
-    throw new ComponentFetchError(path, 'Content-Type is not text/html')
+    throwFetchError(path, 'Content-Type is not text/html')
   }
   const text = await res.text()
   if (text.startsWith('<!DOCTYPE')) {
-    throw new ComponentFetchError(path, 'Content started with <!DOCTYPE')
+    throwFetchError(path, 'Content started with <!DOCTYPE')
   }
 
   const tpl = createElement('template')
@@ -132,17 +130,8 @@ const fetchTemplate = async (path: string): Promise<HTMLTemplateElement> => {
   return tpl
 }
 
-export class ComponentFetchError extends Error {
-  resolved: string
-  reason: string
-
-  constructor(resolved: string, reason: string) {
-    super()
-
-    this.resolved = resolved
-    this.reason = reason
-  }
-}
+const throwFetchError = (path: string, reason: string) =>
+  new Error(`Component '${path}', ${reason}`)
 
 const defineComponent = async (man: ComponentManager, plugins: PluginManager, def: ComponentDef) => {
   const {name, tpl} = def
@@ -156,11 +145,11 @@ const defineComponent = async (man: ComponentManager, plugins: PluginManager, de
 
   const modes: Record<string, string | null> = {}
   for (const dir of ArrayFrom(params)) {
-    const {op, camel, expr} = dir
+    const {op, camel, exp} = dir
 
     if (op === '+' && camel) {
       params.delete(dir)
-      modes[camel] = expr
+      modes[camel] = exp
     }
   }
 

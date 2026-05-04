@@ -17,13 +17,13 @@ export const _for: DirectiveHandler = (
   el,
   dir,
 ) => {
-  const {expr} = dir
+  const {exp} = dir
 
   const next = nextWalkable(el)
 
-  const inMatch = expr.match(forAliasRE)
+  const inMatch = exp.match(forAliasRE)
   if (!inMatch) {
-    console.warn(`[#each] expression: ${expr}`)
+    console.warn(`[#each] expression: ${exp}`)
     return next
   }
 

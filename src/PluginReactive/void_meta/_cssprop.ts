@@ -16,11 +16,11 @@ export const _cssprop: DirectiveHandler = (
   {
     camel,
     kebab,
-    expr,
+    exp,
     mods,
   },
 ) => {
-  const exprReal = expr || camel
+  const exprReal = exp || camel
   if (!exprReal) {
     return
   }

@@ -14,11 +14,11 @@ import { walk } from '../walk.ts'
 export const _is: DirectiveHandler = (
   ctx,
   el,
-  {expr},
+  {exp},
 ) => {
   const {man} = ctx
 
-  if (!expr) {
+  if (!exp) {
     console.warn(`[u-is] empty expression`)
     return
   }
@@ -32,7 +32,7 @@ export const _is: DirectiveHandler = (
   ctx.effect(() => {
     is?.remove()
 
-    const value = evaluate(expr, ctx)
+    const value = evaluate(exp, ctx)
     if (!isString(value)) {
       return
     }

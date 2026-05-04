@@ -8,10 +8,10 @@ import {
 export const _ref: DirectiveHandler = (
   ctx,
   el,
-  {mods, expr},
+  {mods, exp},
 ) => {
-  if (expr) {
+  if (exp) {
     const refs = mods.has('global') ? globalRefs : ctx.refs
-    refs[expr] = new WeakRef(el)
+    refs[exp] = new WeakRef(el)
   }
 }

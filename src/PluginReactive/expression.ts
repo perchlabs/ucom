@@ -5,23 +5,23 @@ import type {
 import { ObjectKeys, ObjectValues } from '../common.ts'
 
 export const evaluate = (
-  expr: string,
+  exp: string,
   ctxThis: Context | null,
   other: DataRecord = {},
 ) =>
   run(
-    `with($data) { return ${expr}; }`,
+    `with($data) { return ${exp}; }`,
     ctxThis?.data ?? {},
     other,
   )
 
 export const execute = (
-  expr: string,
+  exp: string,
   ctxThis: Context | null,
   other: DataRecord = {},
 ): void => 
   run(
-    `with($data) { ${expr}; }`,
+    `with($data) { ${exp}; }`,
     ctxThis?.data ?? {},
     other,
   ) as void

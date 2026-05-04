@@ -13,7 +13,7 @@ export const _event: DirectiveHandler = (
   el,
   {
     camel,
-    expr,
+    exp,
   },
 ) => {
   if (!camel) {
@@ -21,13 +21,13 @@ export const _event: DirectiveHandler = (
   }
 
   let handler: handlerFunc | undefined
-  if (simplePathRE.test(expr)) {
-    const value = evaluate(expr, ctx)
+  if (simplePathRE.test(exp)) {
+    const value = evaluate(exp, ctx)
     if (isFunction(value)) {
       handler = value
     }
   } else {
-    handler = evaluate(`$event => ${expr}`, ctx) as handlerFunc
+    handler = evaluate(`$event => ${exp}`, ctx) as handlerFunc
   }
 
   if (handler) {

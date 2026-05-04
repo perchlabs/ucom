@@ -130,11 +130,10 @@ export type ModuleExports = Record<string, any>
 export type ComponentParams = Set<DirectiveDef>
 
 export type DirectiveDef = {
-  full: string
   op: string
   kebab?: string
   camel?: string
-  expr: string
+  exp: string
   mods: Set<string>
 }
 

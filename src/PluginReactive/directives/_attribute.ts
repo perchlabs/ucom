@@ -17,7 +17,7 @@ export const _attribute: DirectiveHandler = (
   ctx,
   el,
   {
-    expr,
+    exp,
     kebab: attrName,
   },
 ) => {
@@ -27,16 +27,16 @@ export const _attribute: DirectiveHandler = (
 
   // Special handling for 'class' attribute
   if (attrName === 'class') {
-    return bindClass(ctx, el as HTMLElement, expr)
+    return bindClass(ctx, el as HTMLElement, exp)
   }
 
   // Special handling for 'style' attribute
   if (attrName === 'style') {
-    return bindStyle(ctx, el as HTMLElement, expr)
+    return bindStyle(ctx, el as HTMLElement, exp)
   }
 
   // General attribute binding
-  const exprReal = expr || attrName
+  const exprReal = exp || attrName
   ctx.effect(() => {
     try {
       const value = evaluate(exprReal, ctx)
@@ -63,8 +63,8 @@ export const _attribute: DirectiveHandler = (
   })
 }
 
-export const bindClass = (ctx: Context, el: HTMLElement, expr: string): undefined => {
-  // if (!expr) {
+export const bindClass = (ctx: Context, el: HTMLElement, exp: string): undefined => {
+  // if (!exp) {
   //   return
   // }
 
@@ -73,7 +73,7 @@ export const bindClass = (ctx: Context, el: HTMLElement, expr: string): undefine
 
   ctx.effect(() => {
     try {
-      const value = evaluate(expr, ctx)
+      const value = evaluate(exp, ctx)
 
       // Start with original classes
       const classes = new Set(originalClasses)
@@ -97,8 +97,8 @@ export const bindClass = (ctx: Context, el: HTMLElement, expr: string): undefine
   })
 }
 
-const bindStyle = (ctx: Context, el: HTMLElement, expr: string): undefined => {
-  // if (!expr) {
+const bindStyle = (ctx: Context, el: HTMLElement, exp: string): undefined => {
+  // if (!exp) {
   //   return
   // }
 
@@ -107,7 +107,7 @@ const bindStyle = (ctx: Context, el: HTMLElement, expr: string): undefined => {
 
   ctx.effect(() => {
     try {
-      const value = evaluate(expr, ctx)
+      const value = evaluate(exp, ctx)
 
       // Restore original styles first
       el.setAttribute('style', originalStyle)

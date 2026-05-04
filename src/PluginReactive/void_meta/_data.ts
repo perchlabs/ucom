@@ -17,14 +17,14 @@ export const _data: DirectiveHandler = (
   {
     camel,
     mods,
-    expr,
+    exp,
   },
 ) => {
   const [mod = STORE_MOD_VAR] = storeMods.intersection(mods)
   const store = ctx[mod]
 
   try {
-    const v = evaluate(expr, ctx)
+    const v = evaluate(exp, ctx)
     if (camel) {
       store([camel, v])
     } else if (isObject(v)) {

@@ -20,7 +20,7 @@ export const void_meta = (ctx: Context, el: HTMLMetaElement) => {
       _data(ctx, el, def)
       _cssprop(ctx, el, {
         ...def,
-        expr: '',
+        exp: '',
       })
     },
     '()'(def: DirectiveDef) {

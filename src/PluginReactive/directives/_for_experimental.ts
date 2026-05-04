@@ -25,11 +25,11 @@ export const _for: DirectiveHandler = (
   el,
   dir,
 ) => {
-  const {expr} = dir
+  const {exp} = dir
 
-  const inMatch = expr.match(forAliasRE)
+  const inMatch = exp.match(forAliasRE)
   if (!inMatch) {
-    console.warn(`[#each] invalid expression: ${expr}`)
+    console.warn(`[#each] invalid expression: ${exp}`)
     return
   }
 
