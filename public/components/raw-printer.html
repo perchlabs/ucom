@@ -1,15 +1,15 @@
 <param $name>
 
+<meta
+  $has-run=false
+  ()="run(name)"
+>
+
 <script>
   export default class extends HTMLElement {
-    async connectedCallback() {
-      this.$effect(() => {
-        this.#tryRun(this.$data.name)
-      })
-    }
-
     #hasRun = false
-    async #tryRun(name) {
+
+    async run(name) {
       if (this.#hasRun || !name) {
         return
       }

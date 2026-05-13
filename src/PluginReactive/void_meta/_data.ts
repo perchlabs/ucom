@@ -9,7 +9,6 @@ import {
   isObject,
   ObjectEntriesEach,
 } from '../../common.ts'
-import { evaluate } from '../expression.ts'
 
 export const _data: DirectiveHandler = (
   ctx,
@@ -24,7 +23,7 @@ export const _data: DirectiveHandler = (
   const store = ctx[mod]
 
   try {
-    const v = evaluate(exp, ctx)
+    const v = ctx.eval(exp)
     if (camel) {
       store([camel, v])
     } else if (isObject(v)) {

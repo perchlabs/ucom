@@ -14,6 +14,8 @@ export const isFunction = (v: unknown): v is ((...args: any[]) => any) => typeof
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
+export const isPromise = (v: unknown): v is Promise<any> => v instanceof Promise
+
 export const isHTMLElement = (v: unknown): v is HTMLElement => v instanceof HTMLElement
 export const isShadowRoot = (v: unknown): v is ShadowRoot => v instanceof ShadowRoot
 export const isElement = (v: Node): v is Element => v?.nodeType === 1
@@ -36,9 +38,9 @@ export const ObjectEntriesEach = <T>(
   each: (entry: [k: string, v: T]) => void,
 ): void => ObjectEntries(obj).forEach(each)
 
-export const reComponentPath = new RegExp(`.*?([a-z]+\-[a-z0-9]+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
+export const reComponentPath = new RegExp(`.*?(([a-z]+)(\-[a-z0-9]+)+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
-export const isValidComponentName = (v: string) => /^[a-z]+\-[a-z0-9]+$/.test(v.toLowerCase())
+export const isValidComponentName = (v: string) => /^[a-z]+(\-[a-z0-9]+)+$/.test(v.toLowerCase())
 
 export const isUserKey = (k: string) =>
   k !== CONSTRUCTOR &&
@@ -48,9 +50,10 @@ export const attrToggled = (el: Element, name: string) =>
   el.hasAttribute(name) ?? false
 
 export const pullAttr = (el: Element, name: string) => {
-  const val = el.getAttribute(name)
+  let val = el.getAttribute(name)
   if (val != null) {
     el.removeAttribute(name)
+    val = val.trim()
   }
   return val
 }
@@ -78,6 +81,8 @@ export const camelToKebab = (v: string) => v.replace(/([A-Z])/g, '-$1').toLowerC
 // export const kebabToCamel = (v: string) => v.replace(/-./g, m => m.toUpperCase()[1])
 export const kebabToCamel = (v: string) => v.replace(/-./g, m => m[1].toUpperCase())
 
+export const isValidCamel = (v: string) => /^[a-z]+([a-zA-Z0-9]+)*$/.test(v)
+
 export const split = (v: string, s: string = ' ') => v.split(s).filter(c => c)
 
 export const hashContent = (tpl: HTMLTemplateElement): number => {
@@ -93,3 +98,30 @@ export const observeMutations = (target: Node, callback: MutationCallback) =>
       childList: true,
       subtree: true,
     })
+
+export const AbortablePromise = <T>(
+  raw: Promise<T>,
+  {signal}: { signal: AbortSignal },
+): Promise<T> => {
+  const {promise, reject} = Promise.withResolvers<T>()
+  const race = Promise.race([raw, promise])
+
+  if (signal.aborted) {
+    reject(AbortablePromise.Canceled)
+  }
+
+  signal.addEventListener('abort', () => reject(AbortablePromise.Canceled))
+
+  return race
+}
+AbortablePromise.Canceled = Symbol()
+
+export const isPromisePending = (p: Promise<any>) => {
+  const t = {}
+  return Promise
+    .race([p, t])
+    .then(
+      v => v === t,
+      () => false,
+    )
+}

@@ -77,7 +77,7 @@ export default (pluginsRaw: Plugin[]) => {
         throw Error(`Resolve '${url}'`)
       }
 
-      const [,name, postfix] = matches
+      const [,name,,, postfix] = matches
       if (postfix === DIR_POSTFIX) {
         url += `/${name}${FILE_POSTFIX}`
       }

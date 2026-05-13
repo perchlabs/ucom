@@ -2,9 +2,9 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`17.9k` minified) (`7.8k` gzipped)
-* ucom_vue (`27.7k` minified) (`11.8k` gzipped)
-* ucom_lite (`6.1k` minified) (`3.0k` gzipped)
+* ucom (`19.2k` minified) (`8.4k` gzipped)
+* ucom_vue (`28.0k` minified) (`11.8k` gzipped)
+* ucom_lite (`6.3k` minified) (`3.0k` gzipped)
 
 **Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
 
@@ -178,10 +178,11 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 
 ### Template Directives
 
-#### Directives that create a subscope ####
+#### Subscope Directives ####
 
 - `#if` (`#else`, `#else-if`)
 - `#each`
+- `#await` (`#then`, `#catch`)
 
 #### Normal directives ####
 - `u-is`
@@ -204,6 +205,27 @@ The component will be a `.html` file with the same name as the `.ucom` directory
   <div #each="n in 10" @click="alert(n)" %n></div>
 </template>
 ```
+
+`#await`, `#then`, `catch` promise handling with [Svelte-like](https://svelte.dev/docs/svelte/await) syntax.
+
+```html
+<template u-com>
+  <meta
+    $set-promise="() => new Promise(resolve => setTimeout(resolve, 1000))"
+    $p="setPromise()"
+  >
+
+  <button @click="p = setPromise()">Reset</button>
+
+  <div #await="p">
+    pending
+  </div>
+  <div #then>
+    resolved
+  </div>
+</template>
+```
+
 
 While displaying text a `meta` [void element](https://developer.mozilla.org/en-US/docs/Glossary/Void_element) tag is converted to span.  This is fine because the shadow root of the web component separates it from the main HTML document.
 

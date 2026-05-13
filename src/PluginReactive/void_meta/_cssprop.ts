@@ -8,7 +8,6 @@ import {
 import {
   contextableParent,
 } from '../utils.ts'
-import { evaluate } from '../expression.ts'
 
 export const _cssprop: DirectiveHandler = (
   ctx,
@@ -30,7 +29,7 @@ export const _cssprop: DirectiveHandler = (
 
   ctx.effect(() => {
     try {
-      let value = evaluate(exprReal, ctx) as string
+      let value = ctx.eval(exprReal) as string
       if (mods.has('escape')) {
         value = `"${CSS.escape(value)}"`
       }

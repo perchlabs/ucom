@@ -15,6 +15,8 @@ import void_meta from './void_meta'
 import { _show } from './directives/_show.ts'
 import { _if } from './directives/_if.ts'
 import { _for } from './directives/_for.ts'
+import { _await } from './directives/_await.ts'
+
 // import { _for } from './directives/_for_experimental.ts'
 import { _is } from './directives/_is.ts'
 
@@ -58,6 +60,7 @@ export const walkChildren = (ctx: Context, node: ContextableNode = ctx.walkable)
 const ctrlDirs: [string, DirectiveHandler][] = [
   ['#if', _if],
   ['#each', _for],
+  ['#await', _await],
   ['u-is', _is],
   ['u-show', _show],
 ]

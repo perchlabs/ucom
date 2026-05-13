@@ -1,7 +1,6 @@
 import type {
   DirectiveHandler,
 } from '../reference.ts'
-import { evaluate } from '../expression.ts'
 
 export const _text: DirectiveHandler = (
   ctx,
@@ -14,7 +13,7 @@ export const _text: DirectiveHandler = (
   // Create an effect that automatically re-runs when signals change.
   ctx.effect(() => {
     try {
-      el[prop] = evaluate(exprReal, ctx) as string | undefined ?? ''
+      el[prop] = ctx.eval(exprReal) as string | undefined ?? ''
     } catch (e) {
       console.error('[text] ', e)
     }

@@ -2,7 +2,6 @@ import type {
   DirectiveHandler,
 } from '../reference.ts'
 import { isFunction } from '../../common.ts'
-import { evaluate } from '../expression.ts'
 
 export const _effect: DirectiveHandler = (
   ctx,
@@ -12,7 +11,7 @@ export const _effect: DirectiveHandler = (
     mods,
   },
 ) => {
-  const value = evaluate(exp, ctx)
+  const value = ctx.eval(exp)
   if (isFunction(value)) {
     if (mods.has('once')) {
       value()

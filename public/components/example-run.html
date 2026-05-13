@@ -1,0 +1,18 @@
+<param $name>
+
+<source src="@com/highlight-article.ucom">
+<source src="@com/raw-printer.html">
+
+<template u-is="name"></template>
+<!-- <route-await-04></route-await-04> -->
+
+<highlight-article #if="name">
+  <raw-printer :name></raw-printer>
+</highlight-article>
+
+<style>
+  :host {
+    display: block;
+    margin-bottom: 5.0rem;
+  }
+</style>

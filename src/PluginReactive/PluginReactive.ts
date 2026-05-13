@@ -135,7 +135,7 @@ export default {
   },
 
   [DISCONNECTED]({el}: PluginCallbackBuilderParams) {
-    return () => (el as UpgradeComponent)[ContextIndex].teardown()
+    return () => (el as UpgradeComponent)[ContextIndex]?.teardown()
   },
 } as Plugin
 
@@ -148,7 +148,7 @@ const parseParams = (funcs: FunctionRecord, params: ComponentParams): PropDefs =
     if (op === '$' && kebab && camel) {
       params.delete(dir)
 
-      const eVal = exp ? evaluate(exp, null, funcs) : undefined
+      const eVal = exp ? evaluate(exp, {}, funcs) : undefined
       let pipe: (v: any) => any
 
       if (mods.has('int')) {

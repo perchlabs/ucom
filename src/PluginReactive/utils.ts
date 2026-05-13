@@ -40,7 +40,7 @@ export const makeElementAs = (el: Element, tagName: string) => {
   attributeEntries(el).forEach(e => tag.setAttribute(...e))
 
   if (isTemplateElement(el)) {
-    tag.append(el.content)
+    tag.append((el.cloneNode(true) as HTMLTemplateElement).content)
   } else {
     tag.innerHTML = el.innerHTML
   }

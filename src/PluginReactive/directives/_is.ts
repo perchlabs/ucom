@@ -7,8 +7,9 @@ import {
   isValidComponentName,
   isValidComponentPath,
 } from '../../common.ts'
-import { makeElementAs } from '../utils.ts'
-import { evaluate } from '../expression.ts'
+import {
+  makeElementAs,
+} from '../utils.ts'
 import { walk } from '../walk.ts'
 
 export const _is: DirectiveHandler = (
@@ -17,7 +18,6 @@ export const _is: DirectiveHandler = (
   {exp},
 ) => {
   const {man} = ctx
-
   if (!exp) {
     console.warn(`[u-is] empty expression`)
     return
@@ -31,8 +31,9 @@ export const _is: DirectiveHandler = (
 
   ctx.effect(() => {
     is?.remove()
+    is = undefined
 
-    const value = evaluate(exp, ctx)
+    const value = ctx.eval(exp)
     if (!isString(value)) {
       return
     }
@@ -45,7 +46,7 @@ export const _is: DirectiveHandler = (
         const {name, path} = man.resolve(value)
         tagName = name
         if (!man.has(tagName)) {
-          man.get(path)
+         man.get(path)
         }
       } catch (e) {
         return
@@ -55,7 +56,9 @@ export const _is: DirectiveHandler = (
     }
 
     is = makeElementAs(el, tagName)
-    el.before(is)
     walk(ctx, is)
+    el.before(is)
+  }, () => {
+    is = undefined
   })
 }

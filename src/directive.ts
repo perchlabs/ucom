@@ -15,7 +15,7 @@ export const getDirectives = (el: Element, reFilter?: RegExp) =>
 
 export const pullDir = (el: Element, key: string) => {
   const attr = pullAttr(el, key)
-  if (attr) {
+  if (attr !== null) {
     return createDirectiveDefinition(key, attr)
   }
 }

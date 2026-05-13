@@ -11,13 +11,14 @@ export interface Context {
   walkable: ContextableNode
   start: Text | ContextableNode
 
-  mount(root: ContextableNode, anchor: Node): void
+  mount(root: ContextableNode, anchor: Node): Context
   scope(el: Element, data?: DataRecord): Context
   teardown(): void
 
   push: (fn: () => void) => void
-  effect: (fn: () => void) => void
+  effect: (fnEffect: () => void, fnCleanup?: () => void) => void
 
+  eval: (exp: string, data?: DataRecord | null) => unknown
   data: DataRecord
   var: StoreAdder
   calc: StoreAdder

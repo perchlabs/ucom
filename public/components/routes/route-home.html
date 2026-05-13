@@ -1,38 +1,18 @@
+<source src="@com/example-run.html">
 
 <example-run
   #each="i in 7"
-  :name="'example-' + `${i+1}`.padStart(2, '0')"
+  :name="'route-home-' + `${i+1}`.padStart(2, '0')"
 ></example-run>
 
-<template u-com="example-run">
-  <param $name>
 
-  <source src="@com/highlight-article.ucom">
-  <source src="@com/raw-printer.html">
-
-  <template u-is="name"></template>
-
-  <highlight-article>
-    <raw-printer :name></raw-printer>
-  </highlight-article>
-
-  <style>
-    :host {
-      display: block;
-      margin-bottom: 5.0rem;
-    }
-  </style>
-</template>
-
-
-
-<template u-com="example-01">
+<template u-com="route-home-01">
   This is a component
 </template>
 
 
 
-<template u-com="example-02">
+<template u-com="route-home-02">
   <header id="myheader">Element IDs are sandboxed via Shadowdom.</header>
   <main>Use semantic html tags for clean CSS.</main>
 
@@ -51,7 +31,7 @@
 
 
 
-<template u-com="example-03">
+<template u-com="route-home-03">
   You can export a superclass of <code>HTMLElement</code>, or export the standard custom element callbacks;
   <br>
   <code>attributeChangedCallback</code>, <code>connectedCallback</code> and <code>disconnectedCallback</code>.
@@ -86,7 +66,7 @@
 
 
 
-<template u-com="example-04">
+<template u-com="route-home-04">
   <meta $count=0>
 
   <!-- Create a calculated field -->
@@ -112,7 +92,7 @@
 
 
 
-<template u-com="example-05">
+<template u-com="route-home-05">
   <!-- Use a persistent store variable for reactive local storage. -->
   <meta $count.save=0>
 
@@ -134,7 +114,7 @@
 
 
 
-<template u-com="example-06">
+<template u-com="route-home-06">
   <meta $--color1="'violet'">
   <div class="one"><meta %color1> one</div>
 

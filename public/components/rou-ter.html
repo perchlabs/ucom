@@ -26,9 +26,7 @@
       this.#routeUnknown = this.#routes.find(r => r.unknown)
 
       const route = this.getRoute(window.location.href)
-      Object.assign($data, {
-        name: route.name,
-      })
+      $data.name = route.name
 
       window.addEventListener('hashchange', this.hashchangeEvent)
 }

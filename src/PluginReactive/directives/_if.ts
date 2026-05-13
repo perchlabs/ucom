@@ -3,7 +3,6 @@ import type {
   DirectiveHandler,
   WalkableReturn,
 } from '../reference.ts'
-import { evaluate } from '../expression.ts'
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import { pullAttr } from '../../common.ts'
 
@@ -15,9 +14,8 @@ type Branch = [
 export const _if: DirectiveHandler = (
   ctxRoot,
   el,
-  dir,
+  {exp},
 ) => {
-  const {exp} = dir
 
   const branches: Branch[] = [[el, exp]]
 
@@ -37,7 +35,7 @@ export const _if: DirectiveHandler = (
     }
   }
 
-  const [parent, anchor] = parentAndAnchor(el, dir)
+  let [parent, anchor] = parentAndAnchor(el)
   if (!parent) {
     return
   }
@@ -58,11 +56,10 @@ export const _if: DirectiveHandler = (
   ctxRoot.effect(() => {
     for (let i = 0; i < branches.length; i++) {
       const [el, exp] = branches[i]
-      if (!exp || evaluate(exp, ctxRoot)) {
+      if (!exp || ctxRoot.eval(exp)) {
         if (i !== activeBranchIndex) {
           removeActiveContext()
-          ctx = ctxRoot.scope(el)
-          ctx.mount(parent, anchor)
+          ctx = ctxRoot.scope(el).mount(parent, anchor)
 
           anchor.remove()
           activeBranchIndex = i
@@ -73,6 +70,8 @@ export const _if: DirectiveHandler = (
     // no matched branch.
     activeBranchIndex = -1
     removeActiveContext()
+  }, () => {
+    // parent = null
   })
 
   return next

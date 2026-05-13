@@ -33,6 +33,7 @@ import {
   uniqueArr,
   cloneTemplateContent,
 } from '../common.ts'
+import { evaluate } from './expression.ts'
 import { walk, walkChildren } from './walk.ts'
 
 interface Frag {
@@ -140,6 +141,8 @@ export const createContext = (
 
         parent.insertBefore(walkable, anchor)
       }
+
+      return ctx
     },
 
     teardown() {
@@ -158,16 +161,23 @@ export const createContext = (
         range.setEndAfter(frag.end)
         range.deleteContents()
       } else {
-        (walkable as Element).remove?.()
+        ;(walkable as Element).remove?.()
       }
     },
 
-    effect(fn: () => void) {
-      ctx.push(createEffect(fn))
+    effect(fnEffect: () => void, fnCleanup?: () => void) {
+      ctx.push(createEffect(fnEffect))
+      if (fnCleanup) {
+        ctx.push(fnCleanup)
+      }
     },
 
     push(fn: () => void) {
       cleanup.push(fn)
+    },
+
+    eval(exp: string, data?: DataRecord | null): unknown {
+      return evaluate(exp, ctx.data, data ?? {})
     },
 
     [STORE_MOD_VAR](entry) {

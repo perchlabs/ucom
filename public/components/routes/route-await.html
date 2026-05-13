@@ -1,0 +1,180 @@
+<source src="@com/example-run.html">
+
+<example-run
+  #each="i in 5"
+  :name="'route-await-' + `${i+1}`.padStart(2, '0')"
+></example-run>
+
+
+
+<template u-com="route-await-01">
+  <meta $my-promise="new Promise(() => {})">
+
+  Show the pending content first, and then the resolved content.
+
+  <div #await="myPromise">
+    awaiting
+  </div>
+  <div #then="msg">
+    then: <meta %msg>
+  </div>
+  <div #catch="err">
+    catch: <meta %err>
+  </div>
+
+  <script>
+    export function connectedCallback() {
+      const {promise, resolve, reject} = Promise.withResolvers()
+      this.$data.myPromise = promise
+      setTimeout(() => resolve('resolved data'), 1000)
+      // setTimeout(() => reject('reject data'), 1000)
+    }
+  </script>
+
+  <style>
+    :host {
+      display: block;
+      min-height: 3.2em;
+    }
+  </style>
+</template>
+
+
+
+<template u-com="route-await-02">
+  <param $delay.int=1000>
+  <meta $my-promise="new Promise(resolve => setTimeout(resolve, delay))">
+
+  Only show the content when the promise has resolved.
+
+  <meta %delay>
+
+  <div #await="myPromise" #then>
+    waited <meta %delay>ms to resolve
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      min-height: 3.2em;
+    }
+  </style>
+</template>
+
+
+
+<template u-com="route-await-03">
+  <param $delay.int=1000>
+  <meta $my-promise="new Promise((resolve, reject) => {
+    setTimeout(reject('failed'), delay)
+  })">
+
+  Only show the content when the promise has rejected.
+  <div #await="myPromise" #catch="err">
+    waited <meta %delay>ms to reject with '<meta %err>'
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      min-height: 3.2em;
+    }
+  </style>
+</template>
+
+
+<template u-com="route-await-04">
+  <meta $p>
+
+  <button @click="p = undefined">undefined</button>
+  <button @click="p = new Promise(() => {})">pending</button>
+  <button @click="p = Promise.resolve('is ok')">resolved</button>
+  <button @click="p = Promise.reject('not ok')">rejected</button>
+
+  <div #await="p">
+    pending
+  </div>
+  <div #then="msg">
+    resolved '<meta %msg>'
+  </div>
+  <div #catch="err">
+    rejected '<meta %err>'
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      min-height: 3.2em;
+    }
+  </style>
+</template>
+
+
+
+<template u-com="route-await-05">
+  A test to make sure that all await-then-catch blocks are found and removed
+  regardless of errors.
+
+  <div #await="await1">
+    await1
+  </div>
+  <div></div>
+
+  <!-- ----------------- -->
+
+  <div #await="await2" #then="then2">
+    await2 then2
+  </div>
+  <div></div>
+
+  <!-- ----------------- -->
+
+  <div #await="await3" #then="then3">
+    await3 then3
+  </div>
+  <div #catch="catch3">
+    catch3
+  </div>
+  <div></div>
+
+  <!-- ----------------- -->
+
+  <div #await="await4" #then="catch4">
+    await4 catch4
+  </div>
+  <div></div>
+
+  <!-- ----------------- -->
+
+  <div #await="await5">
+    await5
+  </div>
+  <div #then="then5">
+    then5
+  </div>
+  <div></div>
+
+  <!-- ----------------- -->
+
+  <div #await="await6">
+    await6
+  </div>
+  <div #then="then6">
+    then6
+  </div>
+  <div #catch="catch6">
+    catch6
+  </div>
+  <div></div>
+
+  <!-- ----------------- -->
+
+  <div #await="await7">
+    await7
+  </div>
+  <div #catch="catch7">
+    catch7
+  </div>
+  <div></div>
+
+</template>

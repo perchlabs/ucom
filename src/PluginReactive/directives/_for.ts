@@ -4,7 +4,6 @@ import type {
   DataRecord,
 } from '../reference.ts'
 import { isNumber, isObject, isArray } from '../../common.ts'
-import { evaluate } from '../expression.ts'
 import { parentAndAnchor, contextableParent, nextWalkable } from '../utils.ts'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
@@ -125,7 +124,7 @@ export const _for: DirectiveHandler = (
       cleanSaved()
       parent = contextableParent(anchor)
       // Evaluate the array expression
-      let source = evaluate(sourceExp, ctxRoot)
+      let source = ctxRoot.eval(sourceExp)
 
       ctxs = createChildContexts(source)
 

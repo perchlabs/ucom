@@ -11,7 +11,6 @@ import {
   camelToKebab,
   split,
 } from '../../common.ts'
-import { evaluate } from '../expression.ts'
 
 export const _attribute: DirectiveHandler = (
   ctx,
@@ -39,7 +38,7 @@ export const _attribute: DirectiveHandler = (
   const exprReal = exp || attrName
   ctx.effect(() => {
     try {
-      const value = evaluate(exprReal, ctx)
+      const value = ctx.eval(exprReal)
 
       // Handle boolean attributes (disabled, checked, readonly, etc.)
       if (isBoolean(value)) {
@@ -73,7 +72,7 @@ export const bindClass = (ctx: Context, el: HTMLElement, exp: string): undefined
 
   ctx.effect(() => {
     try {
-      const value = evaluate(exp, ctx)
+      const value = ctx.eval(exp)
 
       // Start with original classes
       const classes = new Set(originalClasses)
@@ -107,7 +106,7 @@ const bindStyle = (ctx: Context, el: HTMLElement, exp: string): undefined => {
 
   ctx.effect(() => {
     try {
-      const value = evaluate(exp, ctx)
+      const value = ctx.eval(exp)
 
       // Restore original styles first
       el.setAttribute('style', originalStyle)

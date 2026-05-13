@@ -95,7 +95,7 @@ export const _for: DirectiveHandler = (
 // dataArr.forEach(data => console.log('createChildContexts data index: ', {...data}))
 
     const ctxs: Context[] = dataArr.map((data, index) => {
-      const key = keyExp ? evaluate(keyExp, null, data) : index
+      const key = keyExp ? evaluate(keyExp, {}, data) : index
       const oldIndex = prevKeyToIndexMap?.get(key)
 
       let ctx: Context
@@ -157,7 +157,7 @@ export const _for: DirectiveHandler = (
 
   ctxRoot.effect(() => {
 // console.log('sourceExp :', sourceExp)
-    const source = evaluate(sourceExp, ctxRoot)
+    const source = ctxRoot.eval(sourceExp)
 
     const prevCtxToIndexMap = ctxToIndexMap
     const prevKeyToIndexMap = keyToIndexMap
