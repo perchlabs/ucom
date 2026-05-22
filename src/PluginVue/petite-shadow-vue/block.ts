@@ -7,7 +7,7 @@ import { stop } from '@vue/reactivity'
 export class Block {
   #template: Element | DocumentFragment | ShadowRoot
   #parentCtx?: Context
-  #isFragment: boolean
+  #asFragment: boolean
   #start?: Text
   #end?: Text
   
@@ -19,12 +19,12 @@ export class Block {
   }
 
   constructor(template: Element | ShadowRoot, parentCtx: Context) {
-    this.#isFragment = template instanceof HTMLTemplateElement
+    this.#asFragment = template instanceof HTMLTemplateElement
     const isRoot = template instanceof ShadowRoot
 
     if (isRoot) {
       this.#template = template
-    } else if (this.#isFragment) {
+    } else if (this.#asFragment) {
       this.#template = (template as HTMLTemplateElement).content.cloneNode(
         true
       ) as DocumentFragment
@@ -45,7 +45,7 @@ export class Block {
   }
 
   insert(parent: Element | ShadowRoot, anchor: Node | null = null) {
-    if (this.#isFragment) {
+    if (this.#asFragment) {
       if (this.#start) {
         // already inserted, moving
         let node: Node | null = this.#start

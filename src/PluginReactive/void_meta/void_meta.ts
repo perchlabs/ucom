@@ -23,7 +23,7 @@ export const void_meta = (ctx: Context, el: HTMLMetaElement) => {
         exp: '',
       })
     },
-    '()'(def: DirectiveDef) {
+    '#effect'(def: DirectiveDef) {
       _effect(ctx, el, def)
     },
     '%'(def: DirectiveDef) {
@@ -34,7 +34,7 @@ export const void_meta = (ctx: Context, el: HTMLMetaElement) => {
     },
   }
 
-  for (const def of getDirectives(el, /^\$|--|\$--|%|\(\)/)) {
+  for (const def of getDirectives(el, /^#|\$|--|\$--|%/)) {
     dirMap[def.op]?.(def)
   }
 

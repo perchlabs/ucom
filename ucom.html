@@ -30,10 +30,10 @@
   <meta $tabs="[]">
 
   <nav>
-    <a #each="([href, text]) in tabs" :href %text></a>
+    <a #each="([href, text]) in tabs" +href %text></a>
   </nav>
 
-  <template u-is="`@com/rou-ter.html`" @routes="routesInit">
+  <template #as="`@com/rou-ter.html`" @routes="routesInit">
     <base href="@com/routes/" lazy>
     <source src="route-unknown.html"  loc="#unknown"  unknown>
     <source src="route-home.html"     loc="#home"     tab="Home" default>

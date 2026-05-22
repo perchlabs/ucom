@@ -15,8 +15,8 @@ import {
   isPromise,
   isPromisePending,
   AbortablePromise,
-  ObjectEntries,
-  ObjectEntriesEach,
+  // ObjectEntries,
+  // ObjectEntriesEach,
 } from '../../common.ts'
 
 const AWAIT = '#await'

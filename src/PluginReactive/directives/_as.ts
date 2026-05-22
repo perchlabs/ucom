@@ -12,26 +12,26 @@ import {
 } from '../utils.ts'
 import { walk } from '../walk.ts'
 
-export const _is: DirectiveHandler = (
+export const _as: DirectiveHandler = (
   ctx,
   el,
   {exp},
 ) => {
   const {man} = ctx
   if (!exp) {
-    console.warn(`[u-is] empty expression`)
+    console.warn(`[#as] empty expression`)
     return
   }
   if (!isTemplateElement(el)) {
-    console.warn(`[u-is] not a template`)
+    console.warn(`[#as] not a template`)
     return
   }
 
-  let is: HTMLElement | undefined
+  let as: HTMLElement | undefined
 
   ctx.effect(() => {
-    is?.remove()
-    is = undefined
+    as?.remove()
+    as = undefined
 
     const value = ctx.eval(exp)
     if (!isString(value)) {
@@ -55,10 +55,10 @@ export const _is: DirectiveHandler = (
       return
     }
 
-    is = makeElementAs(el, tagName)
-    walk(ctx, is)
-    el.before(is)
+    as = makeElementAs(el, tagName)
+    walk(ctx, as)
+    el.before(as)
   }, () => {
-    is = undefined
+    as = undefined
   })
 }

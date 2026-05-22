@@ -3,10 +3,10 @@
 <source src="@com/highlight-article.ucom">
 <source src="@com/raw-printer.html">
 
-<template u-is="name"></template>
+<template #as="name"></template>
 
 <highlight-article #if="name">
-  <raw-printer :name></raw-printer>
+  <raw-printer +name></raw-printer>
 </highlight-article>
 
 <style>

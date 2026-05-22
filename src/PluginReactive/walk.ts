@@ -18,7 +18,7 @@ import { _for } from './directives/_for.ts'
 import { _await } from './directives/_await.ts'
 
 // import { _for } from './directives/_for_experimental.ts'
-import { _is } from './directives/_is.ts'
+import { _as } from './directives/_as.ts'
 
 import { _text } from './directives/_text.ts'
 import { _event } from './directives/_event.ts'
@@ -61,14 +61,14 @@ const ctrlDirs: [string, DirectiveHandler][] = [
   ['#if', _if],
   ['#each', _for],
   ['#await', _await],
-  ['u-is', _is],
-  ['u-show', _show],
+  ['#as', _as],
+  ['#show', _show],
 ]
 
-const reDir = /^u-|%|@|:/
+const reDir = /^#|%|@|\+/
 const dirMap: Record<string, DirectiveHandler> = {
-  'u-ref': _ref,
+  '#ref': _ref,
   '%': _text,
-  ':': _attribute,
+  '+': _attribute,
   '@': _event,
 }

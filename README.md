@@ -185,12 +185,12 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `#await` (`#then`, `#catch`)
 
 #### Normal directives ####
-- `u-is`
-- `u-show`
-- `u-ref`
+- `#show`
+- `#as`
+- `#ref`
 - `@` handler
 - `%` text (unescaped HTML with .html modifier)
-- `:` bind (supports :class and :style)
+- `+` bind (supports +class and +style)
 
 `meta` void element options.
 
@@ -198,7 +198,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
 - `$--` combined data with CSS Custom Property
 - `%` text (unescaped HTML with .html modifier)
-- `()` effect runner.
+- `#effect` effect runner.
 
 ```html
 <template u-com>
@@ -416,7 +416,7 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 
 #### Dynamic Element Creation
 
-`u-is` allows for a dynamic tag to be defined based upon a store value.
+`#as` allows for a dynamic tag to be defined based upon a store value.
 
 ```html
 <dyn-amic name="my-other-component"></dyn-amic>
@@ -424,6 +424,6 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 <template u-com="dyn-amic">
   <param $name>
 
-  <template u-is="name"></template>
+  <template #as="name"></template>
 </template>
 ```
