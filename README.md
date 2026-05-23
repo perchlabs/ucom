@@ -2,7 +2,7 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`19.2k` minified) (`8.4k` gzipped)
+* ucom (`19.3k` minified) (`8.4k` gzipped)
 * ucom_vue (`28.0k` minified) (`11.8k` gzipped)
 * ucom_lite (`6.3k` minified) (`3.0k` gzipped)
 
@@ -190,7 +190,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `#ref`
 - `@` handler
 - `%` text (unescaped HTML with .html modifier)
-- `+` bind (supports +class and +style)
+- `?` parameter (offers special case ?class and ?style)
 
 `meta` void element options.
 

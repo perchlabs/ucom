@@ -14,7 +14,7 @@
   <template #each="i in rows">
     <section #each="j in cols">
       <meta $name="`${i}:${j}`">
-      <slot +name><div %name></div></slot>
+      <slot ?name><div %name></div></slot>
     </section>
   </template>
 
@@ -23,7 +23,7 @@
     <template #each="j in cols">
       <meta $name="`${i}:${j}`">
       <section>
-        <slot +name><div %name></div></slot>
+        <slot ?name><div %name></div></slot>
       </section>
     </template>
   </template>

@@ -14,12 +14,10 @@ import void_meta from './void_meta'
 
 import { _show } from './directives/_show.ts'
 import { _if } from './directives/_if.ts'
+// import { _for } from './directives/_for_experimental.ts'
 import { _for } from './directives/_for.ts'
 import { _await } from './directives/_await.ts'
-
-// import { _for } from './directives/_for_experimental.ts'
 import { _as } from './directives/_as.ts'
-
 import { _text } from './directives/_text.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
@@ -65,10 +63,10 @@ const ctrlDirs: [string, DirectiveHandler][] = [
   ['#show', _show],
 ]
 
-const reDir = /^#|%|@|\+/
+const reDir = /^#|%|@|\?/
 const dirMap: Record<string, DirectiveHandler> = {
   '#ref': _ref,
   '%': _text,
-  '+': _attribute,
+  '?': _attribute,
   '@': _event,
 }
