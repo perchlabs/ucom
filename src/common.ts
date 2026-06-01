@@ -16,9 +16,10 @@ export const isObject = (v: unknown): v is Record<any, any> =>
   typeof v === 'object' && v !== null && !isArray(v)
 export const isPromise = (v: unknown): v is Promise<any> => v instanceof Promise
 
+export const isElement = (v: Node): v is Element => v?.nodeType === 1
 export const isHTMLElement = (v: unknown): v is HTMLElement => v instanceof HTMLElement
 export const isShadowRoot = (v: unknown): v is ShadowRoot => v instanceof ShadowRoot
-export const isElement = (v: Node): v is Element => v?.nodeType === 1
+export const isMetaElement = (v: Node): v is HTMLMetaElement => v?.nodeName === 'META'
 export const isTemplateElement = (v: Node): v is HTMLTemplateElement => v?.nodeName === 'TEMPLATE'
 
 export const ObjectAssign = Object.assign

@@ -8,6 +8,7 @@ export type ComputedFunction = () => any
 
 export interface Context {
   man: ComponentManager
+  ptr: ContextableNode
   walkable: ContextableNode
   start: Text | ContextableNode
 
@@ -33,7 +34,9 @@ export type StoreAdder = (entry: StoreAdderEntry) => void
 export type StoreAdderEntry = [key: string, val: any]
 export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
-// export type WalkableReturn = Element | undefined | null
 export type WalkableReturn = Element | undefined | void | null
-export type DirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
+
+export type BranchDirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
   => WalkableReturn
+export type DirectiveHandler = (ctx: Context, el: Element, dir: DirectiveDef)
+  => undefined | void | null

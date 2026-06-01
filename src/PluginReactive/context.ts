@@ -72,7 +72,7 @@ export const createContext = (
       ? ptr
       : ptr.cloneNode(true) as Element
 
-  let initialized = false
+  let mounted = false
   const children = new Set<Context>()
 
   const storeName = `${SYS_CODE}-${safeNodeName(host)}`
@@ -82,6 +82,7 @@ export const createContext = (
 
   const ctx: Context = {
     man,
+    ptr,
     refs,
 
     get start() {
@@ -117,7 +118,7 @@ export const createContext = (
       if (frag) {
         const {start, end} = frag
 
-        if (initialized) {
+        if (mounted) {
           let node: Node | null = start
           let next: Node | null
           while (node) {
@@ -135,12 +136,14 @@ export const createContext = (
           parent.insertBefore(walkable, end)
         }
       } else {
-        if (!initialized) {
+        if (!mounted) {
           walk(ctx, walkable as Element)
         }
 
         parent.insertBefore(walkable, anchor)
       }
+
+      mounted = true
 
       return ctx
     },
@@ -149,6 +152,10 @@ export const createContext = (
       ArrayFrom(children).forEach(child => child.teardown())
       cleanup.forEach(fn => fn())
       teardownCallback()
+
+      if (!mounted) {
+        return
+      }
 
       if (frag) {
         // if (!contextableParent(frag.start)) {
@@ -234,7 +241,7 @@ export const createContext = (
   return ctx
 }
 
-const createFallbackProxy = (data: DataRecord, parent: DataRecord = {}) =>
+const createFallbackProxy = (data: DataRecord, parent: DataRecord) =>
   new Proxy(data, {
     has(_target, camel) {
       return camel in data || camel in parent
@@ -246,16 +253,20 @@ const createFallbackProxy = (data: DataRecord, parent: DataRecord = {}) =>
       if (camel === Symbol.unscopables) {
         return
       }
-
       return Reflect.get(data, camel) ?? Reflect.get(parent, camel)
     },
-    // set(target, camel, val) {
-    //   if (!(camel in target)) {
-    //     console.warn(`Property '${camel}' must be set on the store before updating it.`)
-    //   }
+    set(_target, camel, val) {
+      if (camel in data) {
+        return Reflect.set(data, camel, val)
+      }
+      if (camel in parent) {
+        return Reflect.set(parent, camel, val)
+      }
 
-    //   return Reflect.set(data, camel, val)
-    // },
+      console.warn(`Property '${String(camel)}' undefined`)
+
+      return false
+    },
   })
 
 const simpleItem = ([camel, value]: StoreAdderEntry): StoreItem => {

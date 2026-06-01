@@ -1,6 +1,6 @@
 import type {
   Context,
-  DirectiveHandler,
+  BranchDirectiveHandler,
   WalkableReturn,
 } from '../reference.ts'
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
@@ -11,12 +11,11 @@ type Branch = [
   exp: string | null
 ]
 
-export const _if: DirectiveHandler = (
+export const _if: BranchDirectiveHandler = (
   ctxRoot,
   el,
   {exp},
 ) => {
-
   const branches: Branch[] = [[el, exp]]
 
   // locate else branch

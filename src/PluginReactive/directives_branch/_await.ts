@@ -1,7 +1,7 @@
 import type {
   Context,
   DataRecord,
-  DirectiveHandler,
+  BranchDirectiveHandler,
   WalkableReturn,
 } from '../reference.ts'
 import {
@@ -15,8 +15,6 @@ import {
   isPromise,
   isPromisePending,
   AbortablePromise,
-  // ObjectEntries,
-  // ObjectEntriesEach,
 } from '../../common.ts'
 
 const AWAIT = '#await'
@@ -40,7 +38,7 @@ type Block = [
   data: DataRecord,
 ]
 
-export const _await: DirectiveHandler = (
+export const _await: BranchDirectiveHandler = (
   ctxRoot,
   elRoot,
   {exp: expRoot},
@@ -96,7 +94,7 @@ export const _await: DirectiveHandler = (
   const $blocks = signal<Block[]>([])
   let controller: AbortController
 
-  const tryBlock = (key: BlockKey, value?: any): void => {
+  const runBlock = (key: BlockKey, value?: any): void => {
     if (blkSpecs[key]) {
       const [ptr, exp, useData] = blkSpecs[key]
       $blocks().push([
@@ -123,16 +121,16 @@ export const _await: DirectiveHandler = (
       }
 
       if (isAwaitSeparate && await isPromisePending(rawPromise)) {
-        tryBlock(AWAIT)
+        runBlock(AWAIT)
       }
 
       controller = new AbortController
       try {
         const value = await AbortablePromise(rawPromise, controller)
-        tryBlock(THEN, value)
+        runBlock(THEN, value)
       } catch (err) {
         if (err !== AbortablePromise.Canceled) {
-          tryBlock(CATCH, err)
+          runBlock(CATCH, err)
         }
       }
     } catch (err) {

@@ -1,5 +1,5 @@
 import type {
-  DirectiveHandler,
+  BranchDirectiveHandler,
 } from '../reference.ts'
 import {
   isString,
@@ -12,7 +12,7 @@ import {
 } from '../utils.ts'
 import { walk } from '../walk.ts'
 
-export const _as: DirectiveHandler = (
+export const _as: BranchDirectiveHandler = (
   ctx,
   el,
   {exp},

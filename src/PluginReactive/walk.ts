@@ -4,47 +4,83 @@ import type {
 import type {
   Context,
   ContextableNode,
+  BranchDirectiveHandler,
   DirectiveHandler,
   WalkableReturn,
 } from './reference.ts'
-import { safeNodeName } from '../common.ts'
-import { getDirectives, pullDir } from '../directive.ts'
-import { nextWalkable } from './utils.ts'
-import void_meta from './void_meta'
+import {
+  isMetaElement,
+  ObjectKeys,
+} from '../common.ts'
+import {
+  getDirectives,
+  pullDir,
+} from '../directive.ts'
+import {
+  nextWalkable,
+} from './utils.ts'
+
+import { _if } from './directives_branch/_if.ts'
+import { _each } from './directives_branch/_each.ts'
+// import { _each } from './directives_branch/_each_experimental.ts'
+import { _await } from './directives_branch/_await.ts'
+import { _as } from './directives_branch/_as.ts'
 
 import { _show } from './directives/_show.ts'
-import { _if } from './directives/_if.ts'
-// import { _for } from './directives/_for_experimental.ts'
-import { _for } from './directives/_for.ts'
-import { _await } from './directives/_await.ts'
-import { _as } from './directives/_as.ts'
 import { _text } from './directives/_text.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
 
+import { _data } from './directives/_data.ts'
+import { _cssprop } from './directives/_cssprop.ts'
+import { _data_cssprop } from './directives/_data_cssprop.ts'
+import { _effect } from './directives/_effect.ts'
+
+type HandlerMap = Record<string, DirectiveHandler>
+type WalkDefinition = [RegExp, HandlerMap]
+type RunDefinition = [DirectiveDef, DirectiveHandler]
+
 export const walk = (ctx: Context, el: Element): WalkableReturn => {
-  switch (safeNodeName(el)) {
-    case 'meta':
-      return void_meta(ctx, el as HTMLMetaElement)
-  }
+  const isNormal = !isMetaElement(el)
 
-  let def: DirectiveDef | undefined
+  let walkDef: WalkDefinition
+  if (isNormal) {
+    walkDef = containerWalkDef
 
-  for (const [key, handler] of ctrlDirs) {
-    if (def = pullDir(el, key)) {
-      return handler(ctx, el, def)
+    let def: DirectiveDef | undefined
+    for (const [key, handler] of branchDirs) {
+      if (def = pullDir(el, key)) {
+        return handler(ctx, el, def)
+      }
     }
+  } else {
+    walkDef = voidMetaWalkDef
   }
 
-  let next: WalkableReturn
-  for (def of getDirectives(el, reDir)) {
-    if (next = dirMap[def.op]?.(ctx, el, def)) {
-      return next
-    }
+  const [dataRun, normalRun] = [dataWalkDef, walkDef].map(
+    ([reFilter, map]: WalkDefinition) =>
+      getDirectives(el, reFilter).
+      map(def => map[def.op] ? [def, map[def.op]] as RunDefinition : null).
+      filter(v => !!v))
+
+  if (isNormal && (dataRun.length || normalRun.length)) {
+    ctx = ctx.scope(el)
   }
 
-  walkChildren(ctx, el)
+  const run = (runDefs: RunDefinition[]) => runDefs.forEach(([def, handler]) => handler(ctx, el, def))
+
+  run(dataRun)
+  if (isNormal) {
+    walkChildren(ctx, el)
+  }
+  run(normalRun)
+
+  if (!isNormal) {
+    const next = nextWalkable(el)
+    el.remove()
+    return next
+  }
 }
 
 export const walkChildren = (ctx: Context, node: ContextableNode = ctx.walkable) => {
@@ -55,18 +91,33 @@ export const walkChildren = (ctx: Context, node: ContextableNode = ctx.walkable)
 }
 
 // These directives must match exact string
-const ctrlDirs: [string, DirectiveHandler][] = [
+const branchDirs: [string, BranchDirectiveHandler][] = [
   ['#if', _if],
-  ['#each', _for],
-  ['#await', _await],
+  ['#each', _each],
   ['#as', _as],
-  ['#show', _show],
+  ['#await', _await],
 ]
 
-const reDir = /^#|%|@|\?/
-const dirMap: Record<string, DirectiveHandler> = {
-  '#ref': _ref,
-  '%': _text,
+const makeWalkDefinition = (map: HandlerMap): WalkDefinition => [
+  new RegExp('^' + ObjectKeys(map).map(k => RegExp.escape(k)).join('|')),
+  map,
+]
+
+const dataWalkDef = makeWalkDefinition({
+  $: _data,
+  '$--': _data_cssprop,
+  '--': _cssprop,
+  '&effect': _effect,
+})
+
+const containerWalkDef = makeWalkDefinition({
+  '&show': _show,
+  '&ref': _ref,
   '?': _attribute,
   '@': _event,
-}
+  '%': _text,
+})
+
+const voidMetaWalkDef = makeWalkDefinition({
+  '%': _text,
+})

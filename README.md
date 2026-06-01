@@ -2,11 +2,11 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`19.3k` minified) (`8.4k` gzipped)
-* ucom_vue (`28.0k` minified) (`11.8k` gzipped)
+* ucom (`19.6k` minified) (`8.5k` gzipped)
+* ucom_vue (`27.9k` minified) (`11.8k` gzipped)
 * ucom_lite (`6.3k` minified) (`3.0k` gzipped)
 
-**Notice** This technology is currently unversioned.  An alpha version should be arriving before Spring.
+**Notice** This technology is currently unversioned.  An alpha version should be arriving by Summer.
 
 ### Installation
 
@@ -178,31 +178,42 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 
 ### Template Directives
 
-#### Subscope Directives ####
+#### Priority Directives ####
+
+These directives operate in the following order before any others; including `$` data directives.
 
 - `#if` (`#else`, `#else-if`)
 - `#each`
+- `#as`
 - `#await` (`#then`, `#catch`)
 
-#### Normal directives ####
-- `#show`
-- `#as`
-- `#ref`
+#### Directives ####
+- `&effect` effect runner.
+- `&show`
+- `&ref`
+- `$` data
+- `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
+- `$--` combined data with CSS Custom Property
 - `@` handler
 - `%` text (unescaped HTML with .html modifier)
 - `?` parameter (offers special case ?class and ?style)
 
-`meta` void element options.
+#### `meta` [void element](https://developer.mozilla.org/en-US/docs/Glossary/Void_element) Directives
 
-- `$` data
-- `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
-- `$--` combined data with CSS Custom Property
-- `%` text (unescaped HTML with .html modifier)
-- `#effect` effect runner.
+These directives may appear on a `meta` element within the current scope.  Ex. `<meta $count=0>`
+
+`$`, `--`, `$--`, `%`, `&effect`
+
+#### Examples
+
+`#each` iteration
 
 ```html
 <template u-com>
   <div #each="n in 10" @click="alert(n)" %n></div>
+
+  <meta $arr="['a', 'b', 'c']">
+  <div #each="c in arr" %c></div>
 </template>
 ```
 
@@ -227,26 +238,22 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 ```
 
 
-While displaying text a `meta` [void element](https://developer.mozilla.org/en-US/docs/Glossary/Void_element) tag is converted to span.  This is fine because the shadow root of the web component separates it from the main HTML document.
-
-This was chosen as a compromise between the ugly verbose Alpine style and the more complicated Vue style.  This way we don't need to parse text nodes with complicated regular expressions.
-
 ```html
 <template u-com>
   <!-- Inline calculation -->
   Exponential:
   <div #each="n in 5">
-    <meta %n=>, <meta %n="n**2">, <meta %="n**3">
+    <meta %n=>, <meta %="n**2">, <meta %="n**3">
   </div>
 
   <!-- Precalculate (saved to the current sub-scope) -->
   Exponential:
-  <div #each="n in 5">
-    <meta
-      $n1="n**1"
-      $n2="n**2"
-      $n3="n**3"
-    >
+  <div
+    #each="n in 5"
+    $n1="n**1"
+    $n2="n**2"
+    $n3="n**3"
+  >
     <meta %n1>, <meta %n2>, <meta %n3>
   </div>
 </template>
@@ -258,11 +265,12 @@ Use modifiers `.sync`, `.save` or `.calc`.
 
 ```html
 <template u-com>
-  <!-- data is very flexible -->
+  <!-- data is flexible -->
   <meta
     $count=1
     $double.calc="() => count * 2"
     $.calc="{triple: () => count * 3}"
+    &effect="console.log('count: ', count)"
   >
 
   <button @click="count++">Once: <meta %count></button>
@@ -273,9 +281,7 @@ Use modifiers `.sync`, `.save` or `.calc`.
 
   <script>
     export function connectedCallback() {
-      const {$data} = this
-      this.$effect(() => console.log('count: ', $data.count))
-      this.$effect(() => console.log('double: ', $data.double))
+      this.$effect(() => console.log('double: ', this.$data.double))
     }
   </script>
 </template>

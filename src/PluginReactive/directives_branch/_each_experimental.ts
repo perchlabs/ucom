@@ -1,7 +1,7 @@
 import type {
   DataRecord,
   Context,
-  DirectiveHandler,
+  BranchDirectiveHandler,
 } from '../reference.ts'
 import {
   isNumber,
@@ -20,7 +20,7 @@ const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 type KeyToIndexMap = Map<any, number>
 type ContextToIndexMap = WeakMap<Context, number>
 
-export const _for: DirectiveHandler = (
+export const _each: BranchDirectiveHandler = (
   ctxRoot,
   el,
   dir,

@@ -26,11 +26,12 @@
 </head>
 <body>
 
+
 <template u-com>
   <meta $tabs="[]">
 
   <nav>
-    <a #each="([href, text]) in tabs" ?href %text></a>
+    <a #each="[href, text] in tabs" ?href %text></a>
   </nav>
 
   <template #as="`@com/rou-ter.html`" @routes="routesInit">

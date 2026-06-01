@@ -1,6 +1,9 @@
 import type {
   DirectiveHandler,
 } from '../reference.ts'
+import {
+  isMetaElement,
+} from '../../common.ts'
 
 export const _text: DirectiveHandler = (
   ctx,
@@ -8,14 +11,26 @@ export const _text: DirectiveHandler = (
   {camel, exp, mods},
 ) => {
   const exprReal = camel ?? exp
-  const prop = mods.has('html') ? 'innerHTML' : 'textContent'
 
-  // Create an effect that automatically re-runs when signals change.
-  ctx.effect(() => {
-    try {
-      el[prop] = ctx.eval(exprReal) as string | undefined ?? ''
-    } catch (e) {
-      console.error('[text] ', e)
+  const isMeta = isMetaElement(el)
+  const isHTML = mods.has('html')
+
+  if (isHTML) {
+    // TODO
+  } else {
+    const text = new Text()
+    if (isMeta) {
+      el.before(text)
+    } else {
+      el.prepend(text)
     }
-  })
+
+    ctx.effect(() => {
+      try {
+        text.textContent = `${ctx.eval(exprReal) ?? ''}`
+      } catch (e) {
+        console.error('[%] ', e)
+      }
+    })
+  }
 }

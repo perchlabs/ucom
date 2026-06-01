@@ -4,6 +4,7 @@ import type {
 import {
   isShadowRoot,
   createElement,
+  isMetaElement,
 } from '../../common.ts'
 import {
   contextableParent,
@@ -19,13 +20,23 @@ export const _cssprop: DirectiveHandler = (
     mods,
   },
 ) => {
+  if (!camel || !kebab) {
+    return
+  }
+
   const exprReal = exp || camel
   if (!exprReal) {
     return
   }
+  const propName = `--${kebab}`
 
-  const style = createElement('style')
-  el.before(style)
+  let style: HTMLStyleElement
+  let metaScope: string
+  if (isMetaElement(el)) {
+    style = createElement('style')
+    el.before(style)
+    metaScope = isShadowRoot(contextableParent(style)) ? `:host` : '@scope'
+  }
 
   ctx.effect(() => {
     try {
@@ -34,12 +45,13 @@ export const _cssprop: DirectiveHandler = (
         value = `"${CSS.escape(value)}"`
       }
 
-      const scope = isShadowRoot(contextableParent(style))
-        ? `:host`
-        : '@scope'
-      style.textContent = `${scope} { --${kebab}: ${value}; }`
+      if (style) {
+        style.textContent = `${metaScope} { ${propName}: ${value}; }`
+      } else {
+        (el as HTMLElement)?.style.setProperty(propName, value)
+      }
     } catch (e) {
-      console.error(`[--${kebab}] `, e)
+      console.error(`[${propName}] `, e)
     }
   })
 }

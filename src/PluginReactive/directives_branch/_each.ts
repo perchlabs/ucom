@@ -1,6 +1,6 @@
 import type {
   Context,
-  DirectiveHandler,
+  BranchDirectiveHandler,
   DataRecord,
 } from '../reference.ts'
 import { isNumber, isObject, isArray } from '../../common.ts'
@@ -11,7 +11,7 @@ const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
-export const _for: DirectiveHandler = (
+export const _each: BranchDirectiveHandler = (
   ctxRoot,
   el,
   dir,
