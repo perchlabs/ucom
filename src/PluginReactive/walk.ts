@@ -106,18 +106,20 @@ const makeWalkDefinition = (map: HandlerMap): WalkDefinition => [
 const dataWalkDef = makeWalkDefinition({
   $: _data,
   '$--': _data_cssprop,
-  '--': _cssprop,
-  '&effect': _effect,
 })
 
 const containerWalkDef = makeWalkDefinition({
   '&show': _show,
+  '&effect': _effect,
   '&ref': _ref,
   '?': _attribute,
   '@': _event,
+  '--': _cssprop,
   '%': _text,
 })
 
 const voidMetaWalkDef = makeWalkDefinition({
+  '&effect': _effect,
+  '--': _cssprop,
   '%': _text,
 })
