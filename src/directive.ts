@@ -20,7 +20,7 @@ export const pullDir = (el: Element, key: string) => {
   }
 }
 
-const reDirectiveExpand = /^(\$|\$--|--|@|%|\?|[#&][a-z]+):?([a-z]+[a-z0-9\-]*)?(\..+)*$/
+const reDirectiveExpand = /^(\$|\$--|--|@|%|\?|[#][a-z]+):?([a-z]+[a-z0-9\-]*)?(\..+)*$/
 
 const createDirectiveDefinition = (full: string, exp: string): DirectiveDef | undefined => {
   const match = full.match(reDirectiveExpand)

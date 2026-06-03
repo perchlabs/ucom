@@ -109,9 +109,9 @@ const dataWalkDef = makeWalkDefinition({
 })
 
 const containerWalkDef = makeWalkDefinition({
-  '&show': _show,
-  '&effect': _effect,
-  '&ref': _ref,
+  '#show': _show,
+  '#effect': _effect,
+  '#ref': _ref,
   '?': _attribute,
   '@': _event,
   '--': _cssprop,
@@ -119,7 +119,7 @@ const containerWalkDef = makeWalkDefinition({
 })
 
 const voidMetaWalkDef = makeWalkDefinition({
-  '&effect': _effect,
+  '#effect': _effect,
   '--': _cssprop,
   '%': _text,
 })

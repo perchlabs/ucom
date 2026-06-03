@@ -20,7 +20,7 @@ export const _effect: DirectiveHandler = (
   const func = ctx.eval(value)
 
   if (!isFunction(func)) {
-    console.warn(`&effect: cannot create function from '${value}'`)
+    console.warn(`#effect: cannot create function from '${value}'`)
     return
   }
 

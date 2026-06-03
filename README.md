@@ -178,19 +178,13 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 
 ### Template Directives
 
-#### Priority Directives ####
-
-These directives operate in the following order before any others; including `$` data directives.
-
 - `#if` (`#else`, `#else-if`)
 - `#each`
 - `#as`
 - `#await` (`#then`, `#catch`)
-
-#### Directives ####
-- `&effect` effect runner.
-- `&show`
-- `&ref`
+- `#effect` effect runner.
+- `#show`
+- `#ref`
 - `$` data
 - `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
 - `$--` combined data with CSS Custom Property
@@ -200,9 +194,9 @@ These directives operate in the following order before any others; including `$`
 
 #### `meta` [void element](https://developer.mozilla.org/en-US/docs/Glossary/Void_element) Directives
 
-These directives may appear on a `meta` element within the current scope.  Ex. `<meta $count=0>`
+These directives may appear on a `meta` element.  It will be injected within the current scope.  Ex. `<meta $count=0>`
 
-`$`, `--`, `$--`, `%`, `&effect`
+`$`, `--`, `$--`, `%`, `#effect`
 
 #### Examples
 
@@ -270,7 +264,7 @@ Use modifiers `.sync`, `.save` or `.calc`.
     $count=1
     $double.calc="() => count * 2"
     $.calc="{triple: () => count * 3}"
-    &effect="console.log('count: ', count)"
+    #effect="console.log('count: ', count)"
   >
 
   <button @click="count++">Once: <meta %count></button>
