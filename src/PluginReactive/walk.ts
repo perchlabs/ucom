@@ -111,7 +111,7 @@ const dataWalkDef = makeWalkDefinition({
 const containerWalkDef = makeWalkDefinition({
   '#show': _show,
   '#effect': _effect,
-  '#ref': _ref,
+  '#id': _ref,
   '?': _attribute,
   '@': _event,
   '--': _cssprop,

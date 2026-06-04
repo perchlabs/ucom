@@ -184,7 +184,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `#await` (`#then`, `#catch`)
 - `#effect` effect runner.
 - `#show`
-- `#ref`
+- `#id`
 - `$` data
 - `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
 - `$--` combined data with CSS Custom Property
