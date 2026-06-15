@@ -338,7 +338,7 @@ Element IDs are sandboxed via shadow dom.
 </template>
 ```
 
-[CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties) can be added using `--` prefix on the meta element.  You may choose a different store variable name to use by specifying a value.
+[CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties) can be added using `--` directive.  You may choose a different store variable name by specifying a value.  Directives used on `meta` elements are injected into the current scope.
 
 ```html
 <template u-com>
