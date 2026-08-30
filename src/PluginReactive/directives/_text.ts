@@ -42,8 +42,6 @@ export const _text: DirectiveHandler = (
 
   let [start, end] = [new Text, new Text]
 
-  const $text = signal<string[]>([])
-
   const anchor = new Comment()
 
   if (isMeta) {
@@ -55,8 +53,9 @@ export const _text: DirectiveHandler = (
   anchor.before(start)
   anchor.before(end)
 
-  setTimeout(() => {
+  const $text = signal<string[]>([])
 
+  setTimeout(() => {
     ctx.effect(async () => {
       const valRaw = ctx.eval(exprReal ? exprReal : STORE_DEFAULT_INDEX)
       const valResolved = await PromiseResolve(valRaw)
@@ -68,6 +67,7 @@ export const _text: DirectiveHandler = (
 
     ctx.effect(() => {
       const text = $text().at(-1)
+
       if (text !== undefined) {
         $text([])
 

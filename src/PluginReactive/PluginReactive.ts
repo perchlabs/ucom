@@ -14,6 +14,7 @@ import type {
 import type {
   Context,
   DataRecord,
+  EffectFunc,
 } from './reference.ts'
 import {
   ATTRIBUTE_CHANGED,
@@ -33,8 +34,6 @@ import {
 import {
   computed as $computed,
   signal as $signal,
-  effect as $effect,
-  effectScope as $effectScope,
   trigger as $trigger,
 } from './alien-signals'
 import {
@@ -102,8 +101,6 @@ export default {
 
     ObjectAssign(proto, {
       $computed,
-      $effect,
-      $effectScope,
       $signal,
       $trigger,
     })
@@ -128,6 +125,7 @@ export default {
       ObjectAssign(el, {
         [ContextIndex]: ctx,
         get [DataIndex]() { return ctx.data },
+        $effect(fn: EffectFunc) { ctx.effect(fn) }
       })
 
       walkChildren(ctx)
@@ -189,15 +187,13 @@ type PropDefs = Record<string, PropDef>
 type PropDef = [
   camel: string,
   pipe: (v: string | null) => any,
-
 ]
 
 interface UpgradeComponent extends WebComponent {
   [ContextIndex]: Context
   [DataIndex]: DataRecord
   $computed: () => any
-  $effect: () => any
-  $effectScope: () => any
+  $effect: (fn: EffectFunc) => any
   $signal: () => any
   $trigger: () => any
 }

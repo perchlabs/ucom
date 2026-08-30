@@ -24,10 +24,12 @@ import {
 } from './alien-signals'
 import {
   isSymbol,
+  isAsyncFunction,
   isFunction,
   isShadowRoot,
   isTemplateElement,
   ArrayFrom,
+  ObjectKeys,
   ObjectDefineProperty,
   safeNodeName,
   uniqueArr,
@@ -181,10 +183,18 @@ export const createContext = (
       }
     },
 
-    effect(fnEffect: () => void, fnCleanup?: () => void) {
-      ctx.push(createEffect(fnEffect))
-      if (fnCleanup) {
-        ctx.push(fnCleanup)
+    effect(fn, cleanup?) {
+      type EffectFuncNonAsync = (() => void) | (() => (() => void))
+      let fnFix: EffectFuncNonAsync
+      if (isAsyncFunction(fn)) {
+        fnFix = () => { fn() }
+      } else {
+        fnFix = fn
+      }
+
+      ctx.push(createEffect(fnFix))
+      if (cleanup) {
+        ctx.push(cleanup)
       }
     },
 
@@ -199,7 +209,7 @@ export const createContext = (
     },
 
     [STORE_MOD_VAR](entry) {
-      addItem(simpleItem(entry))
+      addItem(createSimpleItem(entry))
     },
 
     [STORE_MOD_CALC](entry) {
@@ -212,7 +222,7 @@ export const createContext = (
       }
 
       const keyId = `${storeName}-${camel}`
-      syncMap[keyId] ??= simpleItem([camel, value])
+      syncMap[keyId] ??= createSimpleItem([camel, value])
       addItem(syncMap[keyId])
     },
 
@@ -272,41 +282,43 @@ export const createContext = (
     [key, createComputed(val), STORE_ITEM_TYPE_SIGNAL]
 
 
-  const simpleItem = (entry: StoreAdderEntry): StoreItem => {
-    const [val] = entry
+  const createSimpleItem = (entry: StoreAdderEntry): StoreItem => {
+    const [, val] = entry
     return isSymbol(val) ? createSymbolItem(entry) : 
       isFunction(val) ? createFunctionItem(entry) :
       createSignalItem(entry)
   }
 
-  Reflect.ownKeys(dataRaw).forEach((key => addItem(simpleItem([key, dataRaw[key]]))))
+  Reflect.ownKeys(dataRaw).forEach((key => addItem(createSimpleItem([key, dataRaw[key]]))))
 
   return ctx
 }
 
+
 const createFallbackProxy = (data: DataRecord, parent: DataRecord) =>
   new Proxy(data, {
     has(_target, camel) {
-      return Reflect.get(data, camel) || Reflect.get(parent, camel)
+      return camel in data || camel in parent
     },
     ownKeys(_target) {
-      return uniqueArr(Reflect.ownKeys(data), Reflect.ownKeys(parent))
+      return uniqueArr(ObjectKeys(data), ObjectKeys(parent))
     },
     get(_target, camel) {
       if (camel === Symbol.unscopables) {
         return
       }
-      return Reflect.get(data, camel) ?? Reflect.get(parent, camel)
+      return data[camel] ?? parent[camel]
     },
     set(_target, camel, val) {
-      if (Reflect.has(data, camel)) {
+      if (camel in data) {
         return Reflect.set(data, camel, val)
       }
-      if (Reflect.has(parent, camel)) {
+      if (camel in parent) {
         return Reflect.set(parent, camel, val)
       }
+
+      console.warn(`Property '${String(camel)}' undefined`)
 
       return false
     },
   })
-

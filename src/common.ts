@@ -11,6 +11,7 @@ export const isBoolean = (v: unknown): v is boolean => typeof v === 'boolean'
 export const isNumber = (v: unknown): v is number => typeof v === 'number'
 export const isString = (v: unknown): v is string => typeof v === 'string'
 export const isSymbol = (v: unknown): v is symbol => typeof v === 'symbol'
+export const isAsyncFunction = (v: unknown): v is (() => Promise<unknown>) => v?.constructor?.name === 'AsyncFunction'
 export const isFunction = (v: unknown): v is ((...args: any[]) => any) => typeof v === 'function'
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>

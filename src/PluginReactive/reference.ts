@@ -6,6 +6,11 @@ import type {
 export type DataRecord = Record<string | symbol, any>
 export type ComputedFunction = () => any
 
+export type EffectFunc =
+  (() => void) |
+  (() => (() => void)) |
+  (() => Promise<void>)
+
 export interface Context {
   man: ComponentManager
   ptr: ContextableNode
@@ -17,8 +22,7 @@ export interface Context {
   teardown(): void
 
   push: (fn: () => void) => void
-  effect: (fnEffect: () => void, fnCleanup?: () => void) => void
-
+  effect: (fn: EffectFunc, cleanup?: () => void) => void
   eval: (exp: string | symbol, data?: DataRecord | null) => unknown
   data: DataRecord
   var: StoreAdder
