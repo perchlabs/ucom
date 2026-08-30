@@ -15,11 +15,18 @@ export const contextableParent = (el: Node) => el?.parentNode as ContextableNode
 
 export const nextWalkable = (el: Element): WalkableReturn => el.nextElementSibling
 
-// export function createAnchor({key}: DirectiveDef, parent: ContextableNode, el: HTMLElement): Comment {
-//   const anchor = new Comment(key)
+// export function createAnchor({op}: DirectiveDef, parent: ContextableNode, el: HTMLElement): Comment {
+//   const anchor = new Comment(op)
 //   parent.insertBefore(anchor, el)
 //   return anchor
 // }
+
+export function createAnchor({op}: DirectiveDef, parent: ContextableNode, el: HTMLElement): Comment {
+  const anchor = new Comment(op)
+  parent.insertBefore(anchor, el)
+  return anchor
+}
+
 
 export const parentAndAnchor = (
   el: Element,

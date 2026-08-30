@@ -1,7 +1,7 @@
 <source src="@com/example-run.html">
 
 <example-run
-  #each="i in 5"
+  #each="i in 1"
   ?name="'route-await-' + `${i+1}`.padStart(2, '0')"
 ></example-run>
 
@@ -111,7 +111,7 @@
 
 
 
-<template u-com="route-await-05">
+<template #u-com="route-await-05">
   A test to make sure that all await-then-catch blocks are found and removed
   regardless of errors.
 

@@ -14,6 +14,8 @@ export const _effect: DirectiveHandler = (
     mods,
   },
 ) => {
+  const MOD_ONCE = 'once'
+
   const value = simplePathRE.test(exp) || reArrowFunction.test(exp)
     ? exp
     : `() => { ${exp} }`
@@ -24,7 +26,7 @@ export const _effect: DirectiveHandler = (
     return
   }
 
-  if (mods.has('once')) {
+  if (mods.has(MOD_ONCE)) {
     // TODO: 
     // value()
   } else {

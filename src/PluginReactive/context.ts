@@ -3,18 +3,19 @@ import type {
 } from '../reference.ts'
 import {
   SYS_CODE,
-  STORE_MOD_VAR,
-  STORE_MOD_CALC,
-  STORE_MOD_SYNC,
-  STORE_MOD_SAVE,
 } from '../reference.ts'
 import type {
   Context,
   ContextableNode,
   RefRecord,
   DataRecord,
-  ComputedFunction,
   StoreAdderEntry,
+} from './reference.ts'
+import {
+  STORE_MOD_VAR,
+  STORE_MOD_CALC,
+  STORE_MOD_SYNC,
+  STORE_MOD_SAVE,
 } from './reference.ts'
 import {
   computed as createComputed,
@@ -22,16 +23,16 @@ import {
   signal as createSignal,
 } from './alien-signals'
 import {
+  isSymbol,
   isFunction,
   isShadowRoot,
   isTemplateElement,
   ArrayFrom,
-  ObjectKeys,
-  ObjectEntriesEach,
   ObjectDefineProperty,
   safeNodeName,
   uniqueArr,
   cloneTemplateContent,
+  deleteRange,
 } from '../common.ts'
 import { evaluate } from './expression.ts'
 import { walk, walkChildren } from './walk.ts'
@@ -41,10 +42,17 @@ interface Frag {
   end: Text
 }
 
+const STORE_ITEM_TYPE_SYMBOL = 'symbol'
+const STORE_ITEM_TYPE_FUNCTION = 'function'
+const STORE_ITEM_TYPE_SIGNAL = 'signal'
+const STORE_ITEM_TYPE_COMPUTED = 'computed'
+
+type StoreItemType = typeof STORE_ITEM_TYPE_SYMBOL | typeof STORE_ITEM_TYPE_FUNCTION | typeof STORE_ITEM_TYPE_SIGNAL | typeof STORE_ITEM_TYPE_COMPUTED
+
 type StoreItem = [
-  camel: string,
+  camel: string | symbol,
   value: (...args: any[]) => any,
-  isFunc?: boolean,
+  type: StoreItemType,
 ]
 type StoreItemRecord = Record<string, StoreItem>
 
@@ -117,7 +125,6 @@ export const createContext = (
     mount(parent: ContextableNode, anchor: Node) {
       if (frag) {
         const {start, end} = frag
-
         if (mounted) {
           let node: Node | null = start
           let next: Node | null
@@ -163,10 +170,12 @@ export const createContext = (
         //   return
         // }
 
-        const range = new Range
-        range.setStartBefore(frag.start)
-        range.setEndAfter(frag.end)
-        range.deleteContents()
+        deleteRange(frag.start, frag.end, true)
+
+        // const range = new Range
+        // range.setStartBefore(frag.start)
+        // range.setEndAfter(frag.end)
+        // range.deleteContents()
       } else {
         ;(walkable as Element).remove?.()
       }
@@ -183,28 +192,38 @@ export const createContext = (
       cleanup.push(fn)
     },
 
-    eval(exp: string, data?: DataRecord | null): unknown {
-      return evaluate(exp, ctx.data, data ?? {})
+    eval(exp: string | symbol, data?: DataRecord | null): unknown {
+      return isSymbol(exp)
+        ? ctx.data[exp]
+        : evaluate(exp, ctx.data, data ?? {})
     },
 
     [STORE_MOD_VAR](entry) {
       addItem(simpleItem(entry))
     },
 
-    [STORE_MOD_CALC]([camel, value]: [camel: string, value: ComputedFunction]) {
-      addItem([camel, createComputed(value)])
+    [STORE_MOD_CALC](entry) {
+      addItem(createComputedItem(entry))
     },
 
-    [STORE_MOD_SYNC](entry) {
-      const keyId = `${storeName}-${entry[0]}`
-      syncMap[keyId] ??= simpleItem(entry)
+    [STORE_MOD_SYNC]([camel, value]) {
+      if (isSymbol(camel)) {
+        return
+      }
+
+      const keyId = `${storeName}-${camel}`
+      syncMap[keyId] ??= simpleItem([camel, value])
       addItem(syncMap[keyId])
     },
 
     [STORE_MOD_SAVE]([camel, value]) {
+      if (isSymbol(camel)) {
+        return
+      }
+
       const persistItem = (): StoreItem => {
         if (isFunction(value)) {
-          return [camel, value, true]
+          return [camel, value, STORE_ITEM_TYPE_FUNCTION]
         }
 
         const json = localStorage.getItem(keyId)
@@ -214,7 +233,7 @@ export const createContext = (
           localStorage.setItem(keyId, JSON.stringify(signal()))
         })
 
-        return [camel, signal]
+        return [camel, signal, STORE_ITEM_TYPE_SIGNAL]
       }
 
       const keyId = `${storeName}-${camel}`
@@ -224,19 +243,43 @@ export const createContext = (
     },
   }
 
-  const addItem = ([camel, value, isFunc = false]: StoreItem) => {
-    if (isFunc) {
-      data[camel] = value.bind(host)
-    } else {
-      ObjectDefineProperty(data, camel, {
-        get() { return value() },
-        set(val) { value(val) },
-        enumerable: true,
-      })
+  const addItem = ([camel, val, type]: StoreItem) => {
+    switch (type) {
+      case STORE_ITEM_TYPE_SYMBOL:
+      case STORE_ITEM_TYPE_FUNCTION:
+        data[camel] = val
+        break
+      case STORE_ITEM_TYPE_SIGNAL:
+      case STORE_ITEM_TYPE_COMPUTED:
+        ObjectDefineProperty(data, camel, {
+          get() { return val() },
+          set(valNew) { val(valNew) },
+          enumerable: true,
+        })
     }
   }
 
-  ObjectEntriesEach(dataRaw, ctx.var)
+  const createSymbolItem = (entry: StoreAdderEntry): StoreItem =>
+    [...entry, STORE_ITEM_TYPE_SYMBOL]
+
+  const createFunctionItem = ([key, val]: StoreAdderEntry): StoreItem =>
+    [key, val.bind(host), STORE_ITEM_TYPE_FUNCTION]
+
+  const createSignalItem = ([key, val]: StoreAdderEntry): StoreItem =>
+    [key, createSignal(val), STORE_ITEM_TYPE_SIGNAL]
+
+  const createComputedItem = ([key, val]: StoreAdderEntry): StoreItem =>
+    [key, createComputed(val), STORE_ITEM_TYPE_SIGNAL]
+
+
+  const simpleItem = (entry: StoreAdderEntry): StoreItem => {
+    const [val] = entry
+    return isSymbol(val) ? createSymbolItem(entry) : 
+      isFunction(val) ? createFunctionItem(entry) :
+      createSignalItem(entry)
+  }
+
+  Reflect.ownKeys(dataRaw).forEach((key => addItem(simpleItem([key, dataRaw[key]]))))
 
   return ctx
 }
@@ -244,10 +287,10 @@ export const createContext = (
 const createFallbackProxy = (data: DataRecord, parent: DataRecord) =>
   new Proxy(data, {
     has(_target, camel) {
-      return camel in data || camel in parent
+      return Reflect.get(data, camel) || Reflect.get(parent, camel)
     },
     ownKeys(_target) {
-      return uniqueArr(ObjectKeys(data), ObjectKeys(parent))
+      return uniqueArr(Reflect.ownKeys(data), Reflect.ownKeys(parent))
     },
     get(_target, camel) {
       if (camel === Symbol.unscopables) {
@@ -256,25 +299,14 @@ const createFallbackProxy = (data: DataRecord, parent: DataRecord) =>
       return Reflect.get(data, camel) ?? Reflect.get(parent, camel)
     },
     set(_target, camel, val) {
-      if (camel in data) {
+      if (Reflect.has(data, camel)) {
         return Reflect.set(data, camel, val)
       }
-      if (camel in parent) {
+      if (Reflect.has(parent, camel)) {
         return Reflect.set(parent, camel, val)
       }
-
-      console.warn(`Property '${String(camel)}' undefined`)
 
       return false
     },
   })
-
-const simpleItem = ([camel, value]: StoreAdderEntry): StoreItem => {
-  const isFunc = isFunction(value)
-  return [
-    camel,
-    isFunc ? value : createSignal(value),
-    isFunc,
-  ]
-}
 

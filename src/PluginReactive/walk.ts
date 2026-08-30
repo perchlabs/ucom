@@ -14,7 +14,6 @@ import {
 } from '../common.ts'
 import {
   getDirectives,
-  pullDir,
 } from '../directive.ts'
 import {
   nextWalkable,
@@ -23,11 +22,12 @@ import {
 import { _if } from './directives_branch/_if.ts'
 import { _each } from './directives_branch/_each.ts'
 // import { _each } from './directives_branch/_each_experimental.ts'
-import { _await } from './directives_branch/_await.ts'
+import { _promise } from './directives_branch/_promise.ts'
 import { _as } from './directives_branch/_as.ts'
 
 import { _show } from './directives/_show.ts'
 import { _text } from './directives/_text.ts'
+import { _html } from './directives/_html.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
 import { _ref } from './directives/_ref.ts'
@@ -35,10 +35,15 @@ import { _ref } from './directives/_ref.ts'
 import { _data } from './directives/_data.ts'
 import { _cssprop } from './directives/_cssprop.ts'
 import { _data_cssprop } from './directives/_data_cssprop.ts'
+import { _data_html } from './directives/_data_html.ts'
 import { _effect } from './directives/_effect.ts'
 
 type HandlerMap = Record<string, DirectiveHandler>
 type WalkDefinition = [RegExp, HandlerMap]
+
+type BranchHandlerMap = Record<string, BranchDirectiveHandler>
+type BranchWalkDefinition = [RegExp, BranchHandlerMap]
+
 type RunDefinition = [DirectiveDef, DirectiveHandler]
 
 export const walk = (ctx: Context, el: Element): WalkableReturn => {
@@ -48,21 +53,22 @@ export const walk = (ctx: Context, el: Element): WalkableReturn => {
   if (isNormal) {
     walkDef = containerWalkDef
 
-    let def: DirectiveDef | undefined
-    for (const [key, handler] of branchDirs) {
-      if (def = pullDir(el, key)) {
-        return handler(ctx, el, def)
-      }
+    const [reBranch, branchMap] = branchWalkDef
+    for (const def of getDirectives(el, reBranch)) {
+      el.removeAttribute(def.full)
+      return branchMap[def.op](ctx, el, def)
     }
+
   } else {
     walkDef = voidMetaWalkDef
   }
 
   const [dataRun, normalRun] = [dataWalkDef, walkDef].map(
     ([reFilter, map]: WalkDefinition) =>
-      getDirectives(el, reFilter).
-      map(def => map[def.op] ? [def, map[def.op]] as RunDefinition : null).
-      filter(v => !!v))
+    getDirectives(el, reFilter).
+    map(def => map[def.op] ? [def, map[def.op]] as RunDefinition : null).
+    filter(v => !!v)
+  )
 
   if (isNormal && (dataRun.length || normalRun.length)) {
     ctx = ctx.scope(el)
@@ -90,22 +96,32 @@ export const walkChildren = (ctx: Context, node: ContextableNode = ctx.walkable)
   }
 }
 
-// These directives must match exact string
-const branchDirs: [string, BranchDirectiveHandler][] = [
-  ['#if', _if],
-  ['#each', _each],
-  ['#as', _as],
-  ['#await', _await],
-]
-
 const makeWalkDefinition = (map: HandlerMap): WalkDefinition => [
   new RegExp('^' + ObjectKeys(map).map(k => RegExp.escape(k)).join('|')),
   map,
 ]
 
+const makeBranchWalkDefinition = (map: BranchHandlerMap): BranchWalkDefinition => [
+  new RegExp('^' + ObjectKeys(map).map(RegExp.escape).join('|')),
+  map,
+]
+
+const branchWalkDef = makeBranchWalkDefinition({
+  '#if': _if,
+  '#each': _each,
+  '#as': _as,
+
+  '#await': _promise,
+  '#get': _promise,
+  '#post': _promise,
+  '#put': _promise,
+  '#patch': _promise,
+})
+
 const dataWalkDef = makeWalkDefinition({
   $: _data,
   '$--': _data_cssprop,
+  '$!!': _data_html,
 })
 
 const containerWalkDef = makeWalkDefinition({
@@ -116,10 +132,12 @@ const containerWalkDef = makeWalkDefinition({
   '@': _event,
   '--': _cssprop,
   '%': _text,
+  '!!': _html,
 })
 
 const voidMetaWalkDef = makeWalkDefinition({
   '#effect': _effect,
   '--': _cssprop,
   '%': _text,
+  '!!': _html,
 })

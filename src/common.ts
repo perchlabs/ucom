@@ -10,6 +10,7 @@ import type {
 export const isBoolean = (v: unknown): v is boolean => typeof v === 'boolean'
 export const isNumber = (v: unknown): v is number => typeof v === 'number'
 export const isString = (v: unknown): v is string => typeof v === 'string'
+export const isSymbol = (v: unknown): v is symbol => typeof v === 'symbol'
 export const isFunction = (v: unknown): v is ((...args: any[]) => any) => typeof v === 'function'
 export const isArray = Array.isArray
 export const isObject = (v: unknown): v is Record<any, any> =>
@@ -29,6 +30,7 @@ export const ObjectEntries = Object.entries
 export const ObjectFromEntries = Object.fromEntries
 export const ObjectDefineProperty = Object.defineProperty
 export const ArrayFrom = Array.from
+export const PromiseResolve = Promise.resolve.bind(Promise)
 
 export const createElement = document.createElement.bind(document)
 
@@ -38,6 +40,7 @@ export const ObjectEntriesEach = <T>(
   obj: Record<string, T>,
   each: (entry: [k: string, v: T]) => void,
 ): void => ObjectEntries(obj).forEach(each)
+
 
 export const reComponentPath = new RegExp(`.*?(([a-z]+)(\-[a-z0-9]+)+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
@@ -93,6 +96,12 @@ export const hashContent = (tpl: HTMLTemplateElement): number => {
     .reduce((hash, char) => char.charCodeAt(0) + (hash << 6) + (hash << 16) - hash, 0)
 }
 
+export const createDocumentFragment = (text: string) => {
+  const tpl = createElement('template')
+  tpl.innerHTML = text
+  return tpl.content
+}
+
 export const observeMutations = (target: Node, callback: MutationCallback) =>
   new MutationObserver(callback)
     .observe(target, {
@@ -125,4 +134,17 @@ export const isPromisePending = (p: Promise<any>) => {
       v => v === t,
       () => false,
     )
+}
+
+export const deleteRange = (start: Node, end: Node, inclusive: boolean) => {
+  const range = new Range
+  if (inclusive) {
+    range.setStartBefore(start)
+    range.setEndAfter(end)
+  } else {
+    range.setStartAfter(start)
+    range.setEndBefore(end)
+  }
+  range.deleteContents()
+
 }

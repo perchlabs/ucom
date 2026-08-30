@@ -1,7 +1,3 @@
-import {
-  STORE_MOD_VAR,
-  storeMods,
-} from '../../reference.ts'
 import type {
   DirectiveHandler,
 } from '../reference.ts'
@@ -9,6 +5,10 @@ import {
   isObject,
   ObjectEntriesEach,
 } from '../../common.ts'
+import {
+  STORE_MOD_VAR,
+  storeMods,
+} from '../reference.ts'
 
 export const _data: DirectiveHandler = (
   ctx,
