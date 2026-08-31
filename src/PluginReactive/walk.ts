@@ -22,7 +22,10 @@ import {
 import { _if } from './directives_branch/_if.ts'
 import { _each } from './directives_branch/_each.ts'
 // import { _each } from './directives_branch/_each_experimental.ts'
-import { _promise } from './directives_branch/_promise.ts'
+import {
+  _promise,
+  OP_AWAIT, OP_GET, OP_QUERY, OP_POST, OP_PUT, OP_PATCH, OP_DELETE,
+} from './directives_branch/_promise.ts'
 import { _as } from './directives_branch/_as.ts'
 
 import { _show } from './directives/_show.ts'
@@ -111,11 +114,13 @@ const branchWalkDef = makeBranchWalkDefinition({
   '#each': _each,
   '#as': _as,
 
-  '#await': _promise,
-  '#get': _promise,
-  '#post': _promise,
-  '#put': _promise,
-  '#patch': _promise,
+  OP_AWAIT: _promise,
+  OP_GET: _promise,
+  OP_QUERY: _promise,
+  OP_POST: _promise,
+  OP_PUT: _promise,
+  OP_PATCH: _promise,
+  OP_DELETE: _promise,
 })
 
 const dataWalkDef = makeWalkDefinition({

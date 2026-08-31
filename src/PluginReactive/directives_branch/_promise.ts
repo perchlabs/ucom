@@ -27,6 +27,18 @@ import {
 } from '../../directive.ts'
 import { isString } from '@vue/shared'
 
+export const OP_AWAIT = '#await'
+const OP_THEN = '#then'
+const OP_CATCH = '#catch'
+
+export const OP_GET = '#get'
+export const OP_QUERY = '#query'
+export const OP_POST = '#post'
+export const OP_PUT = '#put'
+export const OP_PATCH = '#patch'
+export const OP_DELETE = '#delete'
+type FetchOp = typeof OP_GET | typeof OP_QUERY | typeof OP_POST | typeof OP_PUT | typeof OP_PATCH | typeof OP_DELETE
+
 const FETCH_GET = 'get'
 const FETCH_QUERY = 'query'
 const FETCH_POST = 'post'
@@ -34,14 +46,6 @@ const FETCH_PUT = 'put'
 const FETCH_PATCH = 'patch'
 const FETCH_DELETE = 'delete'
 type FetchType = typeof FETCH_GET | typeof FETCH_QUERY |typeof FETCH_POST | typeof FETCH_PUT | typeof FETCH_PATCH | typeof FETCH_DELETE
-
-const OP_GET = '#get'
-const OP_QUERY = '#query'
-const OP_POST = '#post'
-const OP_PUT = '#put'
-const OP_PATCH = '#patch'
-const OP_DELETE = '#delete'
-type FetchOp = typeof OP_GET | typeof OP_QUERY | typeof OP_POST | typeof OP_PUT | typeof OP_PATCH | typeof OP_DELETE
 
 const fetchMap: Record<FetchOp, FetchType> = {
   [OP_QUERY]: FETCH_QUERY,
@@ -51,10 +55,6 @@ const fetchMap: Record<FetchOp, FetchType> = {
   [OP_PATCH]: FETCH_PATCH,
   [OP_DELETE]: FETCH_DELETE,
 }
-
-const OP_AWAIT = '#await'
-const OP_THEN = '#then'
-const OP_CATCH = '#catch'
 
 const PROMISE = 'promise'
 const THEN = 'then'

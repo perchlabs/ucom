@@ -249,7 +249,6 @@ export const createContext = (
       const keyId = `${storeName}-${camel}`
       syncMap[keyId] ??= persistItem()
       addItem(syncMap[keyId])
-
     },
   }
 
@@ -281,7 +280,6 @@ export const createContext = (
   const createComputedItem = ([key, val]: StoreAdderEntry): StoreItem =>
     [key, createComputed(val), STORE_ITEM_TYPE_SIGNAL]
 
-
   const createSimpleItem = (entry: StoreAdderEntry): StoreItem => {
     const [, val] = entry
     return isSymbol(val) ? createSymbolItem(entry) : 
@@ -293,7 +291,6 @@ export const createContext = (
 
   return ctx
 }
-
 
 const createFallbackProxy = (data: DataRecord, parent: DataRecord) =>
   new Proxy(data, {
