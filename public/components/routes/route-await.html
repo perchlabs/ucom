@@ -16,10 +16,10 @@
     awaiting
   </div>
   <div #then="msg">
-    then: <meta %msg>
+    then: <meta %%msg>
   </div>
   <div #catch="err">
-    catch: <meta %err>
+    catch: <meta %%err>
   </div>
 
   <script>
@@ -47,10 +47,10 @@
 
   Only show the content when the promise has resolved.
 
-  <meta %delay>
+  <meta %%delay>
 
   <div #await="myPromise" #then>
-    waited <meta %delay>ms to resolve
+    waited <meta %%delay>ms to resolve
   </div>
 
   <style>
@@ -69,7 +69,7 @@
 
   Only show the content when the promise has rejected.
   <div #await="myPromise" #catch="err">
-    waited <meta %delay>ms to reject with '<meta %err>'
+    waited <meta %%delay>ms to reject with '<meta %%err>'
   </div>
 
   <style>
@@ -98,10 +98,10 @@
     pending
   </div>
   <div #then="msg">
-    resolved '<meta %msg>'
+    resolved '<meta %%msg>'
   </div>
   <div #catch="err">
-    rejected '<meta %err>'
+    rejected '<meta %%err>'
   </div>
 
   <style>

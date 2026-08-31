@@ -29,14 +29,11 @@ export interface Context {
   calc: StoreAdder
   sync: StoreAdder
   save: StoreAdder
-
-  refs: RefRecord
 }
 // ContextableNode should use Element so that SVGElement is considered.
 export type ContextableNode = DocumentFragment | Element
 export type StoreAdder = (entry: StoreAdderEntry) => void
 export type StoreAdderEntry = [key: string | symbol, val: any]
-export type RefRecord = Record<string, WeakRef<ContextableNode>>
 
 export type WalkableReturn = Element | undefined | void | null
 

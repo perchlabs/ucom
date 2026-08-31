@@ -16,6 +16,7 @@ import {
 } from '../alien-signals/index.ts'
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import {
+  isString,
   isPromisePending,
   AbortablePromise,
   ObjectValues,
@@ -25,7 +26,6 @@ import {
   getDirectives,
   createDirectiveDefinition,
 } from '../../directive.ts'
-import { isString } from '@vue/shared'
 
 export const OP_AWAIT = '#await'
 const OP_THEN = '#then'

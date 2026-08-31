@@ -7,7 +7,6 @@ import {
 import type {
   Context,
   ContextableNode,
-  RefRecord,
   DataRecord,
   StoreAdderEntry,
 } from './reference.ts'
@@ -60,8 +59,6 @@ type StoreItemRecord = Record<string, StoreItem>
 
 const syncMap: StoreItemRecord = {}
 
-export const globalRefs: RefRecord = {}
-
 export const createContext = (
   man: ComponentManager,
   host: HTMLElement,
@@ -71,7 +68,6 @@ export const createContext = (
   dataParent: DataRecord = {},
   teardownCallback: () => void = () => {},
 
-  refs: RefRecord = {},
 ): Context => {
   const frag: Frag | null = isTemplateElement(ptr)
     ? {start: new Text, end: new Text}
@@ -93,7 +89,6 @@ export const createContext = (
   const ctx: Context = {
     man,
     ptr,
-    refs,
 
     get start() {
       return frag?.start ?? walkable
@@ -116,8 +111,6 @@ export const createContext = (
         dataNew,
         proxy,
         () => children.delete(scoped),
-
-        {...refs},
       )
       children.add(scoped)
 

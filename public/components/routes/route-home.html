@@ -80,8 +80,8 @@
   </nav>
 
   <main>
-    <div>Count: <meta %count></div>
-    <div>Number is: <meta %oddeven></div>
+    <div>Count: <meta %%count></div>
+    <div>Number is: <meta %%oddeven></div>
   </main>
 
   <style>
@@ -100,7 +100,7 @@
     #effect="count++"
   >
 
-  You've loaded this component <meta %count> time(s).
+  You've loaded this component <meta %%count> time(s).
 
   <style>
     :host {
@@ -114,15 +114,15 @@
 
 <template u-com="route-home-06">
   <meta $--color1="'violet'">
-  <div class="one"><meta %color1> one</div>
+  <div class="one"><meta %%color1> one</div>
 
   <meta $color-var-two="'green'">
   <div --color-two="colorVarTwo" class="two">
-    <meta %color-var-two> two
+    <meta %%color-var-two> two
   </div>
 
   <section $--color="'blue'">
-    <meta %color> three
+    <meta %%color> three
   </section>
 
   <style>

@@ -33,11 +33,11 @@ import { _text } from './directives/_text.ts'
 import { _html } from './directives/_html.ts'
 import { _event } from './directives/_event.ts'
 import { _attribute } from './directives/_attribute.ts'
-import { _ref } from './directives/_ref.ts'
 
 import { _data } from './directives/_data.ts'
 import { _cssprop } from './directives/_cssprop.ts'
 import { _data_cssprop } from './directives/_data_cssprop.ts'
+import { _data_text } from './directives/_data_text.ts'
 import { _data_html } from './directives/_data_html.ts'
 import { _effect } from './directives/_effect.ts'
 
@@ -114,35 +114,35 @@ const branchWalkDef = makeBranchWalkDefinition({
   '#each': _each,
   '#as': _as,
 
-  OP_AWAIT: _promise,
-  OP_GET: _promise,
-  OP_QUERY: _promise,
-  OP_POST: _promise,
-  OP_PUT: _promise,
-  OP_PATCH: _promise,
-  OP_DELETE: _promise,
+  [OP_AWAIT]: _promise,
+  [OP_GET]: _promise,
+  [OP_QUERY]: _promise,
+  [OP_POST]: _promise,
+  [OP_PUT]: _promise,
+  [OP_PATCH]: _promise,
+  [OP_DELETE]: _promise,
 })
 
 const dataWalkDef = makeWalkDefinition({
   $: _data,
   '$--': _data_cssprop,
+  '$%%': _data_text,
   '$!!': _data_html,
 })
 
 const containerWalkDef = makeWalkDefinition({
   '#show': _show,
   '#effect': _effect,
-  '#id': _ref,
   '?': _attribute,
   '@': _event,
   '--': _cssprop,
-  '%': _text,
+  '%%': _text,
   '!!': _html,
 })
 
 const voidMetaWalkDef = makeWalkDefinition({
   '#effect': _effect,
   '--': _cssprop,
-  '%': _text,
+  '%%': _text,
   '!!': _html,
 })
