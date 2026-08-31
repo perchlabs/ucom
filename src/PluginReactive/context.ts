@@ -184,18 +184,18 @@ export const createContext = (
     },
 
     effect(fn, cleanup?) {
-      type EffectFuncNonAsync = (() => void) | (() => (() => void))
-      let fnFix: EffectFuncNonAsync
-      if (isAsyncFunction(fn)) {
-        fnFix = () => { fn() }
-      } else {
-        fnFix = fn
-      }
+      setTimeout(() => {
+        type EffectFuncNonAsync = (() => void) | (() => (() => void))
 
-      ctx.push(createEffect(fnFix))
-      if (cleanup) {
-        ctx.push(cleanup)
-      }
+        const fnFix: EffectFuncNonAsync = isAsyncFunction(fn)
+          ? () => { fn() } 
+          : fn as EffectFuncNonAsync
+
+        ctx.push(createEffect(fnFix))
+        if (cleanup) {
+          ctx.push(cleanup)
+        }
+      })
     },
 
     push(fn: () => void) {

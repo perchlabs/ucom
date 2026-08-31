@@ -55,36 +55,34 @@ export const _text: DirectiveHandler = (
 
   const $text = signal<string[]>([])
 
-  setTimeout(() => {
-    ctx.effect(async () => {
-      const valRaw = ctx.eval(exprReal ? exprReal : STORE_DEFAULT_INDEX)
-      const valResolved = await PromiseResolve(valRaw)
-      const val = valResolved instanceof Response ? await valResolved.text() : valResolved
+  // setTimeout(() => {
+  ctx.effect(async () => {
+    const valRaw = ctx.eval(exprReal ? exprReal : STORE_DEFAULT_INDEX)
+    const valResolved = await PromiseResolve(valRaw)
+    const val = valResolved instanceof Response ? await valResolved.text() : valResolved
 
-      $text().push(String(val))
-      trigger($text)
-    })
+    $text().push(String(val))
+    trigger($text)
+  })
 
-    ctx.effect(() => {
-      const text = $text().at(-1)
+  ctx.effect(() => {
+    const text = $text().at(-1)
 
-      if (text !== undefined) {
-        $text([])
+    if (text !== undefined) {
+      $text([])
 
-        if (isHTML) {
-          deleteRange(start, end, false)
-          // const range = new Range
-          // range.setStartAfter(start)
-          // range.setEndBefore(end)
-          // range.deleteContents()
+      if (isHTML) {
+        deleteRange(start, end, false)
+        // const range = new Range
+        // range.setStartAfter(start)
+        // range.setEndBefore(end)
+        // range.deleteContents()
 
-          const frag = createDocumentFragment(text)
-          end.before(frag)
-        } else {
-          start.nodeValue = text
-        }
+        const frag = createDocumentFragment(text)
+        end.before(frag)
+      } else {
+        start.nodeValue = text
       }
-    })
-
+    }
   })
 }

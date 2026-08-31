@@ -1,7 +1,7 @@
 <source src="@com/example-run.html">
 
 <example-run
-  #each="i in 1"
+  #each="i in 4"
   ?name="'route-await-' + `${i+1}`.padStart(2, '0')"
 ></example-run>
 
@@ -65,9 +65,7 @@
 
 <template u-com="route-await-03">
   <param $delay.int=1000>
-  <meta $my-promise="new Promise((resolve, reject) => {
-    setTimeout(reject('failed'), delay)
-  })">
+  <meta $my-promise="delayReject(delay, 'failed')">
 
   Only show the content when the promise has rejected.
   <div #await="myPromise" #catch="err">
@@ -80,6 +78,11 @@
       min-height: 3.2em;
     }
   </style>
+
+  <script>
+    export const delayReject = (delay, msg) =>
+      new Promise((resolve, reject) => setTimeout(() => reject(msg), delay))
+  </script>
 </template>
 
 
@@ -111,7 +114,7 @@
 
 
 
-<template #u-com="route-await-05">
+<template u-com="route-await-05">
   A test to make sure that all await-then-catch blocks are found and removed
   regardless of errors.
 

@@ -87,7 +87,6 @@ const filters: Filters = {
   [THEN]: makeDirectiveFilter([OP_THEN]),
   [CATCH]: makeDirectiveFilter([OP_CATCH]),
 }
-
 const isValidFetchType = (key: string): key is keyof typeof fetchMap =>
   key in fetchMap
 
@@ -121,7 +120,6 @@ export const _promise: BranchDirectiveHandler = (
     if (ptr) {
 
       if (getDirectives(ptr, filters[PROMISE]).length) {
-        console.log('found promise directive on next line')
         throw ''
       }
 
@@ -150,9 +148,7 @@ export const _promise: BranchDirectiveHandler = (
       soft(THEN)
       soft(CATCH)
     }
-  } catch (e) {
-    return ptr
-  }
+  } catch (e) {}
 
   const [parent, anchor] = parentAndAnchor(elRoot)
   ObjectValues(blkSpecs).forEach(([el]) => el.remove())
@@ -172,63 +168,6 @@ export const _promise: BranchDirectiveHandler = (
 
   const $blocks = signal<(Block | null)[]>([])
   let controller: AbortController
-
-  setTimeout(() => {
-    ctxRoot.effect(async () => {
-      try {
-        let promise: Promise<unknown>
-        if (method) {
-          const url = expRoot.startsWith('./') || expRoot.startsWith('/')
-            ? expRoot
-            : ctxRoot.eval(expRoot)
-          if (!isString(url)) {
-            throw `Fetch ${method} URL is not a string`
-          }
-
-          promise = fetch(url, {method})
-        } else {
-          promise = PromiseResolve(ctxRoot.eval(expRoot))
-        }
-
-        if (hasSeparatePromiseBlock && await isPromisePending(promise)) {
-          runBlock(PROMISE)
-        }
-
-        controller = new AbortController
-        try {
-          runBlock(THEN, await AbortablePromise(promise, controller))
-        } catch (err) {
-          if (err !== AbortablePromise.Canceled) {
-            runBlock(CATCH, err)
-          }
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    },
-    cleanup)
-
-    ctxRoot.effect(() => {
-      const block = $blocks().at(-1)
-
-      if (block !== undefined) {
-        $blocks([])
-        cleanup()
-      }
-
-      if (block) {
-        try {
-          const [el, data] = block
-          ctx = ctxRoot
-            .scope(el, data)
-            .mount(parent, anchor)
-        } catch (err) {
-          console.error(err)
-        }
-      }
-    },
-    cleanup)
-  })
 
   const runBlock = (blkkey: BlockKey, value?: any) => {
     if (blkSpecs[blkkey]) {
@@ -250,6 +189,61 @@ export const _promise: BranchDirectiveHandler = (
       ctx = undefined
     }
   }
+
+  ctxRoot.effect(async () => {
+    try {
+      let promise: Promise<unknown>
+      if (method) {
+        const url = expRoot.startsWith('./') || expRoot.startsWith('/')
+          ? expRoot
+          : ctxRoot.eval(expRoot)
+        if (!isString(url)) {
+          throw `Fetch ${method} URL is not a string`
+        }
+
+        promise = fetch(url, {method})
+      } else {
+        promise = PromiseResolve(ctxRoot.eval(expRoot))
+      }
+
+      if (hasSeparatePromiseBlock && await isPromisePending(promise)) {
+        runBlock(PROMISE)
+      }
+
+      controller = new AbortController
+      try {
+        runBlock(THEN, await AbortablePromise(promise, controller))
+      } catch (err) {
+        if (err !== AbortablePromise.Canceled) {
+          runBlock(CATCH, err)
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  },
+  cleanup)
+
+  ctxRoot.effect(() => {
+    const block = $blocks().at(-1)
+
+    if (block !== undefined) {
+      $blocks([])
+      cleanup()
+    }
+
+    if (block) {
+      try {
+        const [el, data] = block
+        ctx = ctxRoot
+          .scope(el, data)
+          .mount(parent, anchor)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  },
+  cleanup)
 
   return ptr
 }
