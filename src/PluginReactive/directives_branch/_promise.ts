@@ -17,6 +17,7 @@ import {
 import { nextWalkable, parentAndAnchor } from '../utils.ts'
 import {
   isString,
+  isSimplePath,
   isPromisePending,
   AbortablePromise,
   ObjectValues,
@@ -194,9 +195,7 @@ export const _promise: BranchDirectiveHandler = (
     try {
       let promise: Promise<unknown>
       if (method) {
-        const url = expRoot.startsWith('./') || expRoot.startsWith('/')
-          ? expRoot
-          : ctxRoot.eval(expRoot)
+        const url = isSimplePath(expRoot) ? expRoot : ctxRoot.eval(expRoot)
         if (!isString(url)) {
           throw `Fetch ${method} URL is not a string`
         }

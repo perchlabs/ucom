@@ -182,7 +182,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `#each`
 - `#as`
 - `#await` (`#then`, `#catch`)
-- `#effect` effect runner.
+- `+effect` effect runner.
 - `#show`
 - `$` data
 - `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
@@ -197,7 +197,7 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 
 These directives may appear on a `meta` element.  It will be injected within the current scope.  Ex. `<meta $count=0>`
 
-`$`, `--`, `%%`, `!!`, `$--`, `$%%`, `$!!`, `#effect`
+`$`, `--`, `%%`, `!!`, `$--`, `$%%`, `$!!`, `+effect`
 
 #### Examples
 
@@ -265,7 +265,7 @@ Use modifiers `.sync`, `.save` or `.calc`.
     $count=1
     $double.calc="() => count * 2"
     $.calc="{triple: () => count * 3}"
-    #effect="console.log('count: ', count)"
+    +effect="console.log('count: ', count)"
   >
 
   <button @click="count++">Once: <meta %%count></button>

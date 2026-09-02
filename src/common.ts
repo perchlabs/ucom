@@ -46,10 +46,9 @@ export const ObjectEntriesEach = <T>(
 export const reComponentPath = new RegExp(`.*?(([a-z]+)(\-[a-z0-9]+)+)(${FILE_POSTFIX}|${DIR_POSTFIX})$`)
 export const isValidComponentPath = (path: string) => reComponentPath.test(path)
 export const isValidComponentName = (v: string) => /^[a-z]+(\-[a-z0-9]+)+$/.test(v.toLowerCase())
+export const isSimplePath = (v: string) => v.startsWith('./') || v.startsWith('/')
 
-export const isUserKey = (k: string) =>
-  k !== CONSTRUCTOR &&
-  !k.startsWith('$')
+export const isUserKey = (k: string) => k !== CONSTRUCTOR && !k.startsWith('$')
 
 export const attrToggled = (el: Element, name: string) =>
   el.hasAttribute(name) ?? false
@@ -103,6 +102,18 @@ export const createDocumentFragment = (text: string) => {
   return tpl.content
 }
 
+export const deleteRange = (start: Node, end: Node, inclusive: boolean) => {
+  const range = new Range
+  if (inclusive) {
+    range.setStartBefore(start)
+    range.setEndAfter(end)
+  } else {
+    range.setStartAfter(start)
+    range.setEndBefore(end)
+  }
+  range.deleteContents()
+}
+
 export const observeMutations = (target: Node, callback: MutationCallback) =>
   new MutationObserver(callback)
     .observe(target, {
@@ -135,17 +146,4 @@ export const isPromisePending = (p: Promise<any>) => {
       v => v === t,
       () => false,
     )
-}
-
-export const deleteRange = (start: Node, end: Node, inclusive: boolean) => {
-  const range = new Range
-  if (inclusive) {
-    range.setStartBefore(start)
-    range.setEndAfter(end)
-  } else {
-    range.setStartAfter(start)
-    range.setEndBefore(end)
-  }
-  range.deleteContents()
-
 }
