@@ -135,7 +135,7 @@ export type DirectiveDef = {
   kebab?: string
   camel?: string
   exp: string
-  mods: Set<string>
+  mods: Map<string, string | undefined>
 }
 
 export interface RawComponent extends HTMLElement {

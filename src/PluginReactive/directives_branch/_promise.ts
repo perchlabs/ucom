@@ -158,9 +158,9 @@ export const _promise: BranchDirectiveHandler = (
     return ptr
   }
 
-  const isAwait = op === OP_AWAIT
-  const hasResult = !!(blkSpecs[THEN] || blkSpecs[CATCH])
-  if (!isAwait && !hasResult) {
+  const isAwaitOp = op === OP_AWAIT
+  const hasResultBlock = !!(blkSpecs[THEN] || blkSpecs[CATCH])
+  if (!isAwaitOp && !hasResultBlock) {
     // FIXME: Remove the '!' that is eating the undefined below
     blkSpecs[THEN] = [elRoot, createDirectiveDefinition('#then', '')!]
     elRoot.setAttribute('!!', '')

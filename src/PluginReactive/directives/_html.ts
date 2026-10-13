@@ -11,6 +11,6 @@ export const _html: DirectiveHandler = (
   el,
   def,
 ) => {
-  def.mods.add(TEXT_MOD_HTML)
+  def.mods.set(TEXT_MOD_HTML, undefined)
   _text(ctx, el, def)
 }

@@ -4,7 +4,6 @@ import type {
 import {
   attributeEntries,
   pullAttr,
-  split,
   kebabToCamel,
 } from './common.ts'
 
@@ -20,19 +19,39 @@ export const pullDir = (el: Element, key: string) => {
   }
 }
 
-const reDirectiveExpand = /^(\$|\$--|\$%%|\$!!|--|%%|!!|@|\?|[#\+[a-z]+):?([a-z]+[a-z0-9\-]*)?(\..+)*$/
+const reDirectiveExpand = /^(?<op>#[a-z]+)|(?<op>\$|\$--|\$%%|\$!!|--|%%|!!|@|\?|\||\(\))(?<kebab>[a-z]*)(?<mods>(\.[a-z0-9\(\)]+)*)$/
+
+const reMod = /^\.(?<mod>[a-z]+)((?:\()(?<arg>[a-z0-9]+)(?:\)))?$/g
+
+interface DirectiveGroups {
+  op: string
+  kebab: string | undefined
+  mods: string | undefined
+}
+
+interface ModificationGroups {
+  mod: string
+  arg: string | undefined
+}
 
 export const createDirectiveDefinition = (full: string, exp: string): DirectiveDef | undefined => {
   const match = full.match(reDirectiveExpand)
   if (match) {
-    let [, op, kebab, mods = ''] = match
+    const {op, kebab, mods: modsRaw = ''} = match.groups as unknown as DirectiveGroups
+
+    const mods = new Map<string, string | undefined>()
+    for (const modMatch of modsRaw.matchAll(reMod)) {
+      const {mod, arg} = modMatch.groups as unknown as ModificationGroups
+      mods.set(mod, arg)
+    }
+
     return {
       full,
       op,
       kebab,
       camel: kebab ? kebabToCamel(kebab) : undefined,
       exp: exp.trim(),
-      mods: new Set<string>(split(mods, '.')),
+      mods,
     }
   }
 }
