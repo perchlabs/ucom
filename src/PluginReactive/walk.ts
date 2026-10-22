@@ -14,6 +14,7 @@ import {
 } from '../common.ts'
 import {
   getDirectives,
+  pullDir,
 } from '../directive.ts'
 import {
   nextWalkable,
@@ -44,24 +45,22 @@ import { _effect } from './directives/_effect.ts'
 type HandlerMap = Record<string, DirectiveHandler>
 type WalkDefinition = [RegExp, HandlerMap]
 
-type BranchHandlerMap = Record<string, BranchDirectiveHandler>
-type BranchWalkDefinition = [RegExp, BranchHandlerMap]
-
 type RunDefinition = [DirectiveDef, DirectiveHandler]
 
 export const walk = (ctx: Context, el: Element): WalkableReturn => {
   const isNormal = !isMetaElement(el)
 
+  let def: DirectiveDef | undefined
+
   let walkDef: WalkDefinition
+
   if (isNormal) {
-    walkDef = containerWalkDef
-
-    const [reBranch, branchMap] = branchWalkDef
-    for (const def of getDirectives(el, reBranch)) {
-      el.removeAttribute(def.full)
-      return branchMap[def.op](ctx, el, def)
+    for (const [key, handler] of branchDirs) {
+      if (def = pullDir(el, key)) {
+        return handler(ctx, el, def)
+      }
     }
-
+    walkDef = containerWalkDef
   } else {
     walkDef = voidMetaWalkDef
   }
@@ -104,24 +103,21 @@ const makeWalkDefinition = (map: HandlerMap): WalkDefinition => [
   map,
 ]
 
-const makeBranchWalkDefinition = (map: BranchHandlerMap): BranchWalkDefinition => [
-  new RegExp('^' + ObjectKeys(map).map(RegExp.escape).join('|')),
-  map,
+// These directives must match exact string
+const branchDirs: [string, BranchDirectiveHandler][] = [
+  ['#if', _if],
+  ['#each', _each],
+  ['#as', _as],
+  ['u-show', _show],
+
+  [OP_AWAIT, _promise],
+  [OP_GET, _promise],
+  [OP_QUERY, _promise],
+  [OP_POST, _promise],
+  [OP_PUT, _promise],
+  [OP_PATCH, _promise],
+  [OP_DELETE, _promise],
 ]
-
-const branchWalkDef = makeBranchWalkDefinition({
-  '#if': _if,
-  '#each': _each,
-  '#as': _as,
-
-  [OP_AWAIT]: _promise,
-  [OP_GET]: _promise,
-  [OP_QUERY]: _promise,
-  [OP_POST]: _promise,
-  [OP_PUT]: _promise,
-  [OP_PATCH]: _promise,
-  [OP_DELETE]: _promise,
-})
 
 const dataWalkDef = makeWalkDefinition({
   $: _data,
