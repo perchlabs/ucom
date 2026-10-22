@@ -1,7 +1,11 @@
 import { createReactiveSystem, ReactiveFlags, type ReactiveNode } from './system.js';
 
+interface EffectScopeNode extends ReactiveNode {
+}
+
 interface EffectNode extends ReactiveNode {
-	fn(): void;
+	fn(): (() => void) | void;
+	cleanup: (() => void) | void;
 }
 
 interface ComputedNode<T = any> extends ReactiveNode {
@@ -15,6 +19,7 @@ interface SignalNode<T = any> extends ReactiveNode {
 }
 
 let cycle = 0;
+let runDepth = 0;
 let batchDepth = 0;
 let notifyIndex = 0;
 let queuedLength = 0;
@@ -28,20 +33,23 @@ const {
 	checkDirty,
 	shallowPropagate,
 } = createReactiveSystem({
-	update(node: SignalNode | ComputedNode): boolean {
-		if (node.depsTail !== undefined) {
-			return updateComputed(node as ComputedNode);
-		} else {
-			return updateSignal(node as SignalNode);
+	update(node: SignalNode | ComputedNode | EffectScopeNode): boolean {
+		if ('getter' in node) {
+			return updateComputed(node);
 		}
+		if ('currentValue' in node) {
+			return updateSignal(node);
+		}
+		node.flags = ReactiveFlags.Mutable;
+		return true;
 	},
 	notify(effect: EffectNode) {
 		let insertIndex = queuedLength;
 		let firstInsertedIndex = insertIndex;
 
 		do {
-			effect.flags &= ~ReactiveFlags.Watching;
 			queued[insertIndex++] = effect;
+			effect.flags &= ~ReactiveFlags.Watching;
 			effect = effect.subs?.sub as EffectNode;
 			if (effect === undefined || !(effect.flags & ReactiveFlags.Watching)) {
 				break;
@@ -140,9 +148,10 @@ export function computed<T>(getter: (previousValue?: T) => T): () => T {
 	}) as () => T;
 }
 
-export function effect(fn: () => void): () => void {
+export function effect(fn: () => void | (() => void)): () => void {
 	const e: EffectNode = {
 		fn,
+		cleanup: undefined,
 		subs: undefined,
 		subsTail: undefined,
 		deps: undefined,
@@ -154,8 +163,10 @@ export function effect(fn: () => void): () => void {
 		link(e, prevSub, 0);
 	}
 	try {
-		e.fn();
+		++runDepth;
+		e.cleanup = e.fn();
 	} finally {
+		--runDepth;
 		activeSub = prevSub;
 		e.flags &= ~ReactiveFlags.RecursedCheck;
 	}
@@ -163,12 +174,12 @@ export function effect(fn: () => void): () => void {
 }
 
 export function effectScope(fn: () => void): () => void {
-	const e: ReactiveNode = {
+	const e: EffectScopeNode = {
 		deps: undefined,
 		depsTail: undefined,
 		subs: undefined,
 		subsTail: undefined,
-		flags: ReactiveFlags.None,
+		flags: ReactiveFlags.Mutable,
 	};
 	const prevSub = setActiveSub(e);
 	if (prevSub !== undefined) {
@@ -193,14 +204,14 @@ export function trigger(fn: () => void) {
 		fn();
 	} finally {
 		activeSub = prevSub;
+		sub.flags = ReactiveFlags.None;
 		let link = sub.deps;
 		while (link !== undefined) {
 			const dep = link.dep;
 			link = unlink(link, sub);
 			const subs = dep.subs;
 			if (subs !== undefined) {
-				sub.flags = ReactiveFlags.None;
-				propagate(subs);
+				propagate(subs, !!runDepth);
 				shallowPropagate(subs);
 			}
 		}
@@ -211,14 +222,16 @@ export function trigger(fn: () => void) {
 }
 
 function updateComputed(c: ComputedNode): boolean {
-	++cycle;
 	c.depsTail = undefined;
 	c.flags = ReactiveFlags.Mutable | ReactiveFlags.RecursedCheck;
 	const prevSub = setActiveSub(c);
 	try {
+		++cycle;
+		++runDepth;
 		const oldValue = c.value;
 		return oldValue !== (c.value = c.getter(oldValue));
 	} finally {
+		--runDepth;
 		activeSub = prevSub;
 		c.flags &= ~ReactiveFlags.RecursedCheck;
 		purgeDeps(c);
@@ -239,30 +252,46 @@ function run(e: EffectNode): void {
 			&& checkDirty(e.deps!, e)
 		)
 	) {
-		++cycle;
+		if (e.cleanup) {
+			runCleanup(e);
+			if (!e.flags) {
+				return;
+			}
+		}
 		e.depsTail = undefined;
 		e.flags = ReactiveFlags.Watching | ReactiveFlags.RecursedCheck;
 		const prevSub = setActiveSub(e);
 		try {
-			(e as EffectNode).fn();
+			++cycle;
+			++runDepth;
+			e.cleanup = e.fn();
 		} finally {
+			--runDepth;
 			activeSub = prevSub;
 			e.flags &= ~ReactiveFlags.RecursedCheck;
 			purgeDeps(e);
 		}
-	} else {
+	} else if (e.flags) {
 		e.flags = ReactiveFlags.Watching;
 	}
 }
 
 function flush(): void {
-	while (notifyIndex < queuedLength) {
-		const effect = queued[notifyIndex]!;
-		queued[notifyIndex++] = undefined;
-		run(effect);
+	try {
+		while (notifyIndex < queuedLength) {
+			const effect = queued[notifyIndex]!;
+			queued[notifyIndex++] = undefined;
+			run(effect);
+		}
+	} finally {
+		while (notifyIndex < queuedLength) {
+			const effect = queued[notifyIndex]!;
+			queued[notifyIndex++] = undefined;
+			effect.flags |= ReactiveFlags.Watching | ReactiveFlags.Recursed;
+		}
+		notifyIndex = 0;
+		queuedLength = 0;
 	}
-	notifyIndex = 0;
-	queuedLength = 0;
 }
 
 function computedOper<T>(this: ComputedNode<T>): T {
@@ -287,8 +316,10 @@ function computedOper<T>(this: ComputedNode<T>): T {
 		this.flags = ReactiveFlags.Mutable | ReactiveFlags.RecursedCheck;
 		const prevSub = setActiveSub(this);
 		try {
+			++runDepth;
 			this.value = this.getter();
 		} finally {
+			--runDepth;
 			activeSub = prevSub;
 			this.flags &= ~ReactiveFlags.RecursedCheck;
 		}
@@ -306,7 +337,7 @@ function signalOper<T>(this: SignalNode<T>, ...value: [T]): T | void {
 			this.flags = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
 			const subs = this.subs;
 			if (subs !== undefined) {
-				propagate(subs);
+				propagate(subs, !!runDepth);
 				if (!batchDepth) {
 					flush();
 				}
@@ -321,23 +352,34 @@ function signalOper<T>(this: SignalNode<T>, ...value: [T]): T | void {
 				}
 			}
 		}
-		let sub = activeSub;
-		while (sub !== undefined) {
-			if (sub.flags & (ReactiveFlags.Mutable | ReactiveFlags.Watching)) {
-				link(this, sub, cycle);
-				break;
-			}
-			sub = sub.subs?.sub;
+		const sub = activeSub;
+		if (sub !== undefined) {
+			link(this, sub, cycle);
 		}
 		return this.currentValue;
 	}
 }
 
+function runCleanup(e: EffectNode): void {
+	const cleanup = e.cleanup!;
+	e.cleanup = undefined;
+	const prevSub = activeSub;
+	activeSub = undefined;
+	try {
+		cleanup();
+	} finally {
+		activeSub = prevSub;
+	}
+}
+
 function effectOper(this: EffectNode): void {
+	if (this.cleanup) {
+		runCleanup(this);
+	}
 	effectScopeOper.call(this);
 }
 
-function effectScopeOper(this: ReactiveNode): void {
+function effectScopeOper(this: EffectScopeNode): void {
 	this.depsTail = undefined;
 	this.flags = ReactiveFlags.None;
 	purgeDeps(this);

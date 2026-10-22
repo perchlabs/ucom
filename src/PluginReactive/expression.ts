@@ -7,6 +7,9 @@ import { ObjectKeys, ObjectValues } from '../common.ts'
 export const simplePathRE =
   /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
+export const quotedRE = 
+  /^(["'`])((?:\\\1|(?:(?!\1)).)*)(\1)$/
+
 export const evaluate = (exp: string, $data: DataRecord, other: DataRecord): unknown => {
   const params: DataRecord = {...other, $data}
   try {

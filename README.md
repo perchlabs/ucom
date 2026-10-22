@@ -2,8 +2,8 @@
 
 Ucom is a buildless declarative [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) framework. It comes in three flavors:
 
-* ucom (`19.7k` minified) (`8.5k` gzipped)
-* ucom_vue (`27.9k` minified) (`11.8k` gzipped)
+* ucom (`21.4k` minified) (`9.3k` gzipped)
+* ucom_vue (`28.0k` minified) (`11.8k` gzipped)
 * ucom_lite (`6.3k` minified) (`3.0k` gzipped)
 
 **Notice** This technology is currently unversioned.  An alpha version should be arriving by Summer.
@@ -182,21 +182,22 @@ The component will be a `.html` file with the same name as the `.ucom` directory
 - `#each`
 - `#as`
 - `#await` (`#then`, `#catch`)
-- `#effect` effect runner.
 - `#show`
-- `#id`
 - `$` data
 - `--` [CSS Custom Property](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
+- `%%` text (unescaped HTML with .html modifier)
+- `!!` html unescaped HTML
 - `$--` combined data with CSS Custom Property
+- `$!!` combined data with unescaped HTML output
 - `@` handler
-- `%` text (unescaped HTML with .html modifier)
 - `?` parameter (offers special case ?class and ?style)
+- `()` effect runner.
 
 #### `meta` [void element](https://developer.mozilla.org/en-US/docs/Glossary/Void_element) Directives
 
 These directives may appear on a `meta` element.  It will be injected within the current scope.  Ex. `<meta $count=0>`
 
-`$`, `--`, `$--`, `%`, `#effect`
+`$`, `--`, `%%`, `!!`, `$--`, `$%%`, `$!!`, `()`
 
 #### Examples
 
@@ -204,10 +205,10 @@ These directives may appear on a `meta` element.  It will be injected within the
 
 ```html
 <template u-com>
-  <div #each="n in 10" @click="alert(n)" %n></div>
+  <div #each="n in 10" @click="alert(n)" %%n></div>
 
   <meta $arr="['a', 'b', 'c']">
-  <div #each="c in arr" %c></div>
+  <div #each="c in arr" %%c></div>
 </template>
 ```
 
@@ -237,7 +238,7 @@ These directives may appear on a `meta` element.  It will be injected within the
   <!-- Inline calculation -->
   Exponential:
   <div #each="n in 5">
-    <meta %n=>, <meta %="n**2">, <meta %="n**3">
+    <meta %%n=>, <meta %%="n**2">, <meta %%="n**3">
   </div>
 
   <!-- Precalculate (saved to the current sub-scope) -->
@@ -248,7 +249,7 @@ These directives may appear on a `meta` element.  It will be injected within the
     $n2="n**2"
     $n3="n**3"
   >
-    <meta %n1>, <meta %n2>, <meta %n3>
+    <meta %%n1>, <meta %%n2>, <meta %%n3>
   </div>
 </template>
 ```
@@ -264,14 +265,14 @@ Use modifiers `.sync`, `.save` or `.calc`.
     $count=1
     $double.calc="() => count * 2"
     $.calc="{triple: () => count * 3}"
-    #effect="console.log('count: ', count)"
+    ()="console.log('count: ', count)"
   >
 
-  <button @click="count++">Once: <meta %count></button>
+  <button @click="count++">Once: <meta %%count></button>
 
-  <div>Double it <meta %double></div>
+  <div>Double it <meta %%double></div>
 
-  <div>Triple it <meta %triple></div>
+  <div>Triple it <meta %%triple></div>
 
   <script>
     export function connectedCallback() {
@@ -293,16 +294,16 @@ Use modifiers `.sync`, `.save` or `.calc`.
   >
 
   <!-- Normal store counter -->
-  <button @click="normal++"><meta %normal> times</button>
+  <button @click="normal++"><meta %%normal> times</button>
 
   <!-- Changes to this counter will be syncronized across all elements of the same name. -->
-  <button @click="share++"><meta %share> times</button>
+  <button @click="share++"><meta %%share> times</button>
 
   <!-- This counter will be both syncronized and persisted across all instances of this element -->
   <!-- of the same name (and page refreshes of this self-instantiated custom element) -->
-  <button @click="persist++"><meta %persist> times</button>
+  <button @click="persist++"><meta %%persist> times</button>
 
-  <div>You have clicked a total of <meta %total> times</div>
+  <div>You have clicked a total of <meta %%total> times</div>
 </template>
 ```
 
@@ -314,7 +315,7 @@ It's easy to add js properties and html attributes to your components using the 
 <template u-com="my-counter">
   <param $count.int=0>
 
-  <button @click="count++"><meta %count> times</button>
+  <button @click="count++"><meta %%count> times</button>
 </template>
 ```
 
@@ -387,7 +388,7 @@ Element IDs are sandboxed via shadow dom.
   <meta --color>
 
   <!-- Print the current color of the component -->
-  <meta %color> color component
+  <meta %%color> color component
 
   <!-- Define the Shadow Root Host color using the CSS custom property -->
   <style>

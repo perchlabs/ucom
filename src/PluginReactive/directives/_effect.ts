@@ -14,17 +14,19 @@ export const _effect: DirectiveHandler = (
     mods,
   },
 ) => {
+  const MOD_ONCE = 'once'
+
   const value = simplePathRE.test(exp) || reArrowFunction.test(exp)
     ? exp
     : `() => { ${exp} }`
   const func = ctx.eval(value)
 
   if (!isFunction(func)) {
-    console.warn(`#effect: cannot create function from '${value}'`)
+    console.warn(`(): cannot create function from '${value}'`)
     return
   }
 
-  if (mods.has('once')) {
+  if (mods.has(MOD_ONCE)) {
     // TODO: 
     // value()
   } else {
