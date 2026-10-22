@@ -119,7 +119,6 @@ export const _promise: BranchDirectiveHandler = (
 
   const scan = (key: BlockKey, forceWalk: boolean) => {
     if (ptr) {
-
       if (getDirectives(ptr, filters[PROMISE]).length) {
         throw ''
       }

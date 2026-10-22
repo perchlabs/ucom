@@ -19,7 +19,7 @@ export const pullDir = (el: Element, key: string) => {
   }
 }
 
-const reDirectiveExpand = /^(?<op>#[a-z]+)|(?<op>\$|\$--|\$%%|\$!!|--|%%|!!|@|\?|\||\(\))(?<kebab>[a-z]*)(?<mods>(\.[a-z0-9\(\)]+)*)$/
+const reDirectiveExpand = /^(?<op>#[a-z]+)|(?<op>\$|\$--|\$%%|\$!!|--|%%|!!|@|\?|\||\(\))(?<kebab>[a-z]+(-[a-z0-9]+)*)?(?<mods>(\.[a-z0-9\(\)]+)*)$/
 
 const reMod = /^\.(?<mod>[a-z]+)((?:\()(?<arg>[a-z0-9]+)(?:\)))?$/g
 
