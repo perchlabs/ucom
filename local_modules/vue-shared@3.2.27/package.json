@@ -1,6 +1,0 @@
-{
-  "name": "@vue/shared",
-  "private": true,
-  "type": "module",
-  "types": "./shared.d.ts"
-}

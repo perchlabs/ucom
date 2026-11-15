@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "./build.sh esbuild ucom ucom_vue ucom_lite",
-    "build:bun": "./build.sh bun ucom ucom_vue ucom_lite",
+    "build": "./build.sh esbuild ucom",
+    "build:bun": "./build.sh bun ucom",
     "tsc": "tsc"
   },
   "devDependencies": {
@@ -15,7 +15,5 @@
     "esbuild": "^0.28.2"
   },
   "dependencies": {
-    "@vue/reactivity": "file:./local_modules/vue-reactivity@3.2.27",
-    "@vue/shared": "file:./local_modules/vue-shared@3.2.27"
   }
 }
