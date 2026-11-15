@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "./build.sh esbuild ucom",
-    "build:bun": "./build.sh bun ucom",
+    "dev": "vite --host --port=3000",
+    "build": "./build.sh esbuild",
+    "build:bun": "./build.sh bun",
     "tsc": "tsc"
   },
   "devDependencies": {
