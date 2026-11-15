@@ -20,7 +20,6 @@ fi
 if [[ -n "$DEV_MODE" ]]; then
   LIST="busybox caddy php python3 ruby"
   CMD=""
-
   for cmd in $LIST; do
     if command -v "$cmd" > /dev/null 2>&1; then
       CMD="$cmd"
