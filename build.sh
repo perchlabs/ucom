@@ -3,10 +3,10 @@ ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null 2>&1 && pwd )"
 SRC_DIR="$ROOT_DIR/src"
 DST_DIR="$ROOT_DIR/dist"
 
-DEV_MODE=
 [[ $* == *--dev* ]] && DEV_MODE=1
 
 TOOL="${TOOL:-esbuild}"
+PORT="${PORT:-8000}"
 
 SRC_FILE="$SRC_DIR/ucom.ts"
 DST_FILE="$DST_DIR/ucom.js"
@@ -18,53 +18,45 @@ if [ ! -f "$SRC_FILE" ]; then
 fi
 
 if [[ -n "$DEV_MODE" ]]; then
-  LIST="busybox caddy php python3 ruby"
-  CMD=""
-  for cmd in $LIST; do
+  declare -A list=(
+    [busybox]="busybox httpd -f -p ${PORT}"
+    [caddy]="file-server --listen :${PORT} --browse"
+    [python3]="python3 -m http.server ${PORT}"
+    [php]="php -S 0.0.0.0:${PORT}"
+    [ruby]="ruby -run -ehttpd . -p${PORT}"
+  )
+  for cmd in "${!list[@]}"; do
     if command -v "$cmd" > /dev/null 2>&1; then
-      CMD="$cmd"
+      HTTPD="${list[$cmd]}"
       break
     fi
   done
-
-  case "$CMD" in
-  busybox)
-    busybox httpd -f -p 8000 &
-  ;;
-  caddy)
-    caddy file-server --listen :8000 --browse &
-  ;;
-  python3)
-    python3 -m http.server 8000 &
-  ;;
-  php)
-    php -S 0.0.0.0:8000 &
-  ;;
-  ruby)
-    ruby -run -ehttpd . -p8000 &
-  ;;
-  *)
+  if [[ -z "$HTTPD" ]]; then
     echo "Unable to find utility to host content." >&2
     exit 1
-  ;;
-  esac
+  fi
+
+  echo "Hosting content on port $PORT"
+  bash -c "$HTTPD > /dev/null 2>&1" &
+  HTTPD_PID=$!
+  trap "kill $HTTPD_PID 2>/dev/null" EXIT
 fi
-WEBSERVER_PID=$!
-trap "kill $WEBSERVER_PID 2>/dev/null" EXIT
 
 case "$TOOL" in
 esbuild)
+  BUILDER="esbuild \"$SRC_FILE\" --outfile=\"$DST_FILE\" --format=esm --bundle"
   if [[ -n "$DEV_MODE" ]]; then
-    esbuild "$SRC_FILE" --format=esm --bundle --watch --outfile="$DST_FILE"
+    BUILDER="$BUILDER --watch"
   else
-    esbuild "$SRC_FILE" --format=esm --bundle --minify --outfile="$DST_FILE"
+    BUILDER="$BUILDER --minify"
   fi
 ;;
 bun)
+  BUILDER="bun build \"$SRC_FILE\" --outfile=\"$DST_FILE\""
   if [[ -n "$DEV_MODE" ]]; then
-    bun build "$SRC_FILE" --watch --outfile="$DST_FILE"
+    BUILDER="$BUILDER --watch"
   else
-    bun build "$SRC_FILE" --production --outfile="$DST_FILE"
+    BUILDER="$BUILDER --production"
   fi
 ;;
 *)
@@ -72,3 +64,6 @@ bun)
   exit 1
 ;;
 esac
+
+# Run Builder utility
+bash -c "$BUILDER"
