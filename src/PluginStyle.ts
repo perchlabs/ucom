@@ -48,6 +48,6 @@ const loadSheets = async (): Promise<CSSStyleSheet[]> => {
 }
 
 const queryForStyles = (root: QueryableRoot) => {
-  const selector = ['STYLE', 'LINK'].map(k => `${k}[${SYS_CODE}]`).join(',')
+  const selector = ['STYLE', 'LINK'].map(k => `${k}[${CSS.escape(SYS_CODE)}]`).join(',')
   return queryAll<HTMLStyleElement | HTMLLinkElement>(root, selector)
 }

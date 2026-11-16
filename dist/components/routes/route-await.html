@@ -5,7 +5,7 @@
   ?name="'route-await-' + `${i+1}`.padStart(2, '0')"
 ></example-run>
 
-<template u-com="route-await-01">
+<template #com="route-await-01">
   <meta $my-promise="new Promise(() => {})">
 
   Show the pending content first, and then the resolved content.
@@ -38,7 +38,7 @@
 
 
 
-<template u-com="route-await-02">
+<template #com="route-await-02">
   <param $delay.int=1000>
   <meta $my-promise="new Promise(resolve => setTimeout(resolve, delay))">
 
@@ -60,7 +60,7 @@
 
 
 
-<template u-com="route-await-03">
+<template #com="route-await-03">
   <param $delay.int=1000>
   <meta $my-promise="delayReject(delay, 'failed')">
 
@@ -83,7 +83,7 @@
 </template>
 
 
-<template u-com="route-await-04">
+<template #com="route-await-04">
   <meta $p>
 
   <button @click="p = undefined">undefined</button>
@@ -111,7 +111,7 @@
 
 
 
-<template u-com="route-await-05">
+<template #com="route-await-05">
   A test to make sure that all await-then-catch blocks are found and removed
   regardless of errors.
 

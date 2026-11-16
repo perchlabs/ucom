@@ -7,13 +7,13 @@
 
 
 
-<template u-com="route-home-01">
+<template #com="route-home-01">
   This is a component
 </template>
 
 
 
-<template u-com="route-home-02">
+<template #com="route-home-02">
   <header id="myheader">Element IDs are sandboxed via Shadowdom.</header>
   <main>Use semantic html tags for clean CSS.</main>
 
@@ -32,7 +32,7 @@
 
 
 
-<template u-com="route-home-03">
+<template #com="route-home-03">
   You can export a superclass of <code>HTMLElement</code>, or export the standard custom element callbacks;
   <br>
   <code>attributeChangedCallback</code>, <code>connectedCallback</code> and <code>disconnectedCallback</code>.
@@ -67,7 +67,7 @@
 
 
 
-<template u-com="route-home-04">
+<template #com="route-home-04">
   <meta $count=0>
 
   <!-- Create a calculated field -->
@@ -93,7 +93,7 @@
 
 
 
-<template u-com="route-home-05">
+<template #com="route-home-05">
   <!-- Use a persistent store variable for reactive local storage. -->
   <meta
     $count.save=0
@@ -112,7 +112,7 @@
 
 
 
-<template u-com="route-home-06">
+<template #com="route-home-06">
   <meta $--color1="'violet'">
   <div class="one"><meta %%color1> one</div>
 

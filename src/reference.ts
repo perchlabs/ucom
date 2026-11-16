@@ -169,7 +169,7 @@ export type QueryableRoot = Document | DocumentFragment | Element
 // CONSTANTS
 //////////////////////////
 
-export const SYS_CODE = 'u-com'
+export const SYS_CODE = '#com'
 export const FILE_POSTFIX = '.html'
 export const DIR_POSTFIX = '.ucom'
 

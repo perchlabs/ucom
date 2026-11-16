@@ -39,6 +39,14 @@ export default {
   },
 } as Plugin
 
+
+const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${CSS.escape(SYS_CODE)}]`)
+
+const templateHandler = (
+  tplArr: HTMLTemplateElement[],
+  fn: (tpl: HTMLTemplateElement) => Promise<void>,
+) => Promise.all(tplArr.map(tpl => fn(tpl)))
+
 const processTemplates = async (
   man: ComponentManager,
   tplArr: HTMLTemplateElement[],
@@ -57,10 +65,3 @@ const processTemplates = async (
     }
   }
 })
-
-const queryForTemplates = (root: QueryableRoot) => queryAll<HTMLTemplateElement>(root, `template[${SYS_CODE}]`)
-
-const templateHandler = (
-  tplArr: HTMLTemplateElement[],
-  fn: (tpl: HTMLTemplateElement) => Promise<void>,
-) => Promise.all(tplArr.map(tpl => fn(tpl)))

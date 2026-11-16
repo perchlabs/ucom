@@ -14,10 +14,10 @@ Ucom is a buildless declarative [custom element](https://developer.mozilla.org/e
 
 ### Declare Components
 
-Create a template with a `u-com` attribute. It will be registered as a custom element using shadow dom.  You can then use that element normally anywhere on your page.
+Create a template with a `#com` attribute. It will be registered as a custom element using shadow dom.  You can then use that element normally anywhere on your page.
 
 ```html
-<template u-com="my-component">
+<template #com="my-component">
   This is a component.
 </template>
 
@@ -28,7 +28,7 @@ Create a template with a `u-com` attribute. It will be registered as a custom el
 For the event lifecycle use the element callbacks `attributeChangedCallback`, `connectedCallback`, `disconnectedCallback`.
 
 ```html
-<template u-com="my-component">
+<template #com="my-component">
   <script>
     // This function will be merged into the custom element prototype.
     export function connectedCallback() {
@@ -46,10 +46,10 @@ For the event lifecycle use the element callbacks `attributeChangedCallback`, `c
 
 ### App
 
-Create an immediately executed component app with an empty `u-com` attribute.
+Create an immediately executed component app with an empty `#com` attribute.
 
 ```html
-<template u-com>
+<template #com>
   <script>alert('popup component')</script>
 </template>
 ```
@@ -59,7 +59,7 @@ Create an immediately executed component app with an empty `u-com` attribute.
 You can use the `source` tag inside of any component to declaratively import component dependencies.
 
 ```html
-<template u-com="my-component">
+<template #com="my-component">
   <source src="/components/other-component.html">
 
   <header>Content</header>
@@ -84,7 +84,7 @@ You may use an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Ref
   }
 }</script>
 
-<template u-com>
+<template #com>
   <source src="@com/widget-component.html">
   <source src="@com/second-component.html">
 
@@ -102,7 +102,7 @@ Use a `base` element to reduce redundancy.  Settings on `base` are sticky until 
   }
 }</script>
 
-<template u-com>
+<template #com>
   <base href="@com/">
   <source src="widget-component.html">
   <source src="second-component.html">
@@ -121,7 +121,7 @@ Components can be imported lazily by adding the `"lazy"` attribute to either a `
   }
 }</script>
 
-<template u-com>
+<template #com>
   <base href="@com/" lazy>
   <source src="widget-component.html">
   <source src="second-component.html">
@@ -136,7 +136,7 @@ Components can be imported lazily by adding the `"lazy"` attribute to either a `
 Components can be specified as directory by using suffix `.ucom`.  This is useful for bundling libraries, themes and data files into an easily redistributable component.
 
 ```html
-<template u-com>
+<template #com>
   <!-- To specify a component directory end with .ucom -->
   <source src="/components/complex-component.ucom">
 </template>
@@ -202,7 +202,7 @@ These directives may appear on a `meta` element.  It will be injected within the
 `#each` iteration
 
 ```html
-<template u-com>
+<template #com>
   <div #each="n in 10" @click="alert(n)" %%n></div>
 
   <meta $arr="['a', 'b', 'c']">
@@ -213,7 +213,7 @@ These directives may appear on a `meta` element.  It will be injected within the
 `#await`, `#then`, `catch` promise handling with [Svelte-like](https://svelte.dev/docs/svelte/await) syntax.
 
 ```html
-<template u-com>
+<template #com>
   <meta
     $set-promise="() => new Promise(resolve => setTimeout(resolve, 1000))"
     $p="setPromise()"
@@ -232,7 +232,7 @@ These directives may appear on a `meta` element.  It will be injected within the
 
 
 ```html
-<template u-com>
+<template #com>
   <!-- Inline calculation -->
   Exponential:
   <div #each="n in 5">
@@ -257,7 +257,7 @@ You can use the store to gain access to reactive data by declaring it in a `meta
 Use modifiers `.sync`, `.save` or `.calc`.
 
 ```html
-<template u-com>
+<template #com>
   <!-- data is flexible -->
   <meta
     $count=1
@@ -283,7 +283,7 @@ Use modifiers `.sync`, `.save` or `.calc`.
 #### Syncronized and Persistent Reactive Data
 
 ```html
-<template u-com>
+<template #com>
   <meta
     $normal=0
     $persist.save=0
@@ -310,7 +310,7 @@ It's easy to add js properties and html attributes to your components using the 
 ```html
 <my-counter count="5"></my-counter>
 
-<template u-com="my-counter">
+<template #com="my-counter">
   <param $count.int=0>
 
   <button @click="count++"><meta %%count> times</button>
@@ -322,7 +322,7 @@ It's easy to add js properties and html attributes to your components using the 
 Element IDs are sandboxed via shadow dom.
 
 ```html
-<template u-com>
+<template #com>
   <header id="header">Stylized Component</header>
   <main>Component Body</main>
 
@@ -340,7 +340,7 @@ Element IDs are sandboxed via shadow dom.
 [CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties) can be added using `--` directive.  You may choose a different store variable name by specifying a value.  Directives used on `meta` elements are injected into the current scope.
 
 ```html
-<template u-com>
+<template #com>
   <meta $color="'red'">
   <meta --color>
 
@@ -361,7 +361,7 @@ Element IDs are sandboxed via shadow dom.
 ```
 
 ```html
-<template u-com>
+<template #com>
   <!-- Combine '$' and '--' directives -->
   <meta $--color="'green'">
 
@@ -379,7 +379,7 @@ Element IDs are sandboxed via shadow dom.
 <my-color></my-color>
 <my-color color="purple"></my-color>
 
-<template u-com="my-color">
+<template #com="my-color">
   <!-- Create element attribute and property defaulting to green. -->
   <param $color="'green'">
   <!-- Have the CSS custom property track the element attribute -->
@@ -397,16 +397,16 @@ Element IDs are sandboxed via shadow dom.
 </template>
 ```
 
-You can "pierce" the shadow dom of a component with themes by adding the `u-com` attribute to the `style` or `link` element.  Ucom will add this styling to all custom elements by adding it to its `adoptedStyleSheets`.
+You can "pierce" the shadow dom of a component with themes by adding the `#com` attribute to the `style` or `link` element.  Ucom will add this styling to all custom elements by adding it to its `adoptedStyleSheets`.
 
 You may also use a dynamic CSS `@import` within the `style` tag of each of your components.
 
 ```html
 <!DOCTYPE html>
   <head>
-    <!-- u-com on a link or style will cause it to be attached to all components "piercing" it. -->
-    <link u-com rel="stylesheet" href="/style/bootstrap-5.3.2.min.css">
-    <style u-com>
+    <!-- #com on a link or style will cause it to be attached to all components "piercing" it. -->
+    <link #com rel="stylesheet" href="/style/bootstrap-5.3.2.min.css">
+    <style #com>
       @import url("/style/test.css");
     </style>
   </head>
@@ -420,7 +420,7 @@ You may also use a dynamic CSS `@import` within the `style` tag of each of your 
 ```html
 <dyn-amic name="my-other-component"></dyn-amic>
 
-<template u-com="dyn-amic">
+<template #com="dyn-amic">
   <param $name>
 
   <template #as="name"></template>
